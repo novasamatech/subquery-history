@@ -13,6 +13,7 @@ type Extrinsic @jsonField {
   hash: String!
   module: String!
   call: String!
+  fee: String!
   success: Boolean!
 }
 
