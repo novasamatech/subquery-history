@@ -1,5 +1,5 @@
 {
-  "name": "Fearless SubQuery project",
+  "name": "fearless",
   "version": "1.0.0",
   "description": "This is an example of using 1-N relations",
   "main": "dist/index.js",
