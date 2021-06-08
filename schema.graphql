@@ -1,0 +1,27 @@
+type Transfer @jsonField {
+  amount: BigInt!
+  to: String!
+  from: String!
+}
+
+type Reward @jsonField {
+  amount: String!
+  isReward: Boolean!
+}
+
+type Extrinsic @jsonField {
+  hash: String!
+  module: String!
+  call: String!
+  success: Boolean!
+}
+
+type HistoryElement @entity {
+  id: ID!
+  timestamp: String!
+  address: String!
+  reward: Reward
+  extrincis: Extrinsic
+  transfer: Transfer
+}
+
