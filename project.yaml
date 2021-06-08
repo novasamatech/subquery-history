@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 5403600
+    startBlock: 1
     mapping:
       handlers:
         - handler: handleHistoryElement
