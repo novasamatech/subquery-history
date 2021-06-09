@@ -2,6 +2,7 @@ type Transfer @jsonField {
   amount: String!
   to: String!
   from: String!
+  fee: String!
 }
 
 type Reward @jsonField {
