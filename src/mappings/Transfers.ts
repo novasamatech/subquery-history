@@ -1,17 +1,21 @@
 import {HistoryElement} from '../types/models/HistoryElement';
 import {SubstrateEvent} from "@subql/types";
-import {eventId, exportFeeFromDepositEvent} from "./common";
+import {blockNumber, eventId, exportFeeFromDepositEvent, extrinsicId} from "./common";
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
     const {event: {data: [from, to, ]}} = event;
 
-    const elementFrom = new HistoryElement(eventId(event)+`-1`);
+    const elementFrom = new HistoryElement(eventId(event)+`-from`);
     elementFrom.address = from.toString()
     await populateTransfer(elementFrom, event)
 
-    const elementTo = new HistoryElement(eventId(event)+`-2`);
+    const elementTo = new HistoryElement(eventId(event)+`-to`);
     elementTo.address = to.toString()
     await populateTransfer(elementTo, event)
+}
+
+export async function handleTransferKeepAlive(event: SubstrateEvent): Promise<void> {
+    await handleTransfer(event)
 }
 
 async function populateTransfer(element: HistoryElement, event: SubstrateEvent): Promise<void> {
@@ -22,7 +26,9 @@ async function populateTransfer(element: HistoryElement, event: SubstrateEvent):
         amount: amount.toString(),
         from: from.toString(),
         to: to.toString(),
-        fee: exportFeeFromDepositEvent(event.extrinsic).toString()
+        block: blockNumber(event),
+        fee: exportFeeFromDepositEvent(event.extrinsic).toString(),
+        extrinsicId: extrinsicId(event)
     }
     await element.save();
 }

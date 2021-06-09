@@ -27,3 +27,8 @@ dataSources:
           filter:
             module: balances
             method: Transfer
+        - handler: handleTransferKeepAlive
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: transfer_keep_alive

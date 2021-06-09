@@ -3,6 +3,8 @@ type Transfer @jsonField {
   to: String!
   from: String!
   fee: String!
+  block: String!
+  extrinsicId: String
 }
 
 type Reward @jsonField {
