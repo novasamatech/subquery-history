@@ -1,17 +1,11 @@
 import {HistoryElement} from '../types/models/HistoryElement';
 import {SubstrateEvent} from "@subql/types";
-import {Balance} from "@polkadot/types/interfaces";
-
-function eventId(event: SubstrateEvent): string {
-    return `${event.block.block.header.number.toString()}-${event.idx}`
-}
+import {eventId, exportFeeFromDepositEvent} from "./common";
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
     const {event: {data: [from, to, amount]}} = event;
 
-    const {event: {data: [, fee]}} = event.extrinsic.events.find((event) => {
-        return event.event.method == "Deposit" && event.event.section == "balances"
-    })
+    let fee = exportFeeFromDepositEvent(event.extrinsic)
 
     const elementFrom = new HistoryElement(eventId(event)+`-1`);
     elementFrom.address = from.toString()
@@ -20,7 +14,7 @@ export async function handleTransfer(event: SubstrateEvent): Promise<void> {
         amount: amount.toString(),
         from: from.toString(),
         to: to.toString(),
-        fee: (fee as Balance).toString()
+        fee: fee.toString()
     }
     await elementFrom.save();
 
@@ -33,7 +27,7 @@ export async function handleTransfer(event: SubstrateEvent): Promise<void> {
         amount: amount.toString(),
         from: from.toString(),
         to: to.toString(),
-        fee: (fee as Balance).toString()
+        fee: fee.toString()
     }
     await elementTo.save();
 }
