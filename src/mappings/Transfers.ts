@@ -3,31 +3,26 @@ import {SubstrateEvent} from "@subql/types";
 import {eventId, exportFeeFromDepositEvent} from "./common";
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
-    const {event: {data: [from, to, amount]}} = event;
-
-    let fee = exportFeeFromDepositEvent(event.extrinsic)
+    const {event: {data: [from, to, ]}} = event;
 
     const elementFrom = new HistoryElement(eventId(event)+`-1`);
     elementFrom.address = from.toString()
-    elementFrom.timestamp = event.block.timestamp.toISOString()
-    elementFrom.transfer = {
-        amount: amount.toString(),
-        from: from.toString(),
-        to: to.toString(),
-        fee: fee.toString()
-    }
-    await elementFrom.save();
+    await populateTransfer(elementFrom, event)
 
     const elementTo = new HistoryElement(eventId(event)+`-2`);
     elementTo.address = to.toString()
-    elementTo.timestamp = event.block.timestamp.toISOString()
+    await populateTransfer(elementTo, event)
+}
 
+async function populateTransfer(element: HistoryElement, event: SubstrateEvent): Promise<void> {
+    element.timestamp = event.block.timestamp.toISOString()
 
-    elementTo.transfer = {
+    const {event: {data: [from, to, amount]}} = event;
+    element.transfer = {
         amount: amount.toString(),
         from: from.toString(),
         to: to.toString(),
-        fee: fee.toString()
+        fee: exportFeeFromDepositEvent(event.extrinsic).toString()
     }
-    await elementTo.save();
+    await element.save();
 }
