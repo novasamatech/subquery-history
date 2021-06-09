@@ -1,5 +1,5 @@
 type Transfer @jsonField {
-  amount: BigInt!
+  amount: String!
   to: String!
   from: String!
 }
