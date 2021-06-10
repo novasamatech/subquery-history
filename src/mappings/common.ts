@@ -1,4 +1,4 @@
-import {SubstrateEvent} from "@subql/types";
+import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {SubstrateExtrinsic} from "@subql/types";
 import {Balance} from "@polkadot/types/interfaces";
 
@@ -12,6 +12,10 @@ export function extrinsicId(event: SubstrateEvent): string {
 
 export function blockNumber(event: SubstrateEvent): string {
     return event.block.block.header.number.toString()
+}
+
+export function timestamp(block: SubstrateBlock): string {
+    return (block.timestamp.getTime() / 1000).toString()
 }
 
 export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balance {

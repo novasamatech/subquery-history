@@ -1,6 +1,6 @@
 import {HistoryElement} from '../types/models/HistoryElement';
 import {SubstrateEvent} from "@subql/types";
-import {eventId} from "./common";
+import {eventId, timestamp} from "./common";
 
 export async function handleReward(event: SubstrateEvent): Promise<void> {
     const {event: {data: [account, newReward]}} = event;
@@ -8,7 +8,7 @@ export async function handleReward(event: SubstrateEvent): Promise<void> {
     const element = new HistoryElement(eventId(event));
 
     element.address = account.toString()
-    element.timestamp = event.block.timestamp.toISOString()
+    element.timestamp = timestamp(event.block)
     element.reward = {
         amount: newReward.toString(),
         isReward: true
@@ -23,7 +23,7 @@ export async function handleSlash(event: SubstrateEvent): Promise<void> {
     const element = new HistoryElement(eventId(event));
 
     element.address = account.toString()
-    element.timestamp = event.block.timestamp.toISOString()
+    element.timestamp = timestamp(event.block)
     element.reward = {
         amount: newSlash.toString(),
         isReward: false
