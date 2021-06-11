@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 5403600
+    startBlock: 5439260 # block a bit before one with batch with reward_stakers
     mapping:
       handlers:
         - handler: handleHistoryElement
