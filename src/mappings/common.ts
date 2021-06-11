@@ -31,9 +31,16 @@ export function blockNumber(event: SubstrateEvent): string {
     return event.block.block.header.number.toString()
 }
 
-export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balance {
-    const {event: {data: [, fee]}} = extrinsic.events.find((event) => {
+export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balance | null {
+    const eventRecord = extrinsic.events.find((event) => {
         return event.event.method == "Deposit" && event.event.section == "balances"
     })
-    return fee as Balance
+
+    if (eventRecord != undefined) {
+        const {event: {data: [, fee]}}= eventRecord
+
+        return fee as Balance
+    } else  {
+        return null
+    }
 }
