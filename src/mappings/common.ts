@@ -20,7 +20,7 @@ export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTupl
 }
 
 export function eventId(event: SubstrateEvent): string {
-    return extrinsicId(event)
+    return `${blockNumber(event)}-${event.idx}`
 }
 
 export function extrinsicId(event: SubstrateEvent): string {
