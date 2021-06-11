@@ -15,7 +15,7 @@ export function blockNumber(event: SubstrateEvent): string {
 }
 
 export function timestamp(block: SubstrateBlock): string {
-    return (block.timestamp.getTime() / 1000).toString()
+    return Math.round((block.timestamp.getTime() / 1000)).toString()
 }
 
 export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balance {
