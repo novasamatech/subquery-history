@@ -10,6 +10,7 @@ type Transfer @jsonField {
 type Reward @jsonField {
   amount: String!
   isReward: Boolean!
+  validator: String
 }
 
 type Extrinsic @jsonField {

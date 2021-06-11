@@ -1,4 +1,4 @@
-import {HistoryElement} from '../types/models/HistoryElement';
+import {HistoryElement} from '../types';
 import {SubstrateEvent} from "@subql/types";
 import {blockNumber, eventId, exportFeeFromDepositEvent, extrinsicId, timestamp} from "./common";
 

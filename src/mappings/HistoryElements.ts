@@ -14,7 +14,7 @@ export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promi
             module: extrinsic.extrinsic.method.section,
             call: extrinsic.extrinsic.method.method,
             success: extrinsic.success,
-            fee: exportFeeFromDepositEvent(extrinsic).toString()
+            fee: exportFeeFromDepositEvent(extrinsic)?.toString()
         }
 
         await element.save()
