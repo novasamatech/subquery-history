@@ -26,7 +26,7 @@ type HistoryElement @entity {
   timestamp: String!
   address: String!
   reward: Reward
-  extrincis: Extrinsic
+  extrinsic: Extrinsic
   transfer: Transfer
 }
 

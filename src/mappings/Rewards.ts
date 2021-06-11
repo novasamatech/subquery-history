@@ -1,6 +1,6 @@
 import {HistoryElement} from '../types';
 import {SubstrateEvent} from "@subql/types";
-import {callsFromBatch, eventId, isBatch, distinct} from "./common";
+import {callsFromBatch, eventId, isBatch, distinct, timestamp} from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 
@@ -14,7 +14,7 @@ export async function handleReward(event: SubstrateEvent): Promise<void> {
     const element = new HistoryElement(eventId(event));
 
     element.address = account.toString()
-    element.timestamp = event.block.timestamp.toISOString()
+    element.timestamp = timestamp(event.block)
 
     const cause = event.extrinsic
     const causeCall = cause.extrinsic.method
@@ -58,7 +58,7 @@ export async function handleSlash(event: SubstrateEvent): Promise<void> {
     const element = new HistoryElement(eventId(event));
 
     element.address = account.toString()
-    element.timestamp = event.block.timestamp.toISOString()
+    element.timestamp = timestamp(event.block)
     element.reward = {
         amount: newSlash.toString(),
         isReward: false,
