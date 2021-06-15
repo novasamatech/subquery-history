@@ -1,6 +1,6 @@
 specVersion: 0.0.1
 description: Fearless SubQuery project
-repository: ''
+repository: 'https://github.com/ef1rspb/subquery-fearless'
 schema: ./schema.graphql
 network:
   endpoint: 'wss://polkadot.api.onfinality.io/public-ws'
