@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 7920000
+    startBlock: 7820000
     # for polkadot startBlock: 5350000
     mapping:
       handlers:
