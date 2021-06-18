@@ -4,20 +4,21 @@ import {EraStakersInfo, EraValidatorInfo, IndividualExposure, ValidatorExposure}
 
 export async function handleNewSession(event: SubstrateEvent): Promise<void> {
     const eraStakersInfo = new EraStakersInfo(eventId(event))
-    let validators = await api.query.session.validators()
+    let validatorIds = await api.query.session.validators()
 
     let eraOption = await api.query.staking.activeEra()
     let eraIndex = eraOption.unwrap().index
 
-    let erasStakers = await Promise.all(validators.map(id => api.query.staking.erasStakers(eraIndex, id)))
+    let erasStakers = await Promise.all(validatorIds.map(validatorId => api.query.staking.erasStakers(eraIndex, validatorId)))
 
-    let validatorInfo = erasStakers.map(exp => {
-        return <EraValidatorInfo>{
-            accountId: "testId",
+    let validatorInfo = validatorIds.map(function (validatorId, index) {
+        let exposure = erasStakers[index]
+        return <EraValidatorInfo> {
+            accountId: validatorId.toString(),
             exposure: {
-                total: exp.total.toString(),
-                own: exp.own.toString(),
-                others: exp.others.map(other => {
+                total: exposure.total.toString(),
+                own: exposure.own.toString(),
+                others: exposure.others.map(other => {
                     return <IndividualExposure> {
                         who: other.who.toString(),
                         value: other.value.toString()
