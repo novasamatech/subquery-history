@@ -7,7 +7,8 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 6000000
+    startBlock: 7960400
+    # for westend startBlock: 6000000
     # for polkadot startBlock: 5350000
     mapping:
       handlers:
@@ -33,3 +34,8 @@ dataSources:
           filter:
             module: balances
             method: transfer_keep_alive
+        - handler: handleNewSession
+          kind: substrate/EventHandler
+          filter:
+            module: session
+            method: NewSession
