@@ -4,6 +4,8 @@ import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec } from '@polkadot/types';
+import {EventRecord} from "@polkadot/types/interfaces/system/types"
+
 
 const batchCalls = ["batch", "batch_all"]
 
@@ -21,6 +23,10 @@ export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTupl
 
 export function eventId(event: SubstrateEvent): string {
     return `${blockNumber(event)}-${event.idx}`
+}
+
+export function eventIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
+    return `${blockNumber}-${eventIdx}`
 }
 
 export function extrinsicId(event: SubstrateEvent): string {
