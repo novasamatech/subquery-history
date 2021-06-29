@@ -66,7 +66,7 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
 
                 currentPromises.push(rewardHistoryElement.save())
 
-                return [currentValidator, currentPromises]
+                return [newValidator, currentPromises]
             }, initialState)
 
 
