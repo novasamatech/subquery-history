@@ -38,33 +38,37 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     const distinctValidators = new Set(payoutedValidators)
     let rewardEventType = api.events.staking.Reward;
 
-    let currentValidator;
+    const initialState: [string, Promise<void>[]] = [payoutedValidators[0], []]
 
-    const savingPromises = rewardEvent.block.events
-        .map((eventRecord, eventIndex) => {
-            // ignore non reward events in the block
-            if (!rewardEventType.is(eventRecord.event)) return;
+    const [, savingPromises] = rewardEvent.block.events
+        .reduce<[string, Promise<void>[]]>(
+            (accumulator, eventRecord, eventIndex) => {
+                let [currentValidator, currentPromises] = accumulator
 
-            let {event: {data: [account, newReward]}} = eventRecord
+                // ignore non reward events in the block
+                if (!rewardEventType.is(eventRecord.event)) return accumulator
 
-            if (distinctValidators.has(account.toString())) {
-                // rewards from next call started
-                currentValidator = account
-            }
+                let {event: {data: [account, newReward]}} = eventRecord
+                let eventAccountAddress = account.toString()
 
-            const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString())
-            const rewardHistoryElement = new HistoryElement(eventId)
+                let newValidator = distinctValidators.has(eventAccountAddress) ? eventAccountAddress : currentValidator
 
-            rewardHistoryElement.address = account.toString()
-            rewardHistoryElement.timestamp = blockTimestamp
-            rewardHistoryElement.reward = {
-                amount: newReward.toString(),
-                isReward: true,
-                validator: currentValidator
-            }
+                const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString())
+                const rewardHistoryElement = new HistoryElement(eventId)
 
-            rewardHistoryElement.save()
-        })
+                rewardHistoryElement.address = account.toString()
+                rewardHistoryElement.timestamp = blockTimestamp
+                rewardHistoryElement.reward = {
+                    amount: newReward.toString(),
+                    isReward: true,
+                    validator: newValidator
+                }
+
+                currentPromises.push(rewardHistoryElement.save())
+
+                return [currentValidator, currentPromises]
+            }, initialState)
+
 
     await Promise.all(savingPromises)
 }
