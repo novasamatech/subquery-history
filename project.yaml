@@ -7,11 +7,11 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 7960400
+    startBlock: 8124570
 
     # westend test stake block: 6000000
-    # kusama test stake block: 7960400
-    # polkadot test stake block: 5350000
+    # kusama test stake block: 8124580
+    # polkadot test stake block: 5645004
 
     # polkadot test rewards block: 5704983
     mapping:
@@ -38,8 +38,8 @@ dataSources:
           filter:
             module: balances
             method: transfer_keep_alive
-        - handler: handleNewSession
+        - handler: handleNewEra
           kind: substrate/EventHandler
           filter:
-            module: session
-            method: NewSession
+            module: staking
+            method: StakingElection
