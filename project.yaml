@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 8124570
+    startBlock: 1
 
     # westend test stake block: 6000000
     # kusama test stake block: 8124580
