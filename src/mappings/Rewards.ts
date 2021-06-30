@@ -1,55 +1,86 @@
 import {HistoryElement} from '../types';
 import {SubstrateEvent} from "@subql/types";
-import {callsFromBatch, eventId, isBatch, distinct, timestamp} from "./common";
+import {callsFromBatch, eventIdFromBlockAndIdx, isBatch, timestamp, eventId} from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
+import {EraIndex} from "@polkadot/types/interfaces/staking"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
 }
 
-export async function handleReward(event: SubstrateEvent): Promise<void> {
-    const {event: {data: [account, newReward]}} = event;
+function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number] {
+    const [validatorAddressRaw, eraRaw] = call.args
 
-    const element = new HistoryElement(eventId(event));
+    return [validatorAddressRaw.toString(), (eraRaw as EraIndex).toNumber()]
+}
 
-    element.address = account.toString()
-    element.timestamp = timestamp(event.block)
+export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
+    let blockNumber = rewardEvent.block.block.header.number.toString()
+    let blockTimestamp = timestamp(rewardEvent.block)
 
-    const cause = event.extrinsic
+    let element = await HistoryElement.get(eventId(rewardEvent))
+
+    if (element != undefined) {
+        // already processed reward previously
+        return;
+    }
+
+    const cause = rewardEvent.extrinsic
     const causeCall = cause.extrinsic.method
 
-    let validator;
+    let payoutCallsArgs: [string, number][]
 
     if (isPayoutStakers(causeCall)) {
-        const [validatorAddress,] = cause.extrinsic.method.args
-
-        validator = validatorAddress.toString()
+        payoutCallsArgs = [extractArgsFromPayoutStakers(cause.extrinsic.method)]
     } else if (isBatch(causeCall)) {
-        const validatorsInBatch = callsFromBatch(causeCall)
+        payoutCallsArgs = callsFromBatch(causeCall)
             .filter(isPayoutStakers)
-            .map(payoutCall => payoutCall.args[0].toString()) // validator address
-
-        const distinctValidatorsInBatch = distinct(validatorsInBatch)
-
-        // cannot say which reward_stakers triggered this specific event,
-        // so can only be sure if there is only one distinct validator throughout all reward_stakers in batch
-        if (distinctValidatorsInBatch.length == 1) {
-            validator = distinctValidatorsInBatch[0]
-        } else {
-            validator = null
-        }
-    } else {
-        validator = null
+            .map(extractArgsFromPayoutStakers)
     }
 
-    element.reward = {
-        amount: newReward.toString(),
-        isReward: true,
-        validator: validator
-    }
+    const distinctValidators = new Set(
+        payoutCallsArgs.map(([validator,]) => validator)
+    )
 
-    await element.save();
+    let rewardEventType = api.events.staking.Reward;
+
+    const initialState: [number, Promise<void>[]] = [-1, []]
+
+    const [, savingPromises] = rewardEvent.block.events
+        .reduce<[number, Promise<void>[]]>(
+            (accumulator, eventRecord, eventIndex) => {
+                let [currentCallIndex, currentPromises] = accumulator
+
+                // ignore non reward events in the block
+                if (!rewardEventType.is(eventRecord.event)) return accumulator
+
+                let {event: {data: [account, newReward]}} = eventRecord
+                let eventAccountAddress = account.toString()
+
+                let newCallIndex = distinctValidators.has(eventAccountAddress) ? currentCallIndex + 1 : currentCallIndex
+
+                const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString())
+                const rewardHistoryElement = new HistoryElement(eventId)
+
+                const [validator, era] = payoutCallsArgs[newCallIndex]
+
+                rewardHistoryElement.address = account.toString()
+                rewardHistoryElement.timestamp = blockTimestamp
+                rewardHistoryElement.reward = {
+                    amount: newReward.toString(),
+                    isReward: true,
+                    validator: validator,
+                    era: era
+                }
+
+                currentPromises.push(rewardHistoryElement.save())
+
+                return [newCallIndex, currentPromises]
+            }, initialState)
+
+
+    await Promise.all(savingPromises)
 }
 
 export async function handleSlash(event: SubstrateEvent): Promise<void> {
@@ -62,7 +93,8 @@ export async function handleSlash(event: SubstrateEvent): Promise<void> {
     element.reward = {
         amount: newSlash.toString(),
         isReward: false,
-        validator: null // TODO is it possible to determine validator for slash?
+        validator: null, // TODO is it possible to determine validator for slash?
+        era: null // TODO
     }
 
     await element.save();

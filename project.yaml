@@ -8,8 +8,12 @@ dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 7960400
-    # for westend startBlock: 6000000
-    # for polkadot startBlock: 5350000
+
+    # westend test stake block: 6000000
+    # kusama test stake block: 7960400
+    # polkadot test stake block: 5350000
+
+    # polkadot test rewards block: 5704983
     mapping:
       handlers:
         - handler: handleHistoryElement

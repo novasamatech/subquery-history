@@ -9,7 +9,8 @@ type Transfer @jsonField {
 
 type Reward @jsonField {
   amount: String!
-  isReward: Boolean!
+  isReward: Boolean!,
+  era: Int,
   validator: String
 }
 
