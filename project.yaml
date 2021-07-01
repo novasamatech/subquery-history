@@ -3,13 +3,17 @@ description: Fearless SubQuery project
 repository: 'https://github.com/ef1rspb/subquery-fearless'
 schema: ./schema.graphql
 network:
-  endpoint: 'wss://rpc.polkadot.io'
+  endpoint: 'wss://kusama-rpc.polkadot.io'
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
+
+    # westend test stake block: 6000000
+    # kusama test stake block: 8124580
+    # polkadot test stake block: 5645004
+
     # polkadot test rewards block: 5704983
-    # for polkadot startBlock: 5350000
     mapping:
       handlers:
         - handler: handleHistoryElement
@@ -34,3 +38,8 @@ dataSources:
           filter:
             module: balances
             method: transfer_keep_alive
+        - handler: handleNewEra
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakingElection
