@@ -1,9 +1,11 @@
-import {HistoryElement} from '../types';
-import {SubstrateEvent} from "@subql/types";
+import {EraStakersInfo, HistoryElement, Reward} from '../types';
+import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {callsFromBatch, eventIdFromBlockAndIdx, isBatch, timestamp, eventId} from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
+import {AugmentedEvent} from "@polkadot/api/types";
+import {ApiTypes} from "@polkadot/api/types/base";
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -16,9 +18,6 @@ function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number
 }
 
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
-    let blockNumber = rewardEvent.block.block.header.number.toString()
-    let blockTimestamp = timestamp(rewardEvent.block)
-
     let element = await HistoryElement.get(eventId(rewardEvent))
 
     if (element != undefined) {
@@ -43,59 +42,102 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
         payoutCallsArgs.map(([validator,]) => validator)
     )
 
-    let rewardEventType = api.events.staking.Reward;
+    const initialCallIndex = -1
 
-    const initialState: [number, Promise<void>[]] = [-1, []]
+    await buildRewardEvents(
+        rewardEvent.block,
+        api.events.staking.Reward,
+        initialCallIndex,
+       (currentCallIndex, eventAccount) => {
+            return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+        },
+        (currentCallIndex, amount) => {
+            const [validator, era] = payoutCallsArgs[currentCallIndex]
 
-    const [, savingPromises] = rewardEvent.block.events
-        .reduce<[number, Promise<void>[]]>(
-            (accumulator, eventRecord, eventIndex) => {
-                let [currentCallIndex, currentPromises] = accumulator
-
-                // ignore non reward events in the block
-                if (!rewardEventType.is(eventRecord.event)) return accumulator
-
-                let {event: {data: [account, newReward]}} = eventRecord
-                let eventAccountAddress = account.toString()
-
-                let newCallIndex = distinctValidators.has(eventAccountAddress) ? currentCallIndex + 1 : currentCallIndex
-
-                const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString())
-                const rewardHistoryElement = new HistoryElement(eventId)
-
-                const [validator, era] = payoutCallsArgs[newCallIndex]
-
-                rewardHistoryElement.address = account.toString()
-                rewardHistoryElement.timestamp = blockTimestamp
-                rewardHistoryElement.reward = {
-                    amount: newReward.toString(),
-                    isReward: true,
-                    validator: validator,
-                    era: era
-                }
-
-                currentPromises.push(rewardHistoryElement.save())
-
-                return [newCallIndex, currentPromises]
-            }, initialState)
-
-
-    await Promise.all(savingPromises)
+            return {
+                amount: amount,
+                isReward: true,
+                validator: validator,
+                era: era
+            }
+        }
+    )
 }
 
-export async function handleSlash(event: SubstrateEvent): Promise<void> {
-    const {event: {data: [account, newSlash]}} = event;
+export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
+    let element = await HistoryElement.get(eventId(slashEvent))
 
-    const element = new HistoryElement(eventId(event));
-
-    element.address = account.toString()
-    element.timestamp = timestamp(event.block)
-    element.reward = {
-        amount: newSlash.toString(),
-        isReward: false,
-        validator: null, // TODO is it possible to determine validator for slash?
-        era: null // TODO
+    if (element != undefined) {
+        // already processed reward previously
+        return;
     }
 
-    await element.save();
+    const currentEra = (await api.query.staking.currentEra()).unwrap();
+    const slashDefferDuration = api.consts.staking.slashDeferDuration
+
+    const slashEra = currentEra.toNumber() - slashDefferDuration.toNumber()
+
+    const eraStakersInSlashEra = await api.query.staking.erasStakers.entries(slashEra);
+    const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
+        let [, validatorId] = key.args
+
+        return validatorId.toString()
+    })
+    const validatorsSet = new Set(validatorsInSlashEra)
+
+    const initialValidator: string | null = null
+
+    await buildRewardEvents(
+        slashEvent.block,
+        api.events.staking.Slash,
+        initialValidator,
+        (currentValidator, eventAccount) => {
+            return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
+        },
+        (validator, amount) => {
+
+            return {
+                amount: amount,
+                isReward: false,
+                validator: validator,
+                era: slashEra
+            }
+        }
+    )
+}
+
+async function buildRewardEvents<A>(
+    block: SubstrateBlock,
+    eventType: AugmentedEvent<ApiTypes>,
+    initialInnerAccumulator: A,
+    produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
+    produceReward: (currentAccumulator: A, amount: string) => Reward
+) {
+    let blockNumber = block.block.header.number.toString()
+    let blockTimestamp = timestamp(block)
+
+    const [, savingPromises] = block.events.reduce<[A, Promise<void>[]]>(
+        (accumulator, eventRecord, eventIndex) => {
+            let [innerAccumulator, currentPromises] = accumulator
+
+            if (!eventType.is(eventRecord.event)) return accumulator
+
+            let {event: {data: [account, amount]}} = eventRecord
+
+            const newAccumulator = produceNewAccumulator(innerAccumulator, account.toString())
+
+            const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString())
+
+            const element = new HistoryElement(eventId);
+
+            element.timestamp = blockTimestamp
+            element.address = account.toString()
+            element.reward = produceReward(newAccumulator, amount.toString())
+
+            currentPromises.push(element.save())
+
+            return [newAccumulator, currentPromises];
+        }, [initialInnerAccumulator, []])
+
+    await Promise.all(savingPromises);
 }
