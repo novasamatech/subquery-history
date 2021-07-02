@@ -29,7 +29,6 @@ type HistoryElement @entity {
   reward: Reward
   extrinsic: Extrinsic
   transfer: Transfer
-  bonded: Bonded
 }
 
 type EraStakersInfo @entity {
