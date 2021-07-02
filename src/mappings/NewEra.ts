@@ -5,8 +5,8 @@ import {EraStakersInfo} from "../types";
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
     const eraStakersInfo = new EraStakersInfo(eventId(event))
 
-    let eraOption = await api.query.staking.activeEra()
-    let eraIndex = eraOption.unwrap().index
+    let eraOption = await api.query.staking.currentEra()
+    let eraIndex = eraOption.unwrap()
 
     eraStakersInfo.era = eraIndex.toString()
 
@@ -16,7 +16,7 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
         const [, validatorId] = key.args
 
         return {
-            accountId: validatorId.toString(),
+            address: validatorId.toString(),
             exposure: {
                 total: exposure.total.toString(),
                 own: exposure.own.toString(),

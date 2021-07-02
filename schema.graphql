@@ -38,7 +38,7 @@ type EraStakersInfo @entity {
 }
 
 type EraValidatorInfo @jsonField {
-  accountId: String!
+  address: String!
   exposure: ValidatorExposure!
 }
 
