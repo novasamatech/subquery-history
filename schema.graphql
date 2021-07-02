@@ -29,6 +29,7 @@ type HistoryElement @entity {
   reward: Reward
   extrinsic: Extrinsic
   transfer: Transfer
+  bonded: Bonded
 }
 
 type EraStakersInfo @entity {
@@ -51,4 +52,9 @@ type ValidatorExposure @jsonField {
 type IndividualExposure @jsonField {
   who: String!
   value: String!
+}
+
+type Bonded @jsonField {
+  stash: String!
+  amount: String!
 }
