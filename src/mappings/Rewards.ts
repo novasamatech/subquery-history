@@ -1,4 +1,4 @@
-import {EraStakersInfo, HistoryElement, Reward} from '../types';
+import {EraStakersInfo, HistoryElement, Reward, StakeChange} from '../types';
 import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {callsFromBatch, eventIdFromBlockAndIdx, isBatch, timestamp, eventId} from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
@@ -135,6 +135,13 @@ async function buildRewardEvents<A>(
             element.reward = produceReward(newAccumulator, amount.toString())
 
             currentPromises.push(element.save())
+
+            const slashedStackChange = new StakeChange(eventId);
+            slashedStackChange.type = "slashed"
+            slashedStackChange.address = account.toString()
+            slashedStackChange.timestamp = blockTimestamp
+            slashedStackChange.amount = (-amount).toString()
+            currentPromises.push(slashedStackChange.save())
 
             return [newAccumulator, currentPromises];
         }, [initialInnerAccumulator, []])
