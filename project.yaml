@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 3570179
+    startBlock: 5755000
 
     # polkadot test slash bloks: 3570179
 
@@ -30,6 +30,11 @@ dataSources:
           filter:
             module: staking
             method: Slash
+        - handler: handleBonded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Bonded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
