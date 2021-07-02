@@ -35,6 +35,11 @@ dataSources:
           filter:
             module: staking
             method: Bonded
+        - handler: handleUnbonded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Unbonded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:

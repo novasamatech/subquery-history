@@ -55,6 +55,7 @@ type IndividualExposure @jsonField {
 
 #enum StakeChangeType {
 #  bonded
+#  unbonded
 #}
 
 type StakeChange @entity {

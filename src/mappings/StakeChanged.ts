@@ -14,3 +14,15 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
 
     await element.save()
 }
+
+export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
+    const {event: {data: [stash, amount]}} = event;
+
+    const element = new StakeChange(eventId(event));
+    element.timestamp = timestamp(event.extrinsic.block)
+    element.address = stash.toString()
+    element.amount = (-(amount as Balance)).toString()
+    element.type = "unbonded"
+
+    await element.save()
+}
