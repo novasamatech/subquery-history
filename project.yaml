@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 5755000
+    startBlock: 3570179
 
     # polkadot test slash bloks: 3570179
 

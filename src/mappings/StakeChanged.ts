@@ -26,3 +26,15 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
 
     await element.save()
 }
+
+export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<void> {
+    const {event: {data: [validatorOrNominatorAccountId, amount]}} = event;
+
+    const element = new StakeChange(eventId(event));
+    element.timestamp = timestamp(event.block)
+    element.address = validatorOrNominatorAccountId.toString()
+    element.amount = (-(amount as Balance)).toString()
+    element.type = "slashed"
+
+    await element.save()
+}

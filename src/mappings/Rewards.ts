@@ -6,6 +6,7 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
 import {AugmentedEvent} from "@polkadot/api/types";
 import {ApiTypes} from "@polkadot/api/types/base";
+import {handleSlashForAnalytics} from "./StakeChanged"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -65,6 +66,8 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
+    await handleSlashForAnalytics(slashEvent)
+
     let element = await HistoryElement.get(eventId(slashEvent))
 
     if (element != undefined) {
