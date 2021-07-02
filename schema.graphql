@@ -53,9 +53,14 @@ type IndividualExposure @jsonField {
   value: String!
 }
 
-type Bonded @entity {
+#enum StakeChangeType {
+#  bonded
+#}
+
+type StakeChange @entity {
   id: ID!
   timestamp: String!
-  stash: String!
+  address: String!
   amount: String!
+  type: String!
 }
