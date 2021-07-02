@@ -54,7 +54,9 @@ type IndividualExposure @jsonField {
   value: String!
 }
 
-type Bonded @jsonField {
+type Bonded @entity {
+  id: ID!
+  timestamp: String!
   stash: String!
   amount: String!
 }
