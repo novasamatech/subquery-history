@@ -50,7 +50,7 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
         element.timestamp = timestamp(event.block)
         element.address = accountAddress
         element.amount = (amount as Balance).toString()
-        element.type = "reward"
+        element.type = "rewarded"
 
         await element.save()
     }
