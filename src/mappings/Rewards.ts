@@ -1,6 +1,14 @@
-import {EraStakersInfo, HistoryElement, Reward} from '../types';
+import {HistoryElement, Reward} from '../types';
 import {SubstrateBlock, SubstrateEvent} from "@subql/types";
-import {callsFromBatch, eventIdFromBlockAndIdx, isBatch, timestamp, eventId} from "./common";
+import {
+    callsFromBatch,
+    eventIdFromBlockAndIdx,
+    isBatch,
+    timestamp,
+    eventId,
+    isProxy,
+    callsFromProxy
+} from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
@@ -9,7 +17,7 @@ import {ApiTypes} from "@polkadot/api/types/base";
 import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
-    return call.method == "payoutStakers"
+    return call.method == "payoutStakers" || call.callIndex.toString() == "0x0712"
 }
 
 function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number] {
@@ -40,6 +48,10 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         payoutCallsArgs = [extractArgsFromPayoutStakers(cause.extrinsic.method)]
     } else if (isBatch(causeCall)) {
         payoutCallsArgs = callsFromBatch(causeCall)
+            .filter(isPayoutStakers)
+            .map(extractArgsFromPayoutStakers)
+    } else if (isProxy(causeCall)) {
+        payoutCallsArgs = callsFromProxy(causeCall)
             .filter(isPayoutStakers)
             .map(extractArgsFromPayoutStakers)
     }
