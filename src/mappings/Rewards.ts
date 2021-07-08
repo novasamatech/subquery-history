@@ -7,7 +7,7 @@ import {
     timestamp,
     eventId,
     isProxy,
-    callsFromProxy
+    callFromProxy
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -39,22 +39,8 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         return;
     }
 
-    const cause = rewardEvent.extrinsic
-    const causeCall = cause.extrinsic.method
-
-    let payoutCallsArgs: [string, number][]
-
-    if (isPayoutStakers(causeCall)) {
-        payoutCallsArgs = [extractArgsFromPayoutStakers(cause.extrinsic.method)]
-    } else if (isBatch(causeCall)) {
-        payoutCallsArgs = callsFromBatch(causeCall)
-            .filter(isPayoutStakers)
-            .map(extractArgsFromPayoutStakers)
-    } else if (isProxy(causeCall)) {
-        payoutCallsArgs = callsFromProxy(causeCall)
-            .filter(isPayoutStakers)
-            .map(extractArgsFromPayoutStakers)
-    }
+    const causeCall = rewardEvent.extrinsic.extrinsic.method
+    let payoutCallsArgs = determinePayoutCallsArgs(causeCall)
 
     const distinctValidators = new Set(
         payoutCallsArgs.map(([validator,]) => validator)
@@ -80,6 +66,19 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             }
         }
     )
+}
+
+function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, number][] {
+    if (isPayoutStakers(causeCall)) {
+        return [extractArgsFromPayoutStakers(causeCall)]
+    } else if (isBatch(causeCall)) {
+        return callsFromBatch(causeCall)
+            .filter(isPayoutStakers)
+            .map(extractArgsFromPayoutStakers)
+    } else if (isProxy(causeCall)) {
+        let proxyCall = callFromProxy(causeCall)
+        return determinePayoutCallsArgs(proxyCall)
+    }
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
