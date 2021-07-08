@@ -72,17 +72,14 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, numb
     if (isPayoutStakers(causeCall)) {
         return [extractArgsFromPayoutStakers(causeCall)]
     } else if (isBatch(causeCall)) {
-        let calls = callsFromBatch(causeCall)
-        let payoutStakers = calls
-            .filter(isPayoutStakers)
-            .map(extractArgsFromPayoutStakers)
-
-        let proxyCalls = calls
-            .filter(isProxy)
-            .map(callFromProxy)
-            .flatMap(determinePayoutCallsArgs)
-
-        return payoutStakers.concat(proxyCalls)
+        return callsFromBatch(causeCall)
+            .map(call => {
+                return determinePayoutCallsArgs(call)
+                    .map((value, index, array) => {
+                        return value
+                    })
+            })
+            .flat()
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
         return determinePayoutCallsArgs(proxyCall)
