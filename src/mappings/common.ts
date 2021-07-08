@@ -25,10 +25,8 @@ export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTupl
     return batchCall.args[0] as Vec<CallBase<AnyTuple>>
 }
 
-export function callsFromProxy(proxyCall: CallBase<AnyTuple>) : CallBase<AnyTuple>[] {
-    let args = proxyCall.args[2] as CallBase<AnyTuple>
-    let calls = args.args[0] as Vec<CallBase<AnyTuple>>
-    return calls
+export function callFromProxy(proxyCall: CallBase<AnyTuple>) : CallBase<AnyTuple> {
+    return proxyCall.args[2] as CallBase<AnyTuple>
 }
 
 export function eventId(event: SubstrateEvent): string {
