@@ -17,7 +17,7 @@ import {ApiTypes} from "@polkadot/api/types/base";
 import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
-    return call.method == "payoutStakers" || call.callIndex.toString() == "0x0712"
+    return call.method == "payoutStakers"
 }
 
 function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number] {
