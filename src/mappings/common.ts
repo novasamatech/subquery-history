@@ -17,8 +17,16 @@ export function isBatch(call: CallBase<AnyTuple>) : boolean {
     return call.section == "utility" && batchCalls.includes(call.method)
 }
 
+export function isProxy(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "proxy" && call.method == "proxy"
+}
+
 export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTuple>[] {
     return batchCall.args[0] as Vec<CallBase<AnyTuple>>
+}
+
+export function callFromProxy(proxyCall: CallBase<AnyTuple>) : CallBase<AnyTuple> {
+    return proxyCall.args[2] as CallBase<AnyTuple>
 }
 
 export function eventId(event: SubstrateEvent): string {
