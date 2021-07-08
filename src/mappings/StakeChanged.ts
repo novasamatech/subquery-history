@@ -1,5 +1,5 @@
 import {SubstrateEvent} from "@subql/types";
-import {StakeChange} from "../types";
+import {AccumulatedStake, StakeChange} from "../types";
 import {eventId, timestamp} from "./common";
 import {Balance} from "@polkadot/types/interfaces";
 import {RewardDestination} from "@polkadot/types/interfaces/staking";
@@ -7,10 +7,15 @@ import {RewardDestination} from "@polkadot/types/interfaces/staking";
 export async function handleBonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
+    let address = stash.toString()
+    let amountBalance = (amount as Balance).toBigInt()
+    let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
+
     const element = new StakeChange(eventId(event));
     element.timestamp = timestamp(event.extrinsic.block)
-    element.address = stash.toString()
-    element.amount = (amount as Balance).toString()
+    element.address = address
+    element.amount = amountBalance.toString()
+    element.accumulatedAmount = accumulatedAmount.toString()
     element.type = "bonded"
 
     await element.save()
@@ -19,10 +24,15 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
 export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
+    let address = stash.toString()
+    let amountBalance = (amount as Balance).toBigInt()
+    let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
+
     const element = new StakeChange(eventId(event));
     element.timestamp = timestamp(event.extrinsic.block)
-    element.address = stash.toString()
-    element.amount = (amount as Balance).toString()
+    element.address = address
+    element.amount = amountBalance.toString()
+    element.accumulatedAmount = accumulatedAmount.toString()
     element.type = "unbonded"
 
     await element.save()
@@ -31,10 +41,15 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
 export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<void> {
     const {event: {data: [validatorOrNominatorAccountId, amount]}} = event;
 
+    let address = validatorOrNominatorAccountId.toString()
+    let amountBalance = (amount as Balance).toBigInt()
+    let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
+
     const element = new StakeChange(eventId(event));
     element.timestamp = timestamp(event.block)
     element.address = validatorOrNominatorAccountId.toString()
-    element.amount = (amount as Balance).toString()
+    element.amount = amountBalance.toString()
+    element.accumulatedAmount = accumulatedAmount.toString()
     element.type = "slashed"
 
     await element.save()
@@ -46,12 +61,32 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
 
     const payee: RewardDestination = await api.query.staking.payee(accountAddress);
     if (payee.isStaked) {
+        let amountBalance = (amount as Balance).toBigInt()
+        let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
+
         const element = new StakeChange(eventId(event));
         element.timestamp = timestamp(event.block)
         element.address = accountAddress
-        element.amount = (amount as Balance).toString()
+        element.amount = amountBalance.toString()
+        element.accumulatedAmount = accumulatedAmount.toString()
         element.type = "rewarded"
 
         await element.save()
+    }
+}
+
+async function handleAccumulatedStake(address: string, amount: bigint): Promise<bigint> {
+    let accumulatedStake = await AccumulatedStake.get(address)
+    if (accumulatedStake != undefined) {
+        let accumulatedAmount = BigInt(accumulatedStake.amount).valueOf()
+        accumulatedAmount += amount
+        accumulatedStake.amount = accumulatedAmount.toString()
+        await accumulatedStake.save()
+        return accumulatedAmount
+    } else {
+        let accumulatedStake = new AccumulatedStake(address)
+        accumulatedStake.amount = amount.toString()
+        await accumulatedStake.save()
+        return amount
     }
 }

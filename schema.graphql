@@ -65,5 +65,11 @@ type StakeChange @entity {
   timestamp: String!
   address: String!
   amount: String!
+  accumulatedAmount: String!
   type: String!
+}
+
+type AccumulatedStake @entity {
+  id: ID!
+  amount: String!
 }
