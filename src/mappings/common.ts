@@ -7,7 +7,7 @@ import { Vec } from '@polkadot/types';
 import {EventRecord} from "@polkadot/types/interfaces/system/types"
 
 
-const batchCalls = ["batch", "batch_all"]
+const batchCalls = ["batch", "batchAll"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
     return [...new Set(array)];
