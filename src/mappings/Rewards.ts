@@ -53,7 +53,8 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         api.events.staking.Reward,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
-            return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+            let nextIndex = distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+            return Math.min(nextIndex, payoutCallsArgs.length - 1)
         },
         (currentCallIndex, amount) => {
             const [validator, era] = payoutCallsArgs[currentCallIndex]
