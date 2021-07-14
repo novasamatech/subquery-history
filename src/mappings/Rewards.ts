@@ -39,8 +39,11 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         return;
     }
 
-    const causeCall = rewardEvent.extrinsic.extrinsic.method
-    let payoutCallsArgs = determinePayoutCallsArgs(causeCall)
+    let payoutCallsArgs = rewardEvent.block.block.extrinsics
+        .map(extrinsic => extrinsic.method)
+        .map(determinePayoutCallsArgs)
+        .filter(args => args.length != 0)
+        .flat()
 
     const distinctValidators = new Set(
         payoutCallsArgs.map(([validator,]) => validator)
@@ -83,6 +86,8 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, numb
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
         return determinePayoutCallsArgs(proxyCall)
+    } else {
+        return []
     }
 }
 
