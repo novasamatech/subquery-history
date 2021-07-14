@@ -40,14 +40,14 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
     }
 
     let payoutCallsArgs = rewardEvent.block.block.extrinsics
-        .map(extrinsic => { return extrinsic.method })
+        .map(extrinsic => extrinsic.method)
         .map(determinePayoutCallsArgs)
-        .filter(args => {return args.length != 0})
+        .filter(args => args.length != 0)
         .flat()
 
-    const validators = new Array(
+    const validators = new Set(
         payoutCallsArgs.map(([validator,]) => validator)
-    ).flat()
+    )
 
     const initialCallIndex = -1
 
@@ -56,7 +56,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         api.events.staking.Reward,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
-            return validators.includes(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+            return validators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
         },
         (currentCallIndex, amount) => {
             const [validator, era] = payoutCallsArgs[currentCallIndex]
