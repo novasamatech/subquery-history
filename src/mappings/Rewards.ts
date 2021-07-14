@@ -45,7 +45,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         .filter(args => args.length != 0)
         .flat()
 
-    const validators = new Set(
+    const distinctValidators = new Set(
         payoutCallsArgs.map(([validator,]) => validator)
     )
 
@@ -56,7 +56,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         api.events.staking.Reward,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
-            return validators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+            return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
         },
         (currentCallIndex, amount) => {
             const [validator, era] = payoutCallsArgs[currentCallIndex]
