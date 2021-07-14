@@ -39,12 +39,15 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         return;
     }
 
-    const causeCall = rewardEvent.extrinsic.extrinsic.method
-    let payoutCallsArgs = determinePayoutCallsArgs(causeCall)
+    let payoutCallsArgs = rewardEvent.block.block.extrinsics
+        .map(extrinsic => { return extrinsic.method })
+        .map(determinePayoutCallsArgs)
+        .filter(args => {return args.length != 0})
+        .flat()
 
-    const distinctValidators = new Set(
+    const validators = new Array(
         payoutCallsArgs.map(([validator,]) => validator)
-    )
+    ).flat()
 
     const initialCallIndex = -1
 
@@ -53,8 +56,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         api.events.staking.Reward,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
-            let nextIndex = distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
-            return Math.min(nextIndex, payoutCallsArgs.length - 1)
+            return validators.includes(eventAccount) ? currentCallIndex + 1 : currentCallIndex
         },
         (currentCallIndex, amount) => {
             const [validator, era] = payoutCallsArgs[currentCallIndex]
@@ -84,6 +86,8 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, numb
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
         return determinePayoutCallsArgs(proxyCall)
+    } else {
+        return []
     }
 }
 
