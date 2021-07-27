@@ -5,6 +5,7 @@ type Transfer @jsonField {
   fee: String!
   block: String!
   extrinsicId: String
+  success: Boolean!
 }
 
 type Reward @jsonField {
