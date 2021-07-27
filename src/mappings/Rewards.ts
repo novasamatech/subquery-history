@@ -1,4 +1,4 @@
-import {HistoryElement, Reward} from '../types';
+import {ErrorEvent, HistoryElement, Reward} from '../types';
 import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {
     callsFromBatch,
@@ -32,10 +32,18 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
 }
 
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
-    let element = await HistoryElement.get(eventId(rewardEvent))
+    let rewardEventId = eventId(rewardEvent)
+    let element = await HistoryElement.get(rewardEventId)
 
     if (element != undefined) {
         // already processed reward previously
+        return;
+    }
+
+    let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
+
+    if (errorOccursOnEvent != undefined) {
+        logger.info(`Skip rewardEvent: ${rewardEventId.toString()}`)
         return;
     }
 
@@ -166,7 +174,12 @@ async function buildRewardEvents<A>(
             element.address = account.toString()
             element.reward = produceReward(newAccumulator, amount.toString())
 
-            currentPromises.push(element.save())
+            currentPromises.push(element.save().catch(error => {
+                logger.error(`Got error on event: ${eventId.toString()}: ${error.toString()}`)
+                let saveError = new ErrorEvent(eventId)
+                saveError.description = error.toString()
+                return saveError.save()
+            }))
 
             return [newAccumulator, currentPromises];
         }, [initialInnerAccumulator, []])

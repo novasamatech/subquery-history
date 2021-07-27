@@ -73,3 +73,8 @@ type AccumulatedStake @entity {
   id: ID!
   amount: String!
 }
+
+type ErrorEvent @entity {
+  id: ID!
+  description: String
+}
