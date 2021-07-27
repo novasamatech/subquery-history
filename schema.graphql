@@ -76,5 +76,5 @@ type AccumulatedStake @entity {
 
 type ErrorEvent @entity {
   id: ID!
-  description: String
+  description: String!
 }
