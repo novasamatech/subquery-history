@@ -28,7 +28,8 @@ async function populateTransfer(element: HistoryElement, event: SubstrateEvent):
         to: to.toString(),
         block: blockNumber(event),
         fee: exportFeeFromDepositEvent(event.extrinsic).toString(),
-        extrinsicId: extrinsicId(event)
+        extrinsicId: extrinsicId(event),
+        success: true
     }
     await element.save();
 }
