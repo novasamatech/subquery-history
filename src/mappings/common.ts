@@ -8,6 +8,7 @@ import {EventRecord} from "@polkadot/types/interfaces/system/types"
 
 
 const batchCalls = ["batch", "batchAll"]
+const transferCalls = ["transfer", "transferKeepAlive"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
     return [...new Set(array)];
@@ -19,6 +20,10 @@ export function isBatch(call: CallBase<AnyTuple>) : boolean {
 
 export function isProxy(call: CallBase<AnyTuple>) : boolean {
     return call.section == "proxy" && call.method == "proxy"
+}
+
+export function isTransfer(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "balances" && transferCalls.includes(call.method)
 }
 
 export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTuple>[] {
@@ -43,6 +48,10 @@ export function extrinsicId(event: SubstrateEvent): string {
 
 export function blockNumber(event: SubstrateEvent): string {
     return event.block.block.header.number.toString()
+}
+
+export function extrinsicIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
+    return `${blockNumber}-${eventIdx}`
 }
 
 export function timestamp(block: SubstrateBlock): string {
