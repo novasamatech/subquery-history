@@ -1,4 +1,4 @@
-import {HistoryElement, Reward} from '../types';
+import {ErrorEvent, HistoryElement, Reward} from '../types';
 import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {
     callsFromBatch,
@@ -27,8 +27,22 @@ function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number
 }
 
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
-    await handleRewardRestakeForAnalytics(rewardEvent)
-    await handleRewardForTxHistory(rewardEvent)
+    let rewardEventId = eventId(rewardEvent)
+    try {
+        let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
+        if (errorOccursOnEvent != undefined) {
+            logger.info(`Skip rewardEvent: ${rewardEventId}`)
+            return;
+        }
+
+        await handleRewardRestakeForAnalytics(rewardEvent)
+        await handleRewardForTxHistory(rewardEvent)
+    } catch (error) {
+        logger.error(`Got error on event: ${rewardEventId}: ${error.toString()}`)
+        let saveError = new ErrorEvent(rewardEventId)
+        saveError.description = error.toString()
+        await saveError.save()
+    }
 }
 
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
@@ -92,8 +106,22 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, numb
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
-    await handleSlashForAnalytics(slashEvent)
-    await handleSlashForTxHistory(slashEvent)
+    let slashEventId = eventId(slashEvent)
+    try {
+        let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
+        if (errorOccursOnEvent != undefined) {
+            logger.info(`Skip slashEvent: ${slashEventId}`)
+            return;
+        }
+
+        await handleSlashForAnalytics(slashEvent)
+        await handleSlashForTxHistory(slashEvent)
+    } catch (error) {
+        logger.error(`Got error on event: ${slashEventId}: ${error.toString()}`)
+        let saveError = new ErrorEvent(slashEventId)
+        saveError.description = error.toString()
+        await saveError.save()
+    }
 }
 
 async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void> {
@@ -171,5 +199,5 @@ async function buildRewardEvents<A>(
             return [newAccumulator, currentPromises];
         }, [initialInnerAccumulator, []])
 
-    await Promise.all(savingPromises);
+    await Promise.allSettled(savingPromises);
 }
