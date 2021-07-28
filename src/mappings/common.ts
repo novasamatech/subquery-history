@@ -50,6 +50,10 @@ export function blockNumber(event: SubstrateEvent): string {
     return event.block.block.header.number.toString()
 }
 
+export function extrinsicIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
+    return `${blockNumber}-${eventIdx}`
+}
+
 export function timestamp(block: SubstrateBlock): string {
     return Math.round((block.timestamp.getTime() / 1000)).toString()
 }

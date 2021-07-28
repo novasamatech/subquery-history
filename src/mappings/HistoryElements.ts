@@ -1,10 +1,9 @@
 import {SubstrateEvent, SubstrateExtrinsic} from '@subql/types';
 import {HistoryElement, Transfer} from "../types";
 import {
-    blockNumber, callFromProxy, callsFromBatch, eventId,
-    eventIdFromBlockAndIdx,
+    callFromProxy, callsFromBatch,
     exportFeeFromDepositEvent,
-    extrinsicId, isBatch, isProxy,
+    extrinsicIdFromBlockAndIdx, isBatch, isProxy,
     isTransfer,
     timestamp
 } from "./common";
@@ -75,7 +74,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
             to: tuple[0],
             block: blockNumber,
             fee: exportFeeFromDepositEvent(extrinsic).toString(),
-            extrinsicId: eventIdFromBlockAndIdx(blockNumber, extrinsic.idx.toString()),
+            extrinsicId: extrinsicIdFromBlockAndIdx(blockNumber, extrinsic.idx.toString()),
             success: false
         }
     })
