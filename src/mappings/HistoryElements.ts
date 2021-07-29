@@ -80,7 +80,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
     })
 }
 
-function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [string, number][] {
+function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [string, bigint][] {
     if (isTransfer(causeCall)) {
         return [extractArgsFromTransfer(causeCall)]
     } else if (isBatch(causeCall)) {
@@ -100,8 +100,8 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [string, nu
     }
 }
 
-function extractArgsFromTransfer(call: CallBase<AnyTuple>): [string, number] {
+function extractArgsFromTransfer(call: CallBase<AnyTuple>): [string, bigint] {
     const [destinationAddress, amount] = call.args
 
-    return [destinationAddress.toString(), (amount as Balance).toNumber()]
+    return [destinationAddress.toString(), (amount as Balance).toBigInt()]
 }
