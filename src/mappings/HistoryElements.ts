@@ -10,6 +10,7 @@ import {
 import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
+import {u64} from "@polkadot/types";
 
 export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promise<void> {
     const { isSigned } = extrinsic.extrinsic;
@@ -103,5 +104,5 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [string, bi
 function extractArgsFromTransfer(call: CallBase<AnyTuple>): [string, bigint] {
     const [destinationAddress, amount] = call.args
 
-    return [destinationAddress.toString(), (amount as Balance).toBigInt()]
+    return [destinationAddress.toString(), (amount as u64).toBigInt()]
 }
