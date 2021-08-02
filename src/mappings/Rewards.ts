@@ -20,10 +20,20 @@ function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
 }
 
+function isPayoutValidator(call: CallBase<AnyTuple>): boolean {
+    return call.method == "payoutValidator"
+}
+
 function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number] {
     const [validatorAddressRaw, eraRaw] = call.args
 
     return [validatorAddressRaw.toString(), (eraRaw as EraIndex).toNumber()]
+}
+
+function extractArgsFromPayoutValidator(call: CallBase<AnyTuple>, sender: string): [string, number] {
+    const [eraRaw] = call.args
+
+    return [sender, (eraRaw as EraIndex).toNumber()]
 }
 
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
@@ -54,8 +64,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
     }
 
     let payoutCallsArgs = rewardEvent.block.block.extrinsics
-        .map(extrinsic => extrinsic.method)
-        .map(determinePayoutCallsArgs)
+        .map(extrinsic => determinePayoutCallsArgs(extrinsic.method, extrinsic.signer.toString()))
         .filter(args => args.length != 0)
         .flat()
 
@@ -89,13 +98,15 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
     )
 }
 
-function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, number][] {
+function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>, sender: string) : [string, number][] {
     if (isPayoutStakers(causeCall)) {
         return [extractArgsFromPayoutStakers(causeCall)]
+    } else if (isPayoutValidator(causeCall)) {
+        return [extractArgsFromPayoutValidator(causeCall, sender)]
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
-                return determinePayoutCallsArgs(call)
+                return determinePayoutCallsArgs(call, sender)
                     .map((value, index, array) => {
                         return value
                     })
@@ -103,7 +114,7 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, numb
             .flat()
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
-        return determinePayoutCallsArgs(proxyCall)
+        return determinePayoutCallsArgs(proxyCall, sender)
     } else {
         return []
     }
