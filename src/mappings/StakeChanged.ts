@@ -77,7 +77,7 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
 
 async function handleAccumulatedStake(address: string, amount: bigint): Promise<bigint> {
     let accumulatedStake = await AccumulatedStake.get(address)
-    if (accumulatedStake != undefined) {
+    if (accumulatedStake !== undefined) {
         let accumulatedAmount = BigInt(accumulatedStake.amount).valueOf()
         accumulatedAmount += amount
         accumulatedStake.amount = accumulatedAmount.toString()
