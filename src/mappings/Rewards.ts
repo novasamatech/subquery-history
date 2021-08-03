@@ -20,17 +20,27 @@ function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
 }
 
+function isPayoutValidator(call: CallBase<AnyTuple>): boolean {
+    return call.method == "payoutValidator"
+}
+
 function extractArgsFromPayoutStakers(call: CallBase<AnyTuple>): [string, number] {
     const [validatorAddressRaw, eraRaw] = call.args
 
     return [validatorAddressRaw.toString(), (eraRaw as EraIndex).toNumber()]
 }
 
+function extractArgsFromPayoutValidator(call: CallBase<AnyTuple>, sender: string): [string, number] {
+    const [eraRaw] = call.args
+
+    return [sender, (eraRaw as EraIndex).toNumber()]
+}
+
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     let rewardEventId = eventId(rewardEvent)
     try {
         let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
-        if (errorOccursOnEvent != undefined) {
+        if (errorOccursOnEvent !== undefined) {
             logger.info(`Skip rewardEvent: ${rewardEventId}`)
             return;
         }
@@ -38,7 +48,7 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
         await handleRewardRestakeForAnalytics(rewardEvent)
         await handleRewardForTxHistory(rewardEvent)
     } catch (error) {
-        logger.error(`Got error on event: ${rewardEventId}: ${error.toString()}`)
+        logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
         let saveError = new ErrorEvent(rewardEventId)
         saveError.description = error.toString()
         await saveError.save()
@@ -48,16 +58,19 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
     let element = await HistoryElement.get(eventId(rewardEvent))
 
-    if (element != undefined) {
+    if (element !== undefined) {
         // already processed reward previously
         return;
     }
 
     let payoutCallsArgs = rewardEvent.block.block.extrinsics
-        .map(extrinsic => extrinsic.method)
-        .map(determinePayoutCallsArgs)
+        .map(extrinsic => determinePayoutCallsArgs(extrinsic.method, extrinsic.signer.toString()))
         .filter(args => args.length != 0)
         .flat()
+
+    if (payoutCallsArgs.length == 0) {
+        return
+    }
 
     const distinctValidators = new Set(
         payoutCallsArgs.map(([validator,]) => validator)
@@ -85,13 +98,15 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
     )
 }
 
-function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, number][] {
+function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>, sender: string) : [string, number][] {
     if (isPayoutStakers(causeCall)) {
         return [extractArgsFromPayoutStakers(causeCall)]
+    } else if (isPayoutValidator(causeCall)) {
+        return [extractArgsFromPayoutValidator(causeCall, sender)]
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
-                return determinePayoutCallsArgs(call)
+                return determinePayoutCallsArgs(call, sender)
                     .map((value, index, array) => {
                         return value
                     })
@@ -99,7 +114,7 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>) : [string, numb
             .flat()
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
-        return determinePayoutCallsArgs(proxyCall)
+        return determinePayoutCallsArgs(proxyCall, sender)
     } else {
         return []
     }
@@ -109,7 +124,7 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
     let slashEventId = eventId(slashEvent)
     try {
         let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
-        if (errorOccursOnEvent != undefined) {
+        if (errorOccursOnEvent !== undefined) {
             logger.info(`Skip slashEvent: ${slashEventId}`)
             return;
         }
@@ -117,7 +132,7 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
         await handleSlashForAnalytics(slashEvent)
         await handleSlashForTxHistory(slashEvent)
     } catch (error) {
-        logger.error(`Got error on event: ${slashEventId}: ${error.toString()}`)
+        logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
         let saveError = new ErrorEvent(slashEventId)
         saveError.description = error.toString()
         await saveError.save()
@@ -127,7 +142,7 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
 async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void> {
     let element = await HistoryElement.get(eventId(slashEvent))
 
-    if (element != undefined) {
+    if (element !== undefined) {
         // already processed reward previously
         return;
     }
