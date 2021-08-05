@@ -1,13 +1,12 @@
-import {SubstrateEvent, SubstrateExtrinsic} from '@subql/types';
+import {SubstrateExtrinsic} from '@subql/types';
 import {HistoryElement, Transfer} from "../types";
 import {
     callFromProxy, callsFromBatch,
-    exportFeeFromDepositEvent,
+    exportFeeFromDepositEventAsString,
     extrinsicIdFromBlockAndIdx, isBatch, isProxy,
     isTransfer,
     timestamp
 } from "./common";
-import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {u64} from "@polkadot/types";
@@ -50,7 +49,7 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
         module: extrinsic.extrinsic.method.section,
         call: extrinsic.extrinsic.method.method,
         success: extrinsic.success,
-        fee: exportFeeFromDepositEvent(extrinsic)?.toString()
+        fee: exportFeeFromDepositEventAsString(extrinsic)
     }
     await element.save()
 }
@@ -74,7 +73,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
             from: sender.toString(),
             to: tuple[0],
             block: blockNumber,
-            fee: exportFeeFromDepositEvent(extrinsic).toString(),
+            fee: exportFeeFromDepositEventAsString(extrinsic),
             extrinsicId: extrinsicIdFromBlockAndIdx(blockNumber, extrinsic.idx.toString()),
             success: false
         }

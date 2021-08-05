@@ -1,6 +1,6 @@
 import {HistoryElement} from '../types';
 import {SubstrateEvent} from "@subql/types";
-import {blockNumber, eventId, exportFeeFromDepositEvent, extrinsicId, timestamp} from "./common";
+import {blockNumber, eventId, exportFeeFromDepositEventAsString, extrinsicId, timestamp} from "./common";
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
     const {event: {data: [from, to, ]}} = event;
@@ -27,7 +27,7 @@ async function populateTransfer(element: HistoryElement, event: SubstrateEvent):
         from: from.toString(),
         to: to.toString(),
         block: blockNumber(event),
-        fee: exportFeeFromDepositEvent(event.extrinsic).toString(),
+        fee: exportFeeFromDepositEventAsString(event.extrinsic),
         extrinsicId: extrinsicId(event),
         success: true
     }

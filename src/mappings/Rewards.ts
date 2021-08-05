@@ -160,7 +160,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
     })
     const validatorsSet = new Set(validatorsInSlashEra)
 
-    const initialValidator: string | null = null
+    const initialValidator: string = ""
 
     await buildRewardEvents(
         slashEvent.block,
