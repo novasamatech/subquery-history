@@ -12,7 +12,7 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
 
     const element = new StakeChange(eventId(event));
-    element.timestamp = timestamp(event.extrinsic.block)
+    element.timestamp = timestamp(event.block)
     element.address = address
     element.amount = amountBalance.toString()
     element.accumulatedAmount = accumulatedAmount.toString()
@@ -29,7 +29,7 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
-    element.timestamp = timestamp(event.extrinsic.block)
+    element.timestamp = timestamp(event.block)
     element.address = address
     element.amount = amountBalance.toString()
     element.accumulatedAmount = accumulatedAmount.toString()

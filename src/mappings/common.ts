@@ -4,8 +4,6 @@ import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec } from '@polkadot/types';
-import {EventRecord} from "@polkadot/types/interfaces/system/types"
-
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -43,7 +41,8 @@ export function eventIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
 }
 
 export function extrinsicId(event: SubstrateEvent): string {
-    return `${blockNumber(event)}-${event.extrinsic.idx.toString()}`
+    let idx: string = event.extrinsic ? event.extrinsic.idx.toString() : event.idx.toString()
+    return `${blockNumber(event)}-${idx}`
 }
 
 export function blockNumber(event: SubstrateEvent): string {
@@ -70,4 +69,13 @@ export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balanc
     } else  {
         return null
     }
+}
+
+export function exportFeeFromDepositEventAsString(extrinsic?: SubstrateExtrinsic): string {
+    if (extrinsic) {
+        let fee = exportFeeFromDepositEvent(extrinsic)
+        return fee ? fee.toString() : "0"
+    } else {
+        return "0"
+    } 
 }
