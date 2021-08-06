@@ -1,34 +1,30 @@
 import {SubstrateEvent} from "@subql/types";
 import {eventId} from "./common";
-import {EraStakersInfo} from "../types";
+import { EraValidatorInfo } from "../types/models/EraValidatorInfo";
 
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
-    const eraStakersInfo = new EraStakersInfo(eventId(event))
-
     let eraOption = await api.query.staking.currentEra()
     let eraIndex = eraOption.unwrap()
 
-    eraStakersInfo.era = eraIndex.toString()
-
     const exposures = await api.query.staking.erasStakers.entries(eraIndex);
 
-    eraStakersInfo.validators = exposures.map(([key, exposure]) => {
+    let eraValidatorInfos = exposures.map(([key, exposure], index) => {
         const [, validatorId] = key.args
 
-        return {
-            address: validatorId.toString(),
-            exposure: {
-                total: exposure.total.toString(),
-                own: exposure.own.toString(),
-                others: exposure.others.map(other => {
-                    return {
-                        who: other.who.toString(),
-                        value: other.value.toString()
-                    }
-                })
+        let validatorIdString = validatorId.toString()
+        const eraValidatorInfo = new EraValidatorInfo(eventId(event)+validatorIdString)
+        eraValidatorInfo.era = eraIndex.toString()
+        eraValidatorInfo.address = validatorIdString
+        eraValidatorInfo.total = exposure.total.toString()
+        eraValidatorInfo.own = exposure.own.toString()
+        eraValidatorInfo.others = exposure.others.map(other => {
+            return {
+                who: other.who.toString(),
+                value: other.value.toString()
             }
-        }
+        })
+        return eraValidatorInfo.save()
     })
 
-    await eraStakersInfo.save()
+    await Promise.allSettled(eraValidatorInfos)
 }

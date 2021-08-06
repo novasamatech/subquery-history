@@ -32,15 +32,13 @@ type HistoryElement @entity {
   transfer: Transfer
 }
 
-type EraStakersInfo @entity {
+type EraValidatorInfo @entity {
   id: ID!
-  era: String!
-  validators: [EraValidatorInfo]!
-}
-
-type EraValidatorInfo @jsonField {
   address: String!
-  exposure: ValidatorExposure!
+  era: String!
+  total: String!
+  own: String!
+  others: [IndividualExposure]!
 }
 
 type ValidatorExposure @jsonField {
