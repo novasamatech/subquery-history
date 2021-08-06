@@ -41,12 +41,6 @@ type EraValidatorInfo @entity {
   others: [IndividualExposure]!
 }
 
-type ValidatorExposure @jsonField {
-  total: String!
-  own: String!
-  others: [IndividualExposure]!
-}
-
 type IndividualExposure @jsonField {
   who: String!
   value: String!
