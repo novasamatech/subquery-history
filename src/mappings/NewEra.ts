@@ -8,7 +8,7 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
 
     const exposures = await api.query.staking.erasStakers.entries(eraIndex);
 
-    let eraValidatorInfos = exposures.map(([key, exposure], index) => {
+    let eraValidatorInfos = exposures.map(([key, exposure]) => {
         const [, validatorId] = key.args
 
         let validatorIdString = validatorId.toString()
