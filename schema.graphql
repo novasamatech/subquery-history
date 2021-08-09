@@ -35,7 +35,7 @@ type HistoryElement @entity {
 type EraValidatorInfo @entity {
   id: ID!
   address: String!
-  era: String!
+  era: Int!
   total: String!
   own: String!
   others: [IndividualExposure]!
