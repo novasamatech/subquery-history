@@ -5,6 +5,9 @@ import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec } from '@polkadot/types';
 import {EraIndex} from "@polkadot/types/interfaces/staking"
+import { StorageKey } from "@polkadot/types";
+import { AccountId } from "@polkadot/types/interfaces";
+import { Exposure } from "@polkadot/types/interfaces";
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -93,5 +96,18 @@ export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex>
         let eraIndex = eraOption.unwrap()
         currentEraByBlockId[key] = eraIndex
         return eraIndex
+    }
+}
+
+let eraStakersByEra: {[era: number]: [StorageKey<[EraIndex, AccountId]>, Exposure][]} = {}
+
+export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraIndex, AccountId]>, Exposure][]> {
+    let cachedValue = eraStakersByEra[era]
+    if (cachedValue !== undefined) {
+        return cachedValue
+    } else {
+        let eraStakers = await api.query.staking.erasStakers.entries(era);
+        eraStakersByEra[era] = eraStakers
+        return eraStakers
     }
 }

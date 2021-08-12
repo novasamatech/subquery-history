@@ -26,6 +26,7 @@ services:
     command:
       - -f=/app
       - --local #remove
+      - --profiler
 
   graphql-engine:
     image: onfinality/subql-query:latest
