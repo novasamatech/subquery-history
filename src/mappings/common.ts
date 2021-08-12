@@ -4,6 +4,7 @@ import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec } from '@polkadot/types';
+import {EraIndex} from "@polkadot/types/interfaces/staking"
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -78,4 +79,19 @@ export function exportFeeFromDepositEventAsString(extrinsic?: SubstrateExtrinsic
     } else {
         return "0"
     } 
+}
+
+let currentEraByBlockId: {[blockId: string]: EraIndex} = {}
+
+export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex> {
+    let key = block.block.header.number.toString()
+    let cachedValue = currentEraByBlockId[key]
+    if (cachedValue !== undefined) {
+        return cachedValue
+    } else {
+        let eraOption = await api.query.staking.currentEra()
+        let eraIndex = eraOption.unwrap()
+        currentEraByBlockId[key] = eraIndex
+        return eraIndex
+    }
 }

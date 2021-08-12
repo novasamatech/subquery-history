@@ -1,6 +1,6 @@
-import {SubstrateEvent} from "@subql/types";
+import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {AccumulatedStake, StakeChange} from "../types";
-import {eventId, timestamp} from "./common";
+import {blockNumber, eventId, timestamp} from "./common";
 import {Balance} from "@polkadot/types/interfaces";
 import {RewardDestination} from "@polkadot/types/interfaces/staking";
 
@@ -55,11 +55,25 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     await element.save()
 }
 
+let rewardDestinationByBlockAndAddress: {[address: string]: RewardDestination} = {}
+
+async function cachedRewardDestination(block: SubstrateBlock, accountAddress: string): Promise<RewardDestination> {
+    let key = block.block.header.number.toString() + accountAddress
+    let cachedValue = rewardDestinationByBlockAndAddress[key]
+    if (cachedValue !== undefined) {
+        return cachedValue
+    } else {
+        const payee: RewardDestination = await api.query.staking.payee(accountAddress);
+        rewardDestinationByBlockAndAddress[key] = payee
+        return payee
+    }
+}
+
 export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Promise<void> {
     let {event: {data: [accountId, amount]}} = event
     let accountAddress = accountId.toString()
 
-    const payee: RewardDestination = await api.query.staking.payee(accountAddress);
+    const payee: RewardDestination = await cachedRewardDestination(event.block, accountAddress)
     if (payee.isStaked) {
         let amountBalance = (amount as Balance).toBigInt()
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
