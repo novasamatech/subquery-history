@@ -7,7 +7,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1628682
+    startBlock: 1750534
 
     # polkadot test slash bloks: 3570179
 
@@ -20,11 +20,6 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleSetPayee
-          kind: substrate/CallHandler
-          filter:
-            module: staking
-            method: setPayee
         - handler: handleReward
           kind: substrate/EventHandler
           filter:
