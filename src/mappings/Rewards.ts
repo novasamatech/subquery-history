@@ -7,7 +7,9 @@ import {
     timestamp,
     eventId,
     isProxy,
-    callFromProxy
+    callFromProxy,
+    cachedCurrentEra,
+    cachedEraStakers
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -147,12 +149,12 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         return;
     }
 
-    const currentEra = (await api.query.staking.currentEra()).unwrap();
+    const currentEra = await cachedCurrentEra(slashEvent.block);
     const slashDefferDuration = api.consts.staking.slashDeferDuration
 
     const slashEra = currentEra.toNumber() - slashDefferDuration.toNumber()
 
-    const eraStakersInSlashEra = await api.query.staking.erasStakers.entries(slashEra);
+    const eraStakersInSlashEra = await cachedEraStakers(slashEra);
     const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
         let [, validatorId] = key.args
 

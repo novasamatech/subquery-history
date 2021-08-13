@@ -1,6 +1,6 @@
 import {SubstrateEvent} from "@subql/types";
 import {AccumulatedStake, StakeChange} from "../types";
-import {eventId, timestamp} from "./common";
+import {blockNumber, eventId, timestamp} from "./common";
 import {Balance} from "@polkadot/types/interfaces";
 import {RewardDestination} from "@polkadot/types/interfaces/staking";
 
@@ -55,11 +55,51 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     await element.save()
 }
 
+let rewardDestinationByAddress: {[blockId: string]: {[address: string]: RewardDestination}} = {}
+
+async function cachedRewardDestination(accountAddress: string, event: SubstrateEvent): Promise<RewardDestination> {
+    const blockId = blockNumber(event)
+    let cachedBlock = rewardDestinationByAddress[blockId]
+    
+    if (cachedBlock !== undefined) {
+        return cachedBlock[accountAddress]
+    } else {
+        const allAccountsInBlock = event.block.events
+            .filter(event => { 
+                return event.event.method == "Reward" && event.event.section == "staking"
+            })
+            .map(event => { 
+                let {event: {data: [accountId, ]}} = event
+                return accountId
+            });
+
+        const payees = await api.query.staking.payee.multi(allAccountsInBlock);
+        const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
+        
+        let destinationByAddress: {[address: string]: RewardDestination} = {}
+        
+        // something went wrong, so just query for single accountAddress
+        if (rewardDestinations.length !== allAccountsInBlock.length) {
+            const payee = await api.query.staking.payee(accountAddress);
+            destinationByAddress[accountAddress] = payee;
+            rewardDestinationByAddress[blockId] = destinationByAddress
+            return payee
+        }
+        allAccountsInBlock.forEach((account, index) => { 
+            let accountAddress = account.toString()
+            let rewardDestination = rewardDestinations[index]
+            destinationByAddress[accountAddress] = rewardDestination
+        })
+        rewardDestinationByAddress[blockId] = destinationByAddress
+        return destinationByAddress[accountAddress]
+    }
+}
+
 export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Promise<void> {
     let {event: {data: [accountId, amount]}} = event
     let accountAddress = accountId.toString()
 
-    const payee: RewardDestination = await api.query.staking.payee(accountAddress);
+    const payee = await cachedRewardDestination(accountAddress, event)
     if (payee.isStaked) {
         let amountBalance = (amount as Balance).toBigInt()
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
