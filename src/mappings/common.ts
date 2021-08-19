@@ -99,6 +99,7 @@ export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex>
     }
 }
 
+// Due to memory consumption optimization `eraStakersByEra` contains only one key
 let eraStakersByEra: {[era: number]: [StorageKey<[EraIndex, AccountId]>, Exposure][]} = {}
 
 export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraIndex, AccountId]>, Exposure][]> {
@@ -106,6 +107,7 @@ export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraInd
     if (cachedValue !== undefined) {
         return cachedValue
     } else {
+        eraStakersByEra = {}
         let eraStakers = await api.query.staking.erasStakers.entries(era);
         eraStakersByEra[era] = eraStakers
         return eraStakers

@@ -55,6 +55,7 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     await element.save()
 }
 
+// Due to memory consumption optimization `rewardDestinationByAddress` contains only one key
 let rewardDestinationByAddress: {[blockId: string]: {[address: string]: RewardDestination}} = {}
 
 async function cachedRewardDestination(accountAddress: string, event: SubstrateEvent): Promise<RewardDestination> {
@@ -64,6 +65,7 @@ async function cachedRewardDestination(accountAddress: string, event: SubstrateE
     if (cachedBlock !== undefined) {
         return cachedBlock[accountAddress]
     } else {
+        rewardDestinationByAddress = {}
         const allAccountsInBlock = event.block.events
             .filter(event => { 
                 return event.event.method == "Reward" && event.event.section == "staking"
