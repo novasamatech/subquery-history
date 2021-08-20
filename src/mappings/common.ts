@@ -84,32 +84,32 @@ export function exportFeeFromDepositEventAsString(extrinsic?: SubstrateExtrinsic
     } 
 }
 
-let currentEraByBlockId: {[blockId: string]: EraIndex} = {}
+// let currentEraByBlockId: {[blockId: string]: EraIndex} = {}
 
-export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex> {
-    let key = block.block.header.number.toString()
-    let cachedValue = currentEraByBlockId[key]
-    if (cachedValue !== undefined) {
-        return cachedValue
-    } else {
-        let eraOption = await api.query.staking.currentEra()
-        let eraIndex = eraOption.unwrap()
-        currentEraByBlockId[key] = eraIndex
-        return eraIndex
-    }
-}
+// export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex> {
+//     let key = block.block.header.number.toString()
+//     let cachedValue = currentEraByBlockId[key]
+//     if (cachedValue !== undefined) {
+//         return cachedValue
+//     } else {
+//         let eraOption = await api.query.staking.currentEra()
+//         let eraIndex = eraOption.unwrap()
+//         currentEraByBlockId[key] = eraIndex
+//         return eraIndex
+//     }
+// }
 
-// Due to memory consumption optimization `eraStakersByEra` contains only one key
-let eraStakersByEra: {[era: number]: [StorageKey<[EraIndex, AccountId]>, Exposure][]} = {}
+// // Due to memory consumption optimization `eraStakersByEra` contains only one key
+// let eraStakersByEra: {[era: number]: [StorageKey<[EraIndex, AccountId]>, Exposure][]} = {}
 
-export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraIndex, AccountId]>, Exposure][]> {
-    let cachedValue = eraStakersByEra[era]
-    if (cachedValue !== undefined) {
-        return cachedValue
-    } else {
-        eraStakersByEra = {}
-        let eraStakers = await api.query.staking.erasStakers.entries(era);
-        eraStakersByEra[era] = eraStakers
-        return eraStakers
-    }
-}
+// export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraIndex, AccountId]>, Exposure][]> {
+//     let cachedValue = eraStakersByEra[era]
+//     if (cachedValue !== undefined) {
+//         return cachedValue
+//     } else {
+//         eraStakersByEra = {}
+//         let eraStakers = await api.query.staking.erasStakers.entries(era);
+//         eraStakersByEra[era] = eraStakers
+//         return eraStakers
+//     }
+// }

@@ -1,13 +1,13 @@
 import {SubstrateEvent} from "@subql/types";
-import {cachedCurrentEra, cachedEraStakers, eventId} from "./common";
+import {eventId} from "./common";
 import { EraValidatorInfo } from "../types/models/EraValidatorInfo";
 
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
-    let currentEra = await cachedCurrentEra(event.block)
+    const currentEra = (await api.query.staking.currentEra()).unwrap()
 
-    const exposures = await cachedEraStakers(currentEra.toNumber());
+    const exposures = await api.query.staking.erasStakers.entries(currentEra.toNumber());
 
-    let eraValidatorInfos = exposures.map(([key, exposure]) => {
+    const eraValidatorInfos = exposures.map(([key, exposure]) => {
         const [, validatorId] = key.args
 
         let validatorIdString = validatorId.toString()
