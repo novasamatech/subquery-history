@@ -36,6 +36,10 @@ function extractArgsFromPayoutValidator(call: CallBase<AnyTuple>, sender: string
     return [sender, (eraRaw as EraIndex).toNumber()]
 }
 
+export async function handleRewarded(rewardEvent: SubstrateEvent): Promise<void> {
+    await handleReward(rewardEvent)
+}
+
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     let rewardEventId = eventId(rewardEvent)
     try {
@@ -80,7 +84,8 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     await buildRewardEvents(
         rewardEvent.block,
-        api.events.staking.Reward,
+        rewardEvent.event.method,
+        rewardEvent.event.section,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
             return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
@@ -118,6 +123,10 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>, sender: string)
     } else {
         return []
     }
+}
+
+export async function handleSlashed(slashEvent: SubstrateEvent): Promise<void> {
+    await handleSlash(slashEvent)
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
@@ -164,7 +173,8 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
     await buildRewardEvents(
         slashEvent.block,
-        api.events.staking.Slash,
+        slashEvent.event.method,
+        slashEvent.event.section,
         initialValidator,
         (currentValidator, eventAccount) => {
             return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
@@ -183,7 +193,8 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
 async function buildRewardEvents<A>(
     block: SubstrateBlock,
-    eventType: AugmentedEvent<ApiTypes>,
+    eventMethod: String,
+    eventSection: String,
     initialInnerAccumulator: A,
     produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
     produceReward: (currentAccumulator: A, amount: string) => Reward
@@ -195,7 +206,7 @@ async function buildRewardEvents<A>(
         (accumulator, eventRecord, eventIndex) => {
             let [innerAccumulator, currentPromises] = accumulator
 
-            if (!eventType.is(eventRecord.event)) return accumulator
+            if (!(eventRecord.event.method == eventMethod && eventRecord.event.section == eventSection)) return accumulator
 
             let {event: {data: [account, amount]}} = eventRecord
 

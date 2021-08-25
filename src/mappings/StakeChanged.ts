@@ -66,9 +66,13 @@ async function cachedRewardDestination(accountAddress: string, event: SubstrateE
         return cachedBlock[accountAddress]
     } else {
         rewardDestinationByAddress = {}
+        
+        let method = event.event.method
+        let section = event.event.section
+
         const allAccountsInBlock = event.block.events
-            .filter(event => { 
-                return event.event.method == "Reward" && event.event.section == "staking"
+            .filter(blockEvent => { 
+                return blockEvent.event.method == method && blockEvent.event.section == section
             })
             .map(event => { 
                 let {event: {data: [accountId, ]}} = event

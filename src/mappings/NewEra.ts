@@ -2,6 +2,10 @@ import {SubstrateEvent} from "@subql/types";
 import {eventId} from "./common";
 import { EraValidatorInfo } from "../types/models/EraValidatorInfo";
 
+export async function handleStakersElected(event: SubstrateEvent): Promise<void> {
+    await handleNewEra(event)
+}
+
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
     const currentEra = (await api.query.staking.currentEra()).unwrap()
 
