@@ -3,8 +3,9 @@ type Transfer @jsonField {
   to: String!
   from: String!
   fee: String!
-  block: String!
+  blockNumber: Int!
   extrinsicId: String
+  eventIdx: Int!
   success: Boolean!
 }
 
@@ -28,7 +29,7 @@ type HistoryElement @entity {
   blockNumber: Int!
   extrinsicIdx: Int,
   extrinsicHash: String
-  timestamp: String!
+  timestamp: BigInt!
   address: String!
   reward: Reward
   extrinsic: Extrinsic
@@ -39,8 +40,8 @@ type EraValidatorInfo @entity {
   id: ID!
   address: String!
   era: Int!
-  total: String!
-  own: String!
+  total: BigInt!
+  own: BigInt!
   others: [IndividualExposure]!
 }
 
@@ -58,16 +59,18 @@ type IndividualExposure @jsonField {
 
 type StakeChange @entity {
   id: ID!
-  timestamp: String!
+  extrinsicHash: String
+  eventIdx: Int!
+  timestamp: BigInt!
   address: String!
-  amount: String!
-  accumulatedAmount: String!
+  amount: BigInt!
+  accumulatedAmount: BigInt!
   type: String!
 }
 
 type AccumulatedStake @entity {
   id: ID!
-  amount: String!
+  amount: BigInt!
 }
 
 type ErrorEvent @entity {

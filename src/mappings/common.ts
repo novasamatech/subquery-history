@@ -45,16 +45,16 @@ export function extrinsicIdx(event: SubstrateEvent): string {
     return idx
 }
 
-export function blockNumber(event: SubstrateEvent): string {
-    return event.block.block.header.number.toString()
+export function blockNumber(event: SubstrateEvent): number {
+    return event.block.block.header.number.toNumber()
 }
 
-export function extrinsicIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
-    return `${blockNumber}-${eventIdx}`
+export function extrinsicIdFromBlockAndIdx(blockNumber: number, extrinsicIdx: number) {
+    return `${blockNumber.toString()}-${extrinsicIdx.toString()}`
 }
 
-export function timestamp(block: SubstrateBlock): string {
-    return Math.round((block.timestamp.getTime() / 1000)).toString()
+export function timestamp(block: SubstrateBlock): bigint {
+    return BigInt(Math.round((block.timestamp.getTime() / 1000)))
 }
 
 export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balance | null {

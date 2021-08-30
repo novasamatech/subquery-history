@@ -14,8 +14,8 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     const element = new StakeChange(eventId(event));
     element.timestamp = timestamp(event.block)
     element.address = address
-    element.amount = amountBalance.toString()
-    element.accumulatedAmount = accumulatedAmount.toString()
+    element.amount = amountBalance
+    element.accumulatedAmount = accumulatedAmount
     element.type = "bonded"
 
     await element.save()
@@ -31,8 +31,8 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     const element = new StakeChange(eventId(event));
     element.timestamp = timestamp(event.block)
     element.address = address
-    element.amount = amountBalance.toString()
-    element.accumulatedAmount = accumulatedAmount.toString()
+    element.amount = amountBalance
+    element.accumulatedAmount = accumulatedAmount
     element.type = "unbonded"
 
     await element.save()
@@ -48,8 +48,8 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     const element = new StakeChange(eventId(event));
     element.timestamp = timestamp(event.block)
     element.address = validatorOrNominatorAccountId.toString()
-    element.amount = amountBalance.toString()
-    element.accumulatedAmount = accumulatedAmount.toString()
+    element.amount = amountBalance
+    element.accumulatedAmount = accumulatedAmount
     element.type = "slashed"
 
     await element.save()
@@ -113,8 +113,8 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
         const element = new StakeChange(eventId(event));
         element.timestamp = timestamp(event.block)
         element.address = accountAddress
-        element.amount = amountBalance.toString()
-        element.accumulatedAmount = accumulatedAmount.toString()
+        element.amount = amountBalance
+        element.accumulatedAmount = accumulatedAmount
         element.type = "rewarded"
 
         await element.save()
@@ -126,12 +126,12 @@ async function handleAccumulatedStake(address: string, amount: bigint): Promise<
     if (accumulatedStake !== undefined) {
         let accumulatedAmount = BigInt(accumulatedStake.amount).valueOf()
         accumulatedAmount += amount
-        accumulatedStake.amount = accumulatedAmount.toString()
+        accumulatedStake.amount = accumulatedAmount
         await accumulatedStake.save()
         return accumulatedAmount
     } else {
         let accumulatedStake = new AccumulatedStake(address)
-        accumulatedStake.amount = amount.toString()
+        accumulatedStake.amount = amount
         await accumulatedStake.save()
         return amount
     }

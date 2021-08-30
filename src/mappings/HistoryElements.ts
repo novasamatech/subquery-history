@@ -81,14 +81,15 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
 
     let sender = extrinsic.extrinsic.signer
     return transferCallsArgs.map(tuple => {
-        let blockNumber = extrinsic.block.block.header.number.toString()
+        let blockNumber = extrinsic.block.block.header.number.toNumber();
         return {
             amount: tuple[1].toString(),
             from: sender.toString(),
             to: tuple[0],
-            block: blockNumber,
+            blockNumber: blockNumber,
             fee: exportFeeFromDepositEventAsString(extrinsic),
-            extrinsicId: extrinsicIdFromBlockAndIdx(blockNumber, extrinsic.idx.toString()),
+            extrinsicId: extrinsicIdFromBlockAndIdx(blockNumber, extrinsic.idx),
+            eventIdx: 0,
             success: false
         }
     })
