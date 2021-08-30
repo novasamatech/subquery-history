@@ -9,19 +9,11 @@ export async function handleTransfer(event: SubstrateEvent): Promise<void> {
     const elementFrom = new HistoryElement(eventId(event)+`-from`);
     elementFrom.address = from.toString()
     elementFrom.blockNumber = _blockNumber;
-    if (event.extrinsic !== undefined) {
-        elementFrom.extrinsicHash = event.extrinsic.extrinsic.hash.toString();
-        elementFrom.extrinsicIdx = event.extrinsic.idx;
-    }
     await populateTransfer(elementFrom, event)
 
     const elementTo = new HistoryElement(eventId(event)+`-to`);
     elementTo.address = to.toString()
     elementTo.blockNumber = _blockNumber;
-    if (event.extrinsic !== undefined) {
-        elementTo.extrinsicHash = event.extrinsic.extrinsic.hash.toString();
-        elementTo.extrinsicIdx = event.extrinsic.idx;
-    }
     await populateTransfer(elementTo, event)
 }
 
@@ -37,9 +29,7 @@ async function populateTransfer(element: HistoryElement, event: SubstrateEvent):
         amount: amount.toString(),
         from: from.toString(),
         to: to.toString(),
-        blockNumber: blockNumber(event),
         fee: exportFeeFromDepositEventAsString(event.extrinsic),
-        extrinsicId: extrinsicIdx(event),
         eventIdx: event.idx,
         success: true
     }

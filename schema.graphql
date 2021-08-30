@@ -3,8 +3,6 @@ type Transfer @jsonField {
   to: String!
   from: String!
   fee: String!
-  blockNumber: Int!
-  extrinsicId: String
   eventIdx: Int!
   success: Boolean!
 }

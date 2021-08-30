@@ -49,7 +49,7 @@ export function blockNumber(event: SubstrateEvent): number {
     return event.block.block.header.number.toNumber()
 }
 
-export function extrinsicIdFromBlockAndIdx(blockNumber: number, extrinsicIdx: number) {
+export function extrinsicIdFromBlockAndIdx(blockNumber: number, extrinsicIdx: number): string {
     return `${blockNumber.toString()}-${extrinsicIdx.toString()}`
 }
 

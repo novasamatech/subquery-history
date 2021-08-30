@@ -28,9 +28,10 @@ async function saveFailedTransfers(transfers: Transfer[], extrinsic: SubstrateEx
         let extrinsicHash = extrinsic.extrinsic.hash.toString();
         let blockNumber = extrinsic.block.block.header.number.toNumber();
         let extrinsicIdx = extrinsic.idx
+        let extrinsicId = extrinsicIdFromBlockAndIdx(blockNumber, extrinsicIdx)
         let blockTimestamp = timestamp(extrinsic.block);
 
-        const elementFrom = new HistoryElement(transfer.extrinsicId+`-from`);
+        const elementFrom = new HistoryElement(extrinsicId+`-from`);
         elementFrom.address = transfer.from
         elementFrom.blockNumber = blockNumber
         elementFrom.extrinsicHash = extrinsicHash
@@ -38,7 +39,7 @@ async function saveFailedTransfers(transfers: Transfer[], extrinsic: SubstrateEx
         elementFrom.timestamp = blockTimestamp
         elementFrom.transfer = transfer
 
-        const elementTo = new HistoryElement(transfer.extrinsicId+`-to`);
+        const elementTo = new HistoryElement(extrinsicId+`-to`);
         elementTo.address = transfer.to
         elementTo.blockNumber = blockNumber
         elementTo.extrinsicHash = extrinsicHash
@@ -88,7 +89,6 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
             to: tuple[0],
             blockNumber: blockNumber,
             fee: exportFeeFromDepositEventAsString(extrinsic),
-            extrinsicId: extrinsicIdFromBlockAndIdx(blockNumber, extrinsic.idx),
             eventIdx: 0,
             success: false
         }
