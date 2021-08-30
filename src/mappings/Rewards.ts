@@ -95,6 +95,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             const [validator, era] = payoutCallsArgs[currentCallIndex]
 
             return {
+                eventIdx: rewardEvent.idx,
                 amount: amount,
                 isReward: true,
                 validator: validator,
@@ -184,6 +185,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         (validator, amount) => {
 
             return {
+                eventIdx: slashEvent.idx,
                 amount: amount,
                 isReward: false,
                 validator: validator,

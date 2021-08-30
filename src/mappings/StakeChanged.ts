@@ -12,6 +12,10 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
 
     const element = new StakeChange(eventId(event));
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+    }
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
     element.amount = amountBalance
@@ -29,6 +33,10 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+    }
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
     element.amount = amountBalance
@@ -46,6 +54,10 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+    }
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = validatorOrNominatorAccountId.toString()
     element.amount = amountBalance
@@ -111,6 +123,10 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 
         const element = new StakeChange(eventId(event));
+        if (event.extrinsic !== undefined) {
+            element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+        }
+        element.eventIdx = event.idx
         element.timestamp = timestamp(event.block)
         element.address = accountAddress
         element.amount = amountBalance
