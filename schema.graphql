@@ -5,10 +5,12 @@ type Transfer @jsonField {
   fee: String!
   block: String!
   extrinsicId: String
+  eventIdx: Int!
   success: Boolean!
 }
 
 type Reward @jsonField {
+  eventIdx: Int!
   amount: String!
   isReward: Boolean!,
   era: Int,
@@ -25,6 +27,8 @@ type Extrinsic @jsonField {
 
 type HistoryElement @entity {
   id: ID!
+  blockNumber: Int!
+  extrinsicHash: String
   timestamp: String!
   address: String!
   reward: Reward
@@ -55,6 +59,9 @@ type IndividualExposure @jsonField {
 
 type StakeChange @entity {
   id: ID!
+  blockNumber: Int!
+  extrinsicHash: String
+  eventIdx: Int!
   timestamp: String!
   address: String!
   amount: String!

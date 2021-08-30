@@ -20,6 +20,10 @@ export async function handleTransferKeepAlive(event: SubstrateEvent): Promise<vo
 
 async function populateTransfer(element: HistoryElement, event: SubstrateEvent): Promise<void> {
     element.timestamp = timestamp(event.block)
+    element.blockNumber = event.block.block.header.number.toNumber()
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic.extrinsic.hash.toString()
+    }
 
     const {event: {data: [from, to, amount]}} = event;
     element.transfer = {
@@ -29,6 +33,7 @@ async function populateTransfer(element: HistoryElement, event: SubstrateEvent):
         block: blockNumber(event),
         fee: exportFeeFromDepositEventAsString(event.extrinsic),
         extrinsicId: extrinsicId(event),
+        eventIdx: event.idx,
         success: true
     }
     await element.save();

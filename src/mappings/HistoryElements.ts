@@ -29,11 +29,15 @@ async function saveFailedTransfers(transfers: Transfer[], extrinsic: SubstrateEx
         elementFrom.address = transfer.from
         elementFrom.timestamp = timestamp(extrinsic.block)
         elementFrom.transfer = transfer
+        elementFrom.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        elementFrom.blockNumber = extrinsic.block.block.header.number.toNumber()
 
         const elementTo = new HistoryElement(transfer.extrinsicId+`-to`);
         elementTo.address = transfer.to
         elementTo.timestamp = timestamp(extrinsic.block)
         elementTo.transfer = transfer
+        elementTo.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        elementTo.blockNumber = extrinsic.block.block.header.number.toNumber()
 
         return [elementTo.save(), elementFrom.save()]
     })
@@ -44,6 +48,8 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     const element = new HistoryElement(extrinsic.extrinsic.hash.toString());
     element.address = extrinsic.extrinsic.signer.toString()
     element.timestamp = timestamp(extrinsic.block)
+    element.blockNumber = extrinsic.block.block.header.number.toNumber()
+    element.extrinsicHash = extrinsic.extrinsic.hash.toString()
     element.extrinsic = {
         hash: extrinsic.extrinsic.hash.toString(),
         module: extrinsic.extrinsic.method.section,
@@ -75,6 +81,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
             block: blockNumber,
             fee: exportFeeFromDepositEventAsString(extrinsic),
             extrinsicId: extrinsicIdFromBlockAndIdx(blockNumber, extrinsic.idx.toString()),
+            eventIdx: -1,
             success: false
         }
     })

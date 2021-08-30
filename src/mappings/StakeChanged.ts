@@ -12,6 +12,11 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
 
     const element = new StakeChange(eventId(event));
+    element.blockNumber = event.block.block.header.number.toNumber()
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic.extrinsic.hash.toString()
+    }
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
     element.amount = amountBalance.toString()
@@ -29,6 +34,11 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
+    element.blockNumber = event.block.block.header.number.toNumber()
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic.extrinsic.hash.toString()
+    }
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
     element.amount = amountBalance.toString()
@@ -46,6 +56,11 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
+    element.blockNumber = event.block.block.header.number.toNumber()
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic.extrinsic.hash.toString()
+    }
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = validatorOrNominatorAccountId.toString()
     element.amount = amountBalance.toString()
@@ -111,6 +126,11 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 
         const element = new StakeChange(eventId(event));
+        element.blockNumber = event.block.block.header.number.toNumber()
+        if (event.extrinsic !== undefined) {
+            element.extrinsicHash = event.extrinsic.extrinsic.hash.toString()
+        }
+        element.eventIdx = event.idx
         element.timestamp = timestamp(event.block)
         element.address = accountAddress
         element.amount = amountBalance.toString()

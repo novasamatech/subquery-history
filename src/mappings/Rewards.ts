@@ -1,5 +1,5 @@
 import {ErrorEvent, HistoryElement, Reward} from '../types';
-import {SubstrateBlock, SubstrateEvent} from "@subql/types";
+import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
     eventIdFromBlockAndIdx,
@@ -84,6 +84,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     await buildRewardEvents(
         rewardEvent.block,
+        rewardEvent.extrinsic,
         rewardEvent.event.method,
         rewardEvent.event.section,
         initialCallIndex,
@@ -94,6 +95,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             const [validator, era] = payoutCallsArgs[currentCallIndex]
 
             return {
+                eventIdx: rewardEvent.idx,
                 amount: amount,
                 isReward: true,
                 validator: validator,
@@ -173,6 +175,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
     await buildRewardEvents(
         slashEvent.block,
+        slashEvent.extrinsic,
         slashEvent.event.method,
         slashEvent.event.section,
         initialValidator,
@@ -182,6 +185,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         (validator, amount) => {
 
             return {
+                eventIdx: slashEvent.idx,
                 amount: amount,
                 isReward: false,
                 validator: validator,
@@ -193,13 +197,14 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
 async function buildRewardEvents<A>(
     block: SubstrateBlock,
+    extrinsic: SubstrateExtrinsic | undefined,
     eventMethod: String,
     eventSection: String,
     initialInnerAccumulator: A,
     produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
     produceReward: (currentAccumulator: A, amount: string) => Reward
 ) {
-    let blockNumber = block.block.header.number.toString()
+    let blockNumber = block.block.header.number.toNumber()
     let blockTimestamp = timestamp(block)
 
     const [, savingPromises] = block.events.reduce<[A, Promise<void>[]]>(
@@ -212,14 +217,18 @@ async function buildRewardEvents<A>(
 
             const newAccumulator = produceNewAccumulator(innerAccumulator, account.toString())
 
-            const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString())
+            const eventId = eventIdFromBlockAndIdx(blockNumber.toString(), eventIndex.toString())
 
             const element = new HistoryElement(eventId);
 
             element.timestamp = blockTimestamp
             element.address = account.toString()
             element.reward = produceReward(newAccumulator, amount.toString())
-
+            element.blockNumber = blockNumber
+            if (extrinsic !== undefined) {
+                element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+            }
+            
             currentPromises.push(element.save())
 
             return [newAccumulator, currentPromises];
