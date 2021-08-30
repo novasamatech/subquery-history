@@ -28,6 +28,7 @@ async function populateTransfer(element: HistoryElement, event: SubstrateEvent):
 
     const {event: {data: [from, to, amount]}} = event;
     element.transfer = {
+        extrinsicHash: event.extrinsic?.extrinsic.hash.toString() ?? "",
         amount: amount.toString(),
         from: from.toString(),
         to: to.toString(),
