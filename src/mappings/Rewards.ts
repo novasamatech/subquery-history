@@ -1,5 +1,5 @@
 import {ErrorEvent, HistoryElement, Reward} from '../types';
-import {SubstrateBlock, SubstrateEvent} from "@subql/types";
+import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
     eventIdFromBlockAndIdx,
@@ -84,6 +84,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     await buildRewardEvents(
         rewardEvent.block,
+        rewardEvent.extrinsic,
         rewardEvent.event.method,
         rewardEvent.event.section,
         initialCallIndex,
@@ -173,6 +174,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
     await buildRewardEvents(
         slashEvent.block,
+        slashEvent.extrinsic,
         slashEvent.event.method,
         slashEvent.event.section,
         initialValidator,
@@ -193,6 +195,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
 async function buildRewardEvents<A>(
     block: SubstrateBlock,
+    extrinsic: SubstrateExtrinsic | undefined,
     eventMethod: String,
     eventSection: String,
     initialInnerAccumulator: A,
@@ -218,6 +221,11 @@ async function buildRewardEvents<A>(
 
             element.timestamp = blockTimestamp
             element.address = account.toString()
+            element.blockNumber = block.block.header.number.toNumber()
+            if (extrinsic !== undefined) {
+                element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+                element.extrinsicIdx = extrinsic.idx
+            }
             element.reward = produceReward(newAccumulator, amount.toString())
 
             currentPromises.push(element.save())

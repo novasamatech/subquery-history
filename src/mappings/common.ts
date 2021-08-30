@@ -4,10 +4,6 @@ import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec } from '@polkadot/types';
-import {EraIndex} from "@polkadot/types/interfaces/staking"
-import { StorageKey } from "@polkadot/types";
-import { AccountId } from "@polkadot/types/interfaces";
-import { Exposure } from "@polkadot/types/interfaces";
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -44,9 +40,9 @@ export function eventIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
     return `${blockNumber}-${eventIdx}`
 }
 
-export function extrinsicId(event: SubstrateEvent): string {
+export function extrinsicIdx(event: SubstrateEvent): string {
     let idx: string = event.extrinsic ? event.extrinsic.idx.toString() : event.idx.toString()
-    return `${blockNumber(event)}-${idx}`
+    return idx
 }
 
 export function blockNumber(event: SubstrateEvent): string {

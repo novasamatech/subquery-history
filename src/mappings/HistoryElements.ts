@@ -25,14 +25,25 @@ export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promi
 
 async function saveFailedTransfers(transfers: Transfer[], extrinsic: SubstrateExtrinsic): Promise<void> {
     let promises = transfers.map(transfer => {
+        let extrinsicHash = extrinsic.extrinsic.hash.toString();
+        let blockNumber = extrinsic.block.block.header.number.toNumber();
+        let extrinsicIdx = extrinsic.idx
+        let blockTimestamp = timestamp(extrinsic.block);
+
         const elementFrom = new HistoryElement(transfer.extrinsicId+`-from`);
         elementFrom.address = transfer.from
-        elementFrom.timestamp = timestamp(extrinsic.block)
+        elementFrom.blockNumber = blockNumber
+        elementFrom.extrinsicHash = extrinsicHash
+        elementFrom.extrinsicIdx = extrinsicIdx
+        elementFrom.timestamp = blockTimestamp
         elementFrom.transfer = transfer
 
         const elementTo = new HistoryElement(transfer.extrinsicId+`-to`);
         elementTo.address = transfer.to
-        elementTo.timestamp = timestamp(extrinsic.block)
+        elementTo.blockNumber = blockNumber
+        elementTo.extrinsicHash = extrinsicHash
+        elementTo.extrinsicIdx = extrinsicIdx
+        elementTo.timestamp = blockTimestamp
         elementTo.transfer = transfer
 
         return [elementTo.save(), elementFrom.save()]
@@ -43,6 +54,9 @@ async function saveFailedTransfers(transfers: Transfer[], extrinsic: SubstrateEx
 async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     const element = new HistoryElement(extrinsic.extrinsic.hash.toString());
     element.address = extrinsic.extrinsic.signer.toString()
+    element.blockNumber = extrinsic.block.block.header.number.toNumber()
+    element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+    element.extrinsicIdx = extrinsic.idx
     element.timestamp = timestamp(extrinsic.block)
     element.extrinsic = {
         hash: extrinsic.extrinsic.hash.toString(),

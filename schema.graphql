@@ -25,6 +25,9 @@ type Extrinsic @jsonField {
 
 type HistoryElement @entity {
   id: ID!
+  blockNumber: Int!
+  extrinsicIdx: Int,
+  extrinsicHash: String
   timestamp: String!
   address: String!
   reward: Reward
