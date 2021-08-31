@@ -15,6 +15,7 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     if (event.extrinsic !== undefined) {
         element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
     }
+    element.blockNumber = event.block.block.header.number.toNumber()
     element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
@@ -36,6 +37,7 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     if (event.extrinsic !== undefined) {
         element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
     }
+    element.blockNumber = event.block.block.header.number.toNumber()
     element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
@@ -57,6 +59,7 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     if (event.extrinsic !== undefined) {
         element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
     }
+    element.blockNumber = event.block.block.header.number.toNumber()
     element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = validatorOrNominatorAccountId.toString()
@@ -126,6 +129,7 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
         if (event.extrinsic !== undefined) {
             element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
         }
+        element.blockNumber = event.block.block.header.number.toNumber()
         element.eventIdx = event.idx
         element.timestamp = timestamp(event.block)
         element.address = accountAddress

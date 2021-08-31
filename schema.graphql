@@ -33,8 +33,8 @@ type HistoryElement @entity {
   blockNumber: Int!
   extrinsicIdx: Int,
   extrinsicHash: String
-  timestamp: BigInt!
-  address: String!
+  timestamp: BigInt! @index
+  address: String! @index
   reward: Reward
   extrinsic: Extrinsic
   transfer: Transfer
@@ -63,9 +63,10 @@ type IndividualExposure @jsonField {
 
 type StakeChange @entity {
   id: ID!
+  blockNumber: Int!
   extrinsicHash: String
   eventIdx: Int!
-  timestamp: BigInt!
+  timestamp: BigInt! @index
   address: String!
   amount: BigInt!
   accumulatedAmount: BigInt!
