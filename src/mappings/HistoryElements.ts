@@ -2,7 +2,7 @@ import {SubstrateExtrinsic} from '@subql/types';
 import {HistoryElement, Transfer} from "../types";
 import {
     callFromProxy, callsFromBatch,
-    exportFeeFromDepositEventAsString,
+    calculateFeeAsString,
     extrinsicIdFromBlockAndIdx, isBatch, isProxy,
     isTransfer,
     timestamp
@@ -64,7 +64,7 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
         module: extrinsic.extrinsic.method.section,
         call: extrinsic.extrinsic.method.method,
         success: extrinsic.success,
-        fee: exportFeeFromDepositEventAsString(extrinsic)
+        fee: calculateFeeAsString(extrinsic)
     }
     await element.save()
 }
@@ -89,7 +89,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
             from: sender.toString(),
             to: tuple[0],
             blockNumber: blockNumber,
-            fee: exportFeeFromDepositEventAsString(extrinsic),
+            fee: calculateFeeAsString(extrinsic),
             eventIdx: 0,
             success: false
         }
