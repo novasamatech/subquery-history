@@ -90,7 +90,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
             to: tuple[0],
             blockNumber: blockNumber,
             fee: calculateFeeAsString(extrinsic),
-            eventIdx: 0,
+            eventIdx: -1,
             success: false
         }
     })

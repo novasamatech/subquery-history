@@ -67,7 +67,7 @@ type StakeChange @entity {
   extrinsicHash: String
   eventIdx: Int!
   timestamp: BigInt! @index
-  address: String!
+  address: String! @index
   amount: BigInt!
   accumulatedAmount: BigInt!
   type: String!
