@@ -15,6 +15,11 @@ type Reward @jsonField {
   validator: String
 }
 
+type AccumulatedReward @entity {
+  id: ID! #address
+  amount: BigInt!
+}
+
 type Extrinsic @jsonField {
   hash: String!
   module: String!

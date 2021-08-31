@@ -1,4 +1,4 @@
-import {ErrorEvent, HistoryElement, Reward} from '../types';
+import {AccumulatedReward, ErrorEvent, HistoryElement, Reward} from '../types';
 import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
@@ -12,8 +12,7 @@ import {
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
-import {AugmentedEvent} from "@polkadot/api/types";
-import {ApiTypes} from "@polkadot/api/types/base";
+import {Balance} from "@polkadot/types/interfaces";
 import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
@@ -51,6 +50,7 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
 
         await handleRewardRestakeForAnalytics(rewardEvent)
         await handleRewardForTxHistory(rewardEvent)
+        await updateAccumulatedReward(rewardEvent, true)
     } catch (error) {
         logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
         let saveError = new ErrorEvent(rewardEventId)
@@ -142,6 +142,7 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
 
         await handleSlashForAnalytics(slashEvent)
         await handleSlashForTxHistory(slashEvent)
+        await updateAccumulatedReward(slashEvent, false)
     } catch (error) {
         logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
         let saveError = new ErrorEvent(slashEventId)
@@ -236,4 +237,18 @@ async function buildRewardEvents<A>(
         }, [initialInnerAccumulator, []])
 
     await Promise.allSettled(savingPromises);
+}
+
+async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean): Promise<void> {
+    let {event: {data: [accountId, amount]}} = event
+    let accountAddress = accountId.toString()
+
+    let accumulatedReward = await AccumulatedReward.get(accountAddress);
+    if (!accumulatedReward) {
+        accumulatedReward = new AccumulatedReward(accountAddress);
+        accumulatedReward.amount = BigInt(0)
+    }
+    const newAmount = (amount as Balance).toBigInt()
+    accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
+    await accumulatedReward.save()
 }
