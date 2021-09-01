@@ -4,10 +4,6 @@ import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec } from '@polkadot/types';
-import {EraIndex} from "@polkadot/types/interfaces/staking"
-import { StorageKey } from "@polkadot/types";
-import { AccountId } from "@polkadot/types/interfaces";
-import { Exposure } from "@polkadot/types/interfaces";
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -44,24 +40,36 @@ export function eventIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
     return `${blockNumber}-${eventIdx}`
 }
 
-export function extrinsicId(event: SubstrateEvent): string {
+export function extrinsicIdx(event: SubstrateEvent): string {
     let idx: string = event.extrinsic ? event.extrinsic.idx.toString() : event.idx.toString()
-    return `${blockNumber(event)}-${idx}`
+    return idx
 }
 
-export function blockNumber(event: SubstrateEvent): string {
-    return event.block.block.header.number.toString()
+export function blockNumber(event: SubstrateEvent): number {
+    return event.block.block.header.number.toNumber()
 }
 
-export function extrinsicIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
-    return `${blockNumber}-${eventIdx}`
+export function extrinsicIdFromBlockAndIdx(blockNumber: number, extrinsicIdx: number): string {
+    return `${blockNumber.toString()}-${extrinsicIdx.toString()}`
 }
 
-export function timestamp(block: SubstrateBlock): string {
-    return Math.round((block.timestamp.getTime() / 1000)).toString()
+export function timestamp(block: SubstrateBlock): bigint {
+    return BigInt(Math.round((block.timestamp.getTime() / 1000)))
 }
 
-export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balance | null {
+export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
+    if (extrinsic) {
+        let balancesFee = exportFeeFromBalancesDepositEvent(extrinsic)
+        let treasureFee = exportFeeFromTreasureDepositEvent(extrinsic)
+
+        let totalFee = balancesFee + treasureFee
+        return totalFee.toString()
+    } else {
+        return BigInt(0).toString()
+    } 
+}
+
+function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigint {
     const eventRecord = extrinsic.events.find((event) => {
         return event.event.method == "Deposit" && event.event.section == "balances"
     })
@@ -69,47 +77,22 @@ export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balanc
     if (eventRecord != undefined) {
         const {event: {data: [, fee]}}= eventRecord
 
-        return fee as Balance
+        return (fee as Balance).toBigInt()
     } else  {
-        return null
+        return BigInt(0)
     }
 }
 
-export function exportFeeFromDepositEventAsString(extrinsic?: SubstrateExtrinsic): string {
-    if (extrinsic) {
-        let fee = exportFeeFromDepositEvent(extrinsic)
-        return fee ? fee.toString() : "0"
-    } else {
-        return "0"
-    } 
+function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigint {
+    const eventRecord = extrinsic.events.find((event) => {
+        return event.event.method == "Deposit" && event.event.section == "treasure"
+    })
+
+    if (eventRecord != undefined) {
+        const {event: {data: [fee]}}= eventRecord
+
+        return (fee as Balance).toBigInt()
+    } else  {
+        return BigInt(0)
+    }
 }
-
-// let currentEraByBlockId: {[blockId: string]: EraIndex} = {}
-
-// export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex> {
-//     let key = block.block.header.number.toString()
-//     let cachedValue = currentEraByBlockId[key]
-//     if (cachedValue !== undefined) {
-//         return cachedValue
-//     } else {
-//         let eraOption = await api.query.staking.currentEra()
-//         let eraIndex = eraOption.unwrap()
-//         currentEraByBlockId[key] = eraIndex
-//         return eraIndex
-//     }
-// }
-
-// // Due to memory consumption optimization `eraStakersByEra` contains only one key
-// let eraStakersByEra: {[era: number]: [StorageKey<[EraIndex, AccountId]>, Exposure][]} = {}
-
-// export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraIndex, AccountId]>, Exposure][]> {
-//     let cachedValue = eraStakersByEra[era]
-//     if (cachedValue !== undefined) {
-//         return cachedValue
-//     } else {
-//         eraStakersByEra = {}
-//         let eraStakers = await api.query.staking.erasStakers.entries(era);
-//         eraStakersByEra[era] = eraStakers
-//         return eraStakers
-//     }
-// }

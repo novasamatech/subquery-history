@@ -12,10 +12,15 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
 
     const element = new StakeChange(eventId(event));
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+    }
+    element.blockNumber = event.block.block.header.number.toNumber()
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
-    element.amount = amountBalance.toString()
-    element.accumulatedAmount = accumulatedAmount.toString()
+    element.amount = amountBalance
+    element.accumulatedAmount = accumulatedAmount
     element.type = "bonded"
 
     await element.save()
@@ -29,10 +34,15 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+    }
+    element.blockNumber = event.block.block.header.number.toNumber()
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = address
-    element.amount = amountBalance.toString()
-    element.accumulatedAmount = accumulatedAmount.toString()
+    element.amount = amountBalance
+    element.accumulatedAmount = accumulatedAmount
     element.type = "unbonded"
 
     await element.save()
@@ -46,10 +56,15 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
+    if (event.extrinsic !== undefined) {
+        element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+    }
+    element.blockNumber = event.block.block.header.number.toNumber()
+    element.eventIdx = event.idx
     element.timestamp = timestamp(event.block)
     element.address = validatorOrNominatorAccountId.toString()
-    element.amount = amountBalance.toString()
-    element.accumulatedAmount = accumulatedAmount.toString()
+    element.amount = amountBalance
+    element.accumulatedAmount = accumulatedAmount
     element.type = "slashed"
 
     await element.save()
@@ -111,10 +126,15 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 
         const element = new StakeChange(eventId(event));
+        if (event.extrinsic !== undefined) {
+            element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+        }
+        element.blockNumber = event.block.block.header.number.toNumber()
+        element.eventIdx = event.idx
         element.timestamp = timestamp(event.block)
         element.address = accountAddress
-        element.amount = amountBalance.toString()
-        element.accumulatedAmount = accumulatedAmount.toString()
+        element.amount = amountBalance
+        element.accumulatedAmount = accumulatedAmount
         element.type = "rewarded"
 
         await element.save()
@@ -126,12 +146,12 @@ async function handleAccumulatedStake(address: string, amount: bigint): Promise<
     if (accumulatedStake !== undefined) {
         let accumulatedAmount = BigInt(accumulatedStake.amount).valueOf()
         accumulatedAmount += amount
-        accumulatedStake.amount = accumulatedAmount.toString()
+        accumulatedStake.amount = accumulatedAmount
         await accumulatedStake.save()
         return accumulatedAmount
     } else {
         let accumulatedStake = new AccumulatedStake(address)
-        accumulatedStake.amount = amount.toString()
+        accumulatedStake.amount = amount
         await accumulatedStake.save()
         return amount
     }

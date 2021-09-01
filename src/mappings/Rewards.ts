@@ -1,5 +1,5 @@
-import {ErrorEvent, HistoryElement, Reward} from '../types';
-import {SubstrateBlock, SubstrateEvent} from "@subql/types";
+import {AccumulatedReward, ErrorEvent, HistoryElement, Reward} from '../types';
+import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
     eventIdFromBlockAndIdx,
@@ -12,8 +12,7 @@ import {
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
-import {AugmentedEvent} from "@polkadot/api/types";
-import {ApiTypes} from "@polkadot/api/types/base";
+import {Balance} from "@polkadot/types/interfaces";
 import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
@@ -51,6 +50,7 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
 
         await handleRewardRestakeForAnalytics(rewardEvent)
         await handleRewardForTxHistory(rewardEvent)
+        await updateAccumulatedReward(rewardEvent, true)
     } catch (error) {
         logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
         let saveError = new ErrorEvent(rewardEventId)
@@ -84,6 +84,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     await buildRewardEvents(
         rewardEvent.block,
+        rewardEvent.extrinsic,
         rewardEvent.event.method,
         rewardEvent.event.section,
         initialCallIndex,
@@ -94,6 +95,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             const [validator, era] = payoutCallsArgs[currentCallIndex]
 
             return {
+                eventIdx: rewardEvent.idx,
                 amount: amount,
                 isReward: true,
                 validator: validator,
@@ -140,6 +142,7 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
 
         await handleSlashForAnalytics(slashEvent)
         await handleSlashForTxHistory(slashEvent)
+        await updateAccumulatedReward(slashEvent, false)
     } catch (error) {
         logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
         let saveError = new ErrorEvent(slashEventId)
@@ -173,6 +176,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
     await buildRewardEvents(
         slashEvent.block,
+        slashEvent.extrinsic,
         slashEvent.event.method,
         slashEvent.event.section,
         initialValidator,
@@ -182,6 +186,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         (validator, amount) => {
 
             return {
+                eventIdx: slashEvent.idx,
                 amount: amount,
                 isReward: false,
                 validator: validator,
@@ -193,6 +198,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
 async function buildRewardEvents<A>(
     block: SubstrateBlock,
+    extrinsic: SubstrateExtrinsic | undefined,
     eventMethod: String,
     eventSection: String,
     initialInnerAccumulator: A,
@@ -218,6 +224,11 @@ async function buildRewardEvents<A>(
 
             element.timestamp = blockTimestamp
             element.address = account.toString()
+            element.blockNumber = block.block.header.number.toNumber()
+            if (extrinsic !== undefined) {
+                element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+                element.extrinsicIdx = extrinsic.idx
+            }
             element.reward = produceReward(newAccumulator, amount.toString())
 
             currentPromises.push(element.save())
@@ -226,4 +237,18 @@ async function buildRewardEvents<A>(
         }, [initialInnerAccumulator, []])
 
     await Promise.allSettled(savingPromises);
+}
+
+async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean): Promise<void> {
+    let {event: {data: [accountId, amount]}} = event
+    let accountAddress = accountId.toString()
+
+    let accumulatedReward = await AccumulatedReward.get(accountAddress);
+    if (!accumulatedReward) {
+        accumulatedReward = new AccumulatedReward(accountAddress);
+        accumulatedReward.amount = BigInt(0)
+    }
+    const newAmount = (amount as Balance).toBigInt()
+    accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
+    await accumulatedReward.save()
 }

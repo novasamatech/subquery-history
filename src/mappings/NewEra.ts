@@ -18,8 +18,8 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
         const eraValidatorInfo = new EraValidatorInfo(eventId(event)+validatorIdString)
         eraValidatorInfo.era = currentEra.toNumber()
         eraValidatorInfo.address = validatorIdString
-        eraValidatorInfo.total = exposure.total.toString()
-        eraValidatorInfo.own = exposure.own.toString()
+        eraValidatorInfo.total = exposure.total.toBigInt()
+        eraValidatorInfo.own = exposure.own.toBigInt()
         eraValidatorInfo.others = exposure.others.map(other => {
             return {
                 who: other.who.toString(),
