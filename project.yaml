@@ -3,11 +3,11 @@ description: Fearless SubQuery project
 repository: 'https://github.com/ef1rspb/subquery-fearless'
 schema: ./schema.graphql
 network:
-  endpoint: 'wss://rpc.polkadot.io'
+  endpoint: 'wss://kusama-rpc.polkadot.io'
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 6721338
+    startBlock: 1
 
     # polkadot test slash bloks: 3570179
 
