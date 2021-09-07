@@ -53,11 +53,15 @@ async function saveFailedTransfers(transfers: Transfer[], extrinsic: SubstrateEx
 }
 
 async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
-    const element = new HistoryElement(extrinsic.extrinsic.hash.toString());
+    let blockNumber = extrinsic.block.block.header.number.toNumber();
+    let extrinsicIdx = extrinsic.idx
+    let extrinsicId = extrinsicIdFromBlockAndIdx(blockNumber, extrinsicIdx)
+
+    const element = new HistoryElement(extrinsicId);
     element.address = extrinsic.extrinsic.signer.toString()
-    element.blockNumber = extrinsic.block.block.header.number.toNumber()
+    element.blockNumber = blockNumber
     element.extrinsicHash = extrinsic.extrinsic.hash.toString()
-    element.extrinsicIdx = extrinsic.idx
+    element.extrinsicIdx = extrinsicIdx
     element.timestamp = timestamp(extrinsic.block)
     element.extrinsic = {
         hash: extrinsic.extrinsic.hash.toString(),

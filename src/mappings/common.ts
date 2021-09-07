@@ -85,7 +85,7 @@ function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigin
 
 function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigint {
     const eventRecord = extrinsic.events.find((event) => {
-        return event.event.method == "Deposit" && event.event.section == "treasure"
+        return event.event.method == "Deposit" && event.event.section == "treasury"
     })
 
     if (eventRecord != undefined) {

@@ -11,9 +11,10 @@ import {
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
-import {EraIndex} from "@polkadot/types/interfaces/staking"
+import {EraIndex, RewardDestination} from "@polkadot/types/interfaces/staking"
 import {Balance} from "@polkadot/types/interfaces";
 import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
+import {cachedRewardDestination, cachedController} from "./Cache"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -82,11 +83,34 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     const initialCallIndex = -1
 
+    var accountsMapping: {[address: string]: string} = {}
+
+    for (const eventRecord of rewardEvent.block.events) {
+        if (
+            eventRecord.event.section == rewardEvent.event.section && 
+            eventRecord.event.method == rewardEvent.event.method) {
+
+            let {event: {data: [account, _]}} = eventRecord
+
+            let accountAddress = account.toString()
+            let rewardDestination = await cachedRewardDestination(accountAddress, eventRecord as SubstrateEvent)
+
+            if (rewardDestination.isStaked || rewardDestination.isStash) {
+                accountsMapping[accountAddress] = accountAddress
+            } else if (rewardDestination.isController) {
+                accountsMapping[accountAddress] = await cachedController(accountAddress, eventRecord as SubstrateEvent)
+            } else if (rewardDestination.isAccount) {
+                accountsMapping[accountAddress] = rewardDestination.asAccount.toString()
+            }
+        }
+    }
+
     await buildRewardEvents(
         rewardEvent.block,
         rewardEvent.extrinsic,
         rewardEvent.event.method,
         rewardEvent.event.section,
+        accountsMapping,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
             return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
@@ -179,6 +203,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         slashEvent.extrinsic,
         slashEvent.event.method,
         slashEvent.event.section,
+        {},
         initialValidator,
         (currentValidator, eventAccount) => {
             return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
@@ -201,6 +226,7 @@ async function buildRewardEvents<A>(
     extrinsic: SubstrateExtrinsic | undefined,
     eventMethod: String,
     eventSection: String,
+    accountsMapping: {[address: string]: string},
     initialInnerAccumulator: A,
     produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
     produceReward: (currentAccumulator: A, amount: string) => Reward
@@ -223,7 +249,11 @@ async function buildRewardEvents<A>(
             const element = new HistoryElement(eventId);
 
             element.timestamp = blockTimestamp
-            element.address = account.toString()
+
+            const accountAddress = account.toString()
+            const destinationAddress = accountsMapping[accountAddress]
+            element.address = destinationAddress != undefined ? destinationAddress : accountAddress
+
             element.blockNumber = block.block.header.number.toNumber()
             if (extrinsic !== undefined) {
                 element.extrinsicHash = extrinsic.extrinsic.hash.toString()
