@@ -28,6 +28,12 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
                 return accountId
             });
 
+        // looks like accountAddress not related to events so just try to query payee directly
+        if (allAccountsInBlock.length === 0) {
+            rewardDestinationByAddress[blockId] = {}
+            return await api.query.staking.payee(accountAddress)
+        }
+
         const payees = await api.query.staking.payee.multi(allAccountsInBlock);
         const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
         
@@ -35,8 +41,8 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
         
         // something went wrong, so just query for single accountAddress
         if (rewardDestinations.length !== allAccountsInBlock.length) {
-            const payee = await api.query.staking.payee(accountAddress);
-            destinationByAddress[accountAddress] = payee;
+            const payee = await api.query.staking.payee(accountAddress)
+            destinationByAddress[accountAddress] = payee
             rewardDestinationByAddress[blockId] = destinationByAddress
             return payee
         }
@@ -79,6 +85,13 @@ export async function cachedController(accountAddress: string, event: SubstrateE
             if (rewardDestination.isController) {
                 controllerNeedAccounts.push(accountId as AccountId)
             }
+        }
+
+        // looks like accountAddress not related to events so just try to query controller directly
+        if (controllerNeedAccounts.length === 0) {
+            controllersByStash[blockId] = {}
+            let accountId = await api.query.staking.bonded(accountAddress)
+            return accountId.toString()
         }
 
         const bonded = await api.query.staking.bonded.multi(controllerNeedAccounts);

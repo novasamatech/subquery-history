@@ -85,12 +85,12 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     var accountsMapping: {[address: string]: string} = {}
 
-    for (let eventRecord of rewardEvent.block.events) {
+    for (const eventRecord of rewardEvent.block.events) {
         if (
             eventRecord.event.section == rewardEvent.event.section && 
             eventRecord.event.method == rewardEvent.event.method) {
 
-            let {event: {data: [account, amount]}} = eventRecord
+            let {event: {data: [account, _]}} = eventRecord
 
             let accountAddress = account.toString()
             let rewardDestination = await cachedRewardDestination(accountAddress, eventRecord as SubstrateEvent)
