@@ -1,0 +1,86 @@
+specVersion: 0.2.0
+name: nova
+version: 1.0.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
+network:
+  genesisHash: '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97'
+  endpoint: wss://parallel.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
+  dictionary: https://api.subquery.network/sq/subquery/parallel-dictionary
+
+dataSources:
+  - name: main
+    kind: substrate/Runtime
+    startBlock: 1
+    mapping:
+      file: ./dist/src/index.js
+      handlers:
+        - handler: handleHistoryElement
+          kind: substrate/CallHandler
+        - handler: handleReward
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Reward
+        - handler: handleRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Rewarded
+        - handler: handleSlash
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slash
+        - handler: handleSlashed
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slashed
+        - handler: handleBonded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Bonded
+        - handler: handleUnbonded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Unbonded
+        - handler: handleTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: Transfer
+        - handler: handleTransferKeepAlive
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: transfer_keep_alive
+        - handler: handleNewEra
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakingElection
+        - handler: handleStakersElected
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakersElected
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: assets
+            method: Transferred
+        - handler: handleCurrencyTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: currencies
+            method: Transferred
+        - handler: handleTokenTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: tokens
+            method: Transfer

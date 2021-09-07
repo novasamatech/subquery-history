@@ -1,72 +1,52 @@
-specVersion: 0.0.1
-description: Fearless SubQuery project
-repository: 'https://github.com/ef1rspb/subquery-fearless'
-schema: ./schema.graphql
+specVersion: 1.0.0
+name: subquery-nova
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: v1.9.1
+  query:
+    name: '@subql/query'
+    version: v1.5.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
 network:
-  endpoint: 'wss://kusama-rpc.polkadot.io'
+  chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
+  endpoint: >-
+    wss://acala-polkadot.api.onfinality.io/ws
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
-
-    # polkadot test slash bloks: 3570179
-
-    # westend test stake block: 6000000
-    # kusama test stake block: 8124580
-    # polkadot test stake block: 5645004
-
-    # polkadot test rewards block: 5704983
     mapping:
+      file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleReward
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Reward
-        - handler: handleRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Rewarded
-        - handler: handleSlash
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slash
-        - handler: handleSlashed
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slashed
-        - handler: handleBonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Bonded
-        - handler: handleUnbonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Unbonded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
             module: balances
             method: Transfer
-        - handler: handleTransferKeepAlive
+        - handler: handleAssetTransfer
           kind: substrate/EventHandler
           filter:
-            module: balances
-            method: transfer_keep_alive
-        - handler: handleNewEra
+            module: assets
+            method: Transferred
+        - handler: handleCurrencyTransfer
           kind: substrate/EventHandler
           filter:
-            module: staking
-            method: StakingElection
-        - handler: handleStakersElected
+            module: currencies
+            method: Transferred
+        - handler: handleTokenTransfer
           kind: substrate/EventHandler
           filter:
-            module: staking
-            method: StakersElected
+            module: tokens
+            method: Transfer
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded

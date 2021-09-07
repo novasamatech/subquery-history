@@ -1,13 +1,13 @@
 {
-  "name": "fearless",
+  "name": "subquery-nova",
   "version": "1.0.0",
-  "description": "This is an example of using 1-N relations",
+  "description": "Nova SubQuery projects",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -b",
-    "prepack": "rm -rf dist && npm build",
+    "build": "./node_modules/.bin/subql build",
     "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
-    "codegen": "./node_modules/.bin/subql codegen"
+    "codegen": "./node_modules/.bin/subql codegen",
+    "validate": "./node_modules/.bin/subql validate"
   },
   "files": [
     "dist",
@@ -20,9 +20,41 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@polkadot/api": "^4",
-    "@subql/types": "^0.7.1",
-    "typescript": "^4.1.3",
-    "@subql/cli": "^0.9.3"
+    "@acala-network/type-definitions": "^4.1.5",
+    "@interlay/interbtc-types": "^1.5.10",
+    "@zeroio/type-definitions": "^0.0.14",
+    "@kiltprotocol/type-definitions": "^0.1.23",
+    "@subsocial/types": "^0.6.8",
+    "moonbeam-types-bundle": "^2.0.8",
+    "@phala/typedefs": "^0.2.31",
+    "@polkadot/api": "^8",
+    "@polkadot/types-augment": "^8",
+    "@subql/cli": "^1.6.0",
+    "@subql/types": "^1.4.0",
+    "@zeitgeistpm/type-defs": "^0.8.0",
+    "typescript": "^4.1.3"
+  },
+  "exports": {
+    "acalaChaintypes": "./chainTypes/acalaChaintypes.ts",
+    "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
+    "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts",
+    "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts",
+    "encointerChaintypes": "./chainTypes/encointerChaintypes.ts",
+    "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts",
+    "interlayChaintypes": "./chainTypes/interlayChaintypes.ts",
+    "karuraChaintypes": "./chainTypes/karuraChaintypes.ts",
+    "khalaChaintypes": "./chainTypes/khalaChaintypes.ts",
+    "kiltChaintypes": "./chainTypes/kiltChaintypes.ts",
+    "kintsugiChaintypes": "./chainTypes/kintsugiChaintypes.ts",
+    "moonbeamChaintypes": "./chainTypes/moonbeamChaintypes.ts",
+    "parallelHeikoChaintypes": "./chainTypes/parallelHeikoChaintypes.ts",
+    "pichiuChaintypes": "./chainTypes/pichiuChaintypes.ts",
+    "shidenChaintypes": "./chainTypes/shidenChaintypes.ts",
+    "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
+    "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
+    "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts"
+  },
+  "resolutions": {
+    "ipfs-unixfs": "6.0.6"
   }
 }

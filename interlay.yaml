@@ -1,0 +1,54 @@
+specVersion: 1.0.0
+name: subquery-nova-interlay
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: v1.9.1
+  query:
+    name: '@subql/query'
+    version: v1.5.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
+network:
+  chainId: '0xbf88efe70e9e0e916416e8bed61f2b45717f517d7f3523e33c7b001e5ffcbc72'
+  endpoint: >-
+    wss://interlay.api.onfinality.io/public-ws
+  chaintypes:
+    file: ./dist/interlayChaintypes.js
+dataSources:
+  - name: main
+    kind: substrate/Runtime
+    startBlock: 1
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleHistoryElement
+          kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
+        - handler: handleTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: Transfer
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: assets
+            method: Transferred
+        - handler: handleCurrencyTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: currencies
+            method: Transferred
+        - handler: handleTokenTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: tokens
+            method: Transfer

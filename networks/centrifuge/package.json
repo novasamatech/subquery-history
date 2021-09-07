@@ -1,0 +1,35 @@
+{
+    "name": "subquery-nova",
+    "version": "1.0.0",
+    "description": "Nova SubQuery project",
+    "main": "dist/index.js",
+    "scripts": {
+      "build": "tsc -b",
+      "prepack": "rm -rf dist && npm build",
+      "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
+      "codegen": "./node_modules/.bin/subql codegen",
+      "validate": "./node_modules/.bin/subql validate"
+    },
+    "files": [
+      "dist",
+      "schema.graphql",
+      "project.yaml"
+    ],
+    "author": "Jay Ji",
+    "license": "Apache-2.0",
+    "dependencies": {
+      "lodash": "^4.17.21"
+    },
+    "devDependencies": {
+      "@polkadot/api": "^7",
+      "@subql/cli": "^0.21.0",
+      "@subql/types": "^0.14.0",
+      "typescript": "^4.1.3"
+    },
+    "exports": {
+      "chaintypes": "./src/chaintypes.ts"
+    },
+    "resolutions": {
+      "ipfs-unixfs": "6.0.6"
+    }
+  }

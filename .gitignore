@@ -2,3 +2,15 @@ node_modules
 dist
 src/types
 .data
+.idea
+.DS_Store
+.venv
+.vscode
+__pycache__
+temporary
+.pytest_cache
+networks/**/src
+networks/**/docker-compose.yml
+networks/**/local-runner.sh
+networks/**/schema.graphql
+networks/**/tsconfig.json

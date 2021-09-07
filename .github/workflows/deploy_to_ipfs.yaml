@@ -1,0 +1,89 @@
+name: Manual deploy to IPFS
+
+on:
+  workflow_dispatch:
+
+env:
+  SUBQUERY_ORG: nova-wallet
+  SUBQL_ACCESS_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
+
+jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      project_files: ${{ steps.project_files.outputs.files }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 🧾 Get list of projects
+        id: project_files
+        run: |
+          chmod +x .github/get_all_project_files.sh
+          echo "::set-output name=files::$(.github/get_all_project_files.sh)"
+
+      - name: 🔄 Install dependencies
+        run: yarn install
+
+      - name: 🧬 Types generation
+        run: yarn codegen
+
+      - name: 🏗 Build from sources
+        run: yarn build
+
+
+  deploy-to-IPFS:
+    needs: setup
+    name: 📬 Deploy to subquery IPFS
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{fromJson(needs.setup.outputs.project_files)}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: 🔄 Install dependencies
+        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
+        run: yarn install
+
+      - name: 🧬 Types generation
+        run: yarn codegen
+
+      - name: 📬 Deploy to IPFS
+        run:  |
+          ./node_modules/.bin/subql publish -f ${{ matrix.project_file }}  -o
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cids
+          path: .*cid
+
+
+  push-changed-cids:
+      needs: deploy-to-IPFS
+      name: 🏹 Push changes to branch
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v2
+
+        - name: Download built artifact
+          uses: actions/download-artifact@v2
+          with:
+            name: cids
+            path: ./ipfs-cids
+
+        - name: ➡️ Commit files
+          run: |
+            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add -f ipfs-cids
+            git commit -m "Update CIDs for IFPS"
+
+        - name: 🏹 Push changes
+          uses: ad-m/github-push-action@master
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            branch: refs/heads/update-cids-${{github.run_number}}

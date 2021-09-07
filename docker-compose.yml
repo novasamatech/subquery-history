@@ -1,19 +1,26 @@
 version: '3'
-
 services:
   postgres:
+    container_name: "postgres-${PROJECT_PATH}"
     image: postgres:12-alpine
     ports:
       - 5432:5432
     volumes:
       - .data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       POSTGRES_PASSWORD: postgres
 
   subquery-node:
-    image: onfinality/subql-node:latest
+    container_name: "node-${PROJECT_PATH}"
+    image: onfinality/subql-node:v1.9.1
     depends_on:
-      - "postgres"
+      postgres:
+        condition: service_healthy
     restart: always
     environment:
       DB_USER: postgres
@@ -24,15 +31,17 @@ services:
     volumes:
       - ./:/app
     command:
-      - -f=/app
-      - --local #remove
+      - -f=/app/${PROJECT_PATH}
+      # - --local #remove
+      # - --batch-size=50
 
   graphql-engine:
-    image: onfinality/subql-query:latest
+    container_name: "query-${PROJECT_PATH}"
+    image: onfinality/subql-query:v1.5.0
     ports:
       - 3000:3000
     depends_on:
-      - "postgres"
+      - subquery-node
     restart: always
     environment:
       DB_USER: postgres

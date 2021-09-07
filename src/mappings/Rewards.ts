@@ -11,9 +11,10 @@ import {
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
-import {EraIndex} from "@polkadot/types/interfaces/staking"
+import {EraIndex, RewardDestination} from "@polkadot/types/interfaces/staking"
 import {Balance} from "@polkadot/types/interfaces";
 import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
+import {cachedRewardDestination, cachedController} from "./Cache"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -40,23 +41,26 @@ export async function handleRewarded(rewardEvent: SubstrateEvent): Promise<void>
 }
 
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
-    let rewardEventId = eventId(rewardEvent)
-    try {
-        let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
-        if (errorOccursOnEvent !== undefined) {
-            logger.info(`Skip rewardEvent: ${rewardEventId}`)
-            return;
-        }
+    await handleRewardRestakeForAnalytics(rewardEvent)
+    await handleRewardForTxHistory(rewardEvent)
+    await updateAccumulatedReward(rewardEvent, true)
+    // let rewardEventId = eventId(rewardEvent)
+    // try {
+    //     let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
+    //     if (errorOccursOnEvent !== undefined) {
+    //         logger.info(`Skip rewardEvent: ${rewardEventId}`)
+    //         return;
+    //     }
 
-        await handleRewardRestakeForAnalytics(rewardEvent)
-        await handleRewardForTxHistory(rewardEvent)
-        await updateAccumulatedReward(rewardEvent, true)
-    } catch (error) {
-        logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
-        let saveError = new ErrorEvent(rewardEventId)
-        saveError.description = error.toString()
-        await saveError.save()
-    }
+    //     await handleRewardRestakeForAnalytics(rewardEvent)
+    //     await handleRewardForTxHistory(rewardEvent)
+    //     await updateAccumulatedReward(rewardEvent, true)
+    // } catch (error) {
+    //     logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
+    //     let saveError = new ErrorEvent(rewardEventId)
+    //     saveError.description = error.toString()
+    //     await saveError.save()
+    // }
 }
 
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
@@ -76,30 +80,72 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         return
     }
 
-    const distinctValidators = new Set(
-        payoutCallsArgs.map(([validator,]) => validator)
-    )
+    const payoutValidators = payoutCallsArgs.map(([validator,]) => validator)
 
     const initialCallIndex = -1
+
+    var accountsMapping: {[address: string]: string} = {}
+
+    for (const eventRecord of rewardEvent.block.events) {
+        if (
+            eventRecord.event.section == rewardEvent.event.section && 
+            eventRecord.event.method == rewardEvent.event.method
+        ) {
+
+            let {event: {data: [account, _]}} = eventRecord
+
+            if (account.toRawType() === 'Balance') {
+                return
+            }
+
+            let accountAddress = account.toString()
+            let rewardDestination = await cachedRewardDestination(accountAddress, eventRecord as unknown as SubstrateEvent)
+
+            if (rewardDestination.isStaked || rewardDestination.isStash) {
+                accountsMapping[accountAddress] = accountAddress
+            } else if (rewardDestination.isController) {
+                accountsMapping[accountAddress] = await cachedController(accountAddress, eventRecord as unknown as SubstrateEvent)
+            } else if (rewardDestination.isAccount) {
+                accountsMapping[accountAddress] = rewardDestination.asAccount.toString()
+            }
+        }
+    }
 
     await buildRewardEvents(
         rewardEvent.block,
         rewardEvent.extrinsic,
         rewardEvent.event.method,
         rewardEvent.event.section,
+        accountsMapping,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
-            return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+            if (payoutValidators.length > currentCallIndex + 1) {
+                const index = payoutValidators.indexOf(eventAccount)
+                return index !== -1 && index > currentCallIndex ? index : currentCallIndex
+            } else {
+                return currentCallIndex
+            }
         },
-        (currentCallIndex, amount) => {
-            const [validator, era] = payoutCallsArgs[currentCallIndex]
-
-            return {
-                eventIdx: rewardEvent.idx,
-                amount: amount,
-                isReward: true,
-                validator: validator,
-                era: era
+        (currentCallIndex, eventIdx, stash, amount) => {
+            if (currentCallIndex == -1) {
+                return {
+                    eventIdx: eventIdx,
+                    amount: amount,
+                    isReward: true,
+                    stash: stash,
+                    validator: "",
+                    era: -1
+                }
+            } else {
+                const [validator, era] = payoutCallsArgs[currentCallIndex]
+                return {
+                    eventIdx: eventIdx,
+                    amount: amount,
+                    isReward: true,
+                    stash: stash,
+                    validator: validator,
+                    era: era
+                }
             }
         }
     )
@@ -132,23 +178,26 @@ export async function handleSlashed(slashEvent: SubstrateEvent): Promise<void> {
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
-    let slashEventId = eventId(slashEvent)
-    try {
-        let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
-        if (errorOccursOnEvent !== undefined) {
-            logger.info(`Skip slashEvent: ${slashEventId}`)
-            return;
-        }
+    await handleSlashForAnalytics(slashEvent)
+    await handleSlashForTxHistory(slashEvent)
+    await updateAccumulatedReward(slashEvent, false)
+    // let slashEventId = eventId(slashEvent)
+    // try {
+    //     let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
+    //     if (errorOccursOnEvent !== undefined) {
+    //         logger.info(`Skip slashEvent: ${slashEventId}`)
+    //         return;
+    //     }
 
-        await handleSlashForAnalytics(slashEvent)
-        await handleSlashForTxHistory(slashEvent)
-        await updateAccumulatedReward(slashEvent, false)
-    } catch (error) {
-        logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
-        let saveError = new ErrorEvent(slashEventId)
-        saveError.description = error.toString()
-        await saveError.save()
-    }
+    //     await handleSlashForAnalytics(slashEvent)
+    //     await handleSlashForTxHistory(slashEvent)
+    //     await updateAccumulatedReward(slashEvent, false)
+    // } catch (error) {
+    //     logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
+    //     let saveError = new ErrorEvent(slashEventId)
+    //     saveError.description = error.toString()
+    //     await saveError.save()
+    // }
 }
 
 async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void> {
@@ -158,37 +207,42 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         // already processed reward previously
         return;
     }
+    const eraWrapped = await api.query.staking.currentEra()
+    const currentEra = Number(eraWrapped.toString())
+    const slashDeferDuration = api.consts.staking.slashDeferDuration
+    let validatorsSet = new Set()
 
-    const currentEra = (await api.query.staking.currentEra()).unwrap()
-    const slashDefferDuration = api.consts.staking.slashDeferDuration
+    const slashEra = !slashDeferDuration ? currentEra : currentEra - slashDeferDuration.toNumber()
 
-    const slashEra = currentEra.toNumber() - slashDefferDuration.toNumber()
+    if (api.query.staking.erasStakersClipped) {
+        const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
+        const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
+            let [, validatorId] = key.args
 
-    const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
-    const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
-        let [, validatorId] = key.args
+            return validatorId.toString()
+        })
+        validatorsSet = new Set(validatorsInSlashEra)
+    }
 
-        return validatorId.toString()
-    })
-    const validatorsSet = new Set(validatorsInSlashEra)
-
-    const initialValidator: string = ""
+    const initialValidator = null
 
     await buildRewardEvents(
         slashEvent.block,
         slashEvent.extrinsic,
         slashEvent.event.method,
         slashEvent.event.section,
+        {},
         initialValidator,
         (currentValidator, eventAccount) => {
             return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
         },
-        (validator, amount) => {
+        (validator, eventIdx, stash, amount) => {
 
             return {
-                eventIdx: slashEvent.idx,
+                eventIdx: eventIdx,
                 amount: amount,
                 isReward: false,
+                stash: stash,
                 validator: validator,
                 era: slashEra
             }
@@ -201,9 +255,10 @@ async function buildRewardEvents<A>(
     extrinsic: SubstrateExtrinsic | undefined,
     eventMethod: String,
     eventSection: String,
+    accountsMapping: {[address: string]: string},
     initialInnerAccumulator: A,
     produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
-    produceReward: (currentAccumulator: A, amount: string) => Reward
+    produceReward: (currentAccumulator: A, eventIdx: number, stash: string, amount: string) => Reward
 ) {
     let blockNumber = block.block.header.number.toString()
     let blockTimestamp = timestamp(block)
@@ -223,13 +278,17 @@ async function buildRewardEvents<A>(
             const element = new HistoryElement(eventId);
 
             element.timestamp = blockTimestamp
-            element.address = account.toString()
+
+            const accountAddress = account.toString()
+            const destinationAddress = accountsMapping[accountAddress]
+            element.address = destinationAddress != undefined ? destinationAddress : accountAddress
+
             element.blockNumber = block.block.header.number.toNumber()
             if (extrinsic !== undefined) {
                 element.extrinsicHash = extrinsic.extrinsic.hash.toString()
                 element.extrinsicIdx = extrinsic.idx
             }
-            element.reward = produceReward(newAccumulator, amount.toString())
+            element.reward = produceReward(newAccumulator, eventIndex, accountAddress, amount.toString())
 
             currentPromises.push(element.save())
 
@@ -248,7 +307,51 @@ async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean)
         accumulatedReward = new AccumulatedReward(accountAddress);
         accumulatedReward.amount = BigInt(0)
     }
-    const newAmount = (amount as Balance).toBigInt()
+    const newAmount = (amount as unknown as Balance).toBigInt()
     accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
     await accumulatedReward.save()
+}
+
+
+async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
+    const extrinsic = rewardEvent.extrinsic;
+    const block = rewardEvent.block;
+    const blockNumber = block.block.header.number.toString()
+    const blockTimestamp = timestamp(block)
+    const {event: {data: [account, amount]}} = rewardEvent
+    const eventId = eventIdFromBlockAndIdx(blockNumber, rewardEvent.idx.toString())
+    const era = await api.query.parachainStaking.round();
+
+    const paymentDelay = api.consts.parachainStaking.rewardPaymentDelay.toHuman();
+    // HACK: used to get data from object
+    const eraIndex = (era.toJSON() as {current: any}).current - Number(paymentDelay)
+
+    const validatorEvent = rewardEvent.block.events.find(event =>
+        event.event.section == rewardEvent.event.section && 
+        event.event.method == rewardEvent.event.method
+    )
+    const validatorId = validatorEvent?.event.data[0].toString()
+
+    const element = new HistoryElement(eventId);
+    element.timestamp = blockTimestamp
+    element.address = account.toString()
+    element.blockNumber = block.block.header.number.toNumber()
+    if (extrinsic !== undefined) {
+        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        element.extrinsicIdx = extrinsic.idx
+    }
+    element.reward = {eventIdx: rewardEvent.idx,
+        amount: amount.toString(),
+        isReward: true,
+        stash: account.toString(),
+        validator: validatorId,
+        era: eraIndex
+    }
+
+    element.save()
+}
+
+export async function handleParachainRewarded (rewardEvent: SubstrateEvent): Promise<void> {
+    await handleParachainRewardForTxHistory(rewardEvent)
+    await updateAccumulatedReward(rewardEvent, true)
 }
