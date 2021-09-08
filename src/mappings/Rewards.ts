@@ -41,23 +41,26 @@ export async function handleRewarded(rewardEvent: SubstrateEvent): Promise<void>
 }
 
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
-    let rewardEventId = eventId(rewardEvent)
-    try {
-        let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
-        if (errorOccursOnEvent !== undefined) {
-            logger.info(`Skip rewardEvent: ${rewardEventId}`)
-            return;
-        }
+    await handleRewardRestakeForAnalytics(rewardEvent)
+    await handleRewardForTxHistory(rewardEvent)
+    await updateAccumulatedReward(rewardEvent, true)
+    // let rewardEventId = eventId(rewardEvent)
+    // try {
+    //     let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
+    //     if (errorOccursOnEvent !== undefined) {
+    //         logger.info(`Skip rewardEvent: ${rewardEventId}`)
+    //         return;
+    //     }
 
-        await handleRewardRestakeForAnalytics(rewardEvent)
-        await handleRewardForTxHistory(rewardEvent)
-        await updateAccumulatedReward(rewardEvent, true)
-    } catch (error) {
-        logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
-        let saveError = new ErrorEvent(rewardEventId)
-        saveError.description = error.toString()
-        await saveError.save()
-    }
+    //     await handleRewardRestakeForAnalytics(rewardEvent)
+    //     await handleRewardForTxHistory(rewardEvent)
+    //     await updateAccumulatedReward(rewardEvent, true)
+    // } catch (error) {
+    //     logger.error(`Got error on reward event: ${rewardEventId}: ${error.toString()}`)
+    //     let saveError = new ErrorEvent(rewardEventId)
+    //     saveError.description = error.toString()
+    //     await saveError.save()
+    // }
 }
 
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
@@ -156,23 +159,26 @@ export async function handleSlashed(slashEvent: SubstrateEvent): Promise<void> {
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
-    let slashEventId = eventId(slashEvent)
-    try {
-        let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
-        if (errorOccursOnEvent !== undefined) {
-            logger.info(`Skip slashEvent: ${slashEventId}`)
-            return;
-        }
+    await handleSlashForAnalytics(slashEvent)
+    await handleSlashForTxHistory(slashEvent)
+    await updateAccumulatedReward(slashEvent, false)
+    // let slashEventId = eventId(slashEvent)
+    // try {
+    //     let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
+    //     if (errorOccursOnEvent !== undefined) {
+    //         logger.info(`Skip slashEvent: ${slashEventId}`)
+    //         return;
+    //     }
 
-        await handleSlashForAnalytics(slashEvent)
-        await handleSlashForTxHistory(slashEvent)
-        await updateAccumulatedReward(slashEvent, false)
-    } catch (error) {
-        logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
-        let saveError = new ErrorEvent(slashEventId)
-        saveError.description = error.toString()
-        await saveError.save()
-    }
+    //     await handleSlashForAnalytics(slashEvent)
+    //     await handleSlashForTxHistory(slashEvent)
+    //     await updateAccumulatedReward(slashEvent, false)
+    // } catch (error) {
+    //     logger.error(`Got error on slash event: ${slashEventId}: ${error.toString()}`)
+    //     let saveError = new ErrorEvent(slashEventId)
+    //     saveError.description = error.toString()
+    //     await saveError.save()
+    // }
 }
 
 async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void> {
