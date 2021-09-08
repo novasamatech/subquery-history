@@ -119,14 +119,23 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
         },
         (currentCallIndex, amount) => {
-            const [validator, era] = payoutCallsArgs[currentCallIndex]
-
-            return {
-                eventIdx: rewardEvent.idx,
-                amount: amount,
-                isReward: true,
-                validator: validator,
-                era: era
+            if (currentCallIndex == -1) {
+                return {
+                    eventIdx: rewardEvent.idx,
+                    amount: amount,
+                    isReward: true,
+                    validator: "",
+                    era: -1
+                }
+            } else {
+                const [validator, era] = payoutCallsArgs[currentCallIndex]
+                return {
+                    eventIdx: rewardEvent.idx,
+                    amount: amount,
+                    isReward: true,
+                    validator: validator,
+                    era: era
+                }
             }
         }
     )
