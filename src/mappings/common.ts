@@ -77,39 +77,40 @@ export function exportFeeFromDepositEvent(extrinsic: SubstrateExtrinsic): Balanc
 
 export function exportFeeFromDepositEventAsString(extrinsic?: SubstrateExtrinsic): string {
     if (extrinsic) {
-        let fee = exportFeeFromDepositEvent(extrinsic)
-        return fee ? fee.toString() : "0"
+        let balancesFee = calculateBlockAuthorFee(extrinsic)
+        let treasureFee = calculateTreasuryFee(extrinsic)
+
+        let totalFee = balancesFee + treasureFee
+        return totalFee.toString()
     } else {
-        return "0"
-    } 
+        return BigInt(0).toString()
+    }
 }
 
-// let currentEraByBlockId: {[blockId: string]: EraIndex} = {}
+function calculateBlockAuthorFee(extrinsic: SubstrateExtrinsic): bigint {
+    const eventRecord = extrinsic.events.find((event) => {
+        return event.event.method == "Deposit" && event.event.section == "balances"
+    })
 
-// export async function cachedCurrentEra(block: SubstrateBlock): Promise<EraIndex> {
-//     let key = block.block.header.number.toString()
-//     let cachedValue = currentEraByBlockId[key]
-//     if (cachedValue !== undefined) {
-//         return cachedValue
-//     } else {
-//         let eraOption = await api.query.staking.currentEra()
-//         let eraIndex = eraOption.unwrap()
-//         currentEraByBlockId[key] = eraIndex
-//         return eraIndex
-//     }
-// }
+    if (eventRecord != undefined) {
+        const {event: {data: [, fee]}}= eventRecord
 
-// // Due to memory consumption optimization `eraStakersByEra` contains only one key
-// let eraStakersByEra: {[era: number]: [StorageKey<[EraIndex, AccountId]>, Exposure][]} = {}
+        return (fee as Balance).toBigInt()
+    } else  {
+        return BigInt(0)
+    }
+}
 
-// export async function cachedEraStakers(era: number): Promise<[StorageKey<[EraIndex, AccountId]>, Exposure][]> {
-//     let cachedValue = eraStakersByEra[era]
-//     if (cachedValue !== undefined) {
-//         return cachedValue
-//     } else {
-//         eraStakersByEra = {}
-//         let eraStakers = await api.query.staking.erasStakers.entries(era);
-//         eraStakersByEra[era] = eraStakers
-//         return eraStakers
-//     }
-// }
+function calculateTreasuryFee(extrinsic: SubstrateExtrinsic): bigint {
+    const eventRecord = extrinsic.events.find((event) => {
+        return event.event.method == "Deposit" && event.event.section == "treasury"
+    })
+
+    if (eventRecord != undefined) {
+        const {event: {data: [fee]}}= eventRecord
+
+        return (fee as Balance).toBigInt()
+    } else  {
+        return BigInt(0)
+    }
+}
