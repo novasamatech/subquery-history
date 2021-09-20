@@ -120,10 +120,10 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
                 return currentCallIndex
             }
         },
-        (currentCallIndex, stash, amount) => {
+        (currentCallIndex, eventIdx, stash, amount) => {
             if (currentCallIndex == -1) {
                 return {
-                    eventIdx: rewardEvent.idx,
+                    eventIdx: eventIdx,
                     amount: amount,
                     isReward: true,
                     stash: stash,
@@ -133,7 +133,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             } else {
                 const [validator, era] = payoutCallsArgs[currentCallIndex]
                 return {
-                    eventIdx: rewardEvent.idx,
+                    eventIdx: eventIdx,
                     amount: amount,
                     isReward: true,
                     stash: stash,
@@ -227,10 +227,10 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         (currentValidator, eventAccount) => {
             return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
         },
-        (validator, stash, amount) => {
+        (validator, eventIdx, stash, amount) => {
 
             return {
-                eventIdx: slashEvent.idx,
+                eventIdx: eventIdx,
                 amount: amount,
                 isReward: false,
                 stash: stash,
@@ -249,7 +249,7 @@ async function buildRewardEvents<A>(
     accountsMapping: {[address: string]: string},
     initialInnerAccumulator: A,
     produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
-    produceReward: (currentAccumulator: A, stash: string, amount: string) => Reward
+    produceReward: (currentAccumulator: A, eventIdx: number, stash: string, amount: string) => Reward
 ) {
     let blockNumber = block.block.header.number.toString()
     let blockTimestamp = timestamp(block)
@@ -279,7 +279,7 @@ async function buildRewardEvents<A>(
                 element.extrinsicHash = extrinsic.extrinsic.hash.toString()
                 element.extrinsicIdx = extrinsic.idx
             }
-            element.reward = produceReward(newAccumulator, accountAddress, amount.toString())
+            element.reward = produceReward(newAccumulator, eventIndex, accountAddress, amount.toString())
 
             currentPromises.push(element.save())
 
