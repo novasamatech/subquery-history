@@ -3,7 +3,7 @@ description: Fearless SubQuery project
 repository: 'https://github.com/ef1rspb/subquery-fearless'
 schema: ./schema.graphql
 network:
-  endpoint: 'https://kusama.api.onfinality.io/public'
+  endpoint: 'wss://kusama.api.onfinality.io/ws?apikey=d74a87fc-b4f8-47bb-b17e-ed37cfaf24a1'
 dataSources:
   - name: main
     kind: substrate/Runtime
