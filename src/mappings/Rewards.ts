@@ -80,9 +80,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         return
     }
 
-    const distinctValidators = new Set(
-        payoutCallsArgs.map(([validator,]) => validator)
-    )
+    const payoutValidators = payoutCallsArgs.map(([validator,]) => validator)
 
     const initialCallIndex = -1
 
@@ -116,23 +114,29 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         accountsMapping,
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
-            return distinctValidators.has(eventAccount) ? currentCallIndex + 1 : currentCallIndex
+            if (payoutValidators.length > currentCallIndex + 1) {
+                return payoutValidators[currentCallIndex + 1] == eventAccount ? currentCallIndex + 1 : currentCallIndex
+            } else {
+                return currentCallIndex
+            }
         },
-        (currentCallIndex, amount) => {
+        (currentCallIndex, eventIdx, stash, amount) => {
             if (currentCallIndex == -1) {
                 return {
-                    eventIdx: rewardEvent.idx,
+                    eventIdx: eventIdx,
                     amount: amount,
                     isReward: true,
+                    stash: stash,
                     validator: "",
                     era: -1
                 }
             } else {
                 const [validator, era] = payoutCallsArgs[currentCallIndex]
                 return {
-                    eventIdx: rewardEvent.idx,
+                    eventIdx: eventIdx,
                     amount: amount,
                     isReward: true,
+                    stash: stash,
                     validator: validator,
                     era: era
                 }
@@ -199,9 +203,9 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
     }
 
     const currentEra = (await api.query.staking.currentEra()).unwrap()
-    const slashDefferDuration = api.consts.staking.slashDeferDuration
+    const slashDeferDuration = api.consts.staking.slashDeferDuration
 
-    const slashEra = currentEra.toNumber() - slashDefferDuration.toNumber()
+    const slashEra = currentEra.toNumber() - slashDeferDuration.toNumber()
 
     const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
     const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
@@ -223,12 +227,13 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         (currentValidator, eventAccount) => {
             return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
         },
-        (validator, amount) => {
+        (validator, eventIdx, stash, amount) => {
 
             return {
-                eventIdx: slashEvent.idx,
+                eventIdx: eventIdx,
                 amount: amount,
                 isReward: false,
+                stash: stash,
                 validator: validator,
                 era: slashEra
             }
@@ -244,7 +249,7 @@ async function buildRewardEvents<A>(
     accountsMapping: {[address: string]: string},
     initialInnerAccumulator: A,
     produceNewAccumulator: (currentAccumulator: A, eventAccount: string) => A,
-    produceReward: (currentAccumulator: A, amount: string) => Reward
+    produceReward: (currentAccumulator: A, eventIdx: number, stash: string, amount: string) => Reward
 ) {
     let blockNumber = block.block.header.number.toString()
     let blockTimestamp = timestamp(block)
@@ -274,7 +279,7 @@ async function buildRewardEvents<A>(
                 element.extrinsicHash = extrinsic.extrinsic.hash.toString()
                 element.extrinsicIdx = extrinsic.idx
             }
-            element.reward = produceReward(newAccumulator, amount.toString())
+            element.reward = produceReward(newAccumulator, eventIndex, accountAddress, amount.toString())
 
             currentPromises.push(element.save())
 

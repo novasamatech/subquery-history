@@ -12,6 +12,7 @@ type Reward @jsonField {
   amount: String!
   isReward: Boolean!,
   era: Int,
+  stash: String,
   validator: String
 }
 
