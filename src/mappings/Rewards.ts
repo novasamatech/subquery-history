@@ -205,7 +205,9 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
     const currentEra = (await api.query.staking.currentEra()).unwrap()
     const slashDeferDuration = api.consts.staking.slashDeferDuration
 
-    const slashEra = currentEra.toNumber() - slashDeferDuration.toNumber()
+    const slashEra = slashDeferDuration == undefined 
+    ? currentEra.toNumber()
+    : currentEra.toNumber() - slashDeferDuration.toNumber()
 
     const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
     const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
