@@ -1,9 +1,9 @@
 specVersion: 0.0.1
-description: Fearless SubQuery project
-repository: 'https://github.com/ef1rspb/subquery-fearless'
+description: Nova SubQuery project
+repository: 'https://github.com/nova-wallet/subquery-nova'
 schema: ./schema.graphql
 network:
-  endpoint: 'https://kusama.api.onfinality.io/rpc?apikey=d74a87fc-b4f8-47bb-b17e-ed37cfaf24a1'
+  endpoint: 'wss://polkadot.api.onfinality.io/ws?apikey=1e0b7837-a5c7-4c85-b8ce-0239896c7de7'
 dataSources:
   - name: main
     kind: substrate/Runtime
