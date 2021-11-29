@@ -3,7 +3,7 @@ description: Nova SubQuery project
 repository: 'https://github.com/nova-wallet/subquery-nova'
 schema: ./schema.graphql
 network:
-  endpoint: 'wss://polkadot.api.onfinality.io/ws?apikey=1e0b7837-a5c7-4c85-b8ce-0239896c7de7'
+  endpoint: 'wss://rpc.polkadot.io'
 dataSources:
   - name: main
     kind: substrate/Runtime
