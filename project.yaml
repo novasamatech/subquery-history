@@ -6,9 +6,10 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
-  endpoint: wss://polkadot.api.onfinality.io/public-ws
-  dictionary: 'https://api.subquery.network/sq/subquery/dictionary-polkadot'
+  genesisHash: '0x64a1c658a48b2e70a7fb1ad4c39eea35022568c20fc44a6e2e3d0a57aee6053b'
+  endpoint: wss://heiko-rpc.parallel.fi
+  chaintypes:
+    file: './src/types.json'
 
 dataSources:
   - name: main
