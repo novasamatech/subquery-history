@@ -1,22 +1,21 @@
-specVersion: 0.0.1
+specVersion: 0.2.0
+name: nova
+version: 1.0.0
 description: Nova SubQuery project
-repository: 'https://github.com/nova-wallet/subquery-nova'
-schema: ./schema.graphql
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
 network:
-  endpoint: 'wss://rpc.polkadot.io'
+  genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
+  endpoint: wss://polkadot.api.onfinality.io/public-ws
+  dictionary: 'https://api.subquery.network/sq/subquery/dictionary-polkadot'
+
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
-
-    # polkadot test slash bloks: 3570179
-
-    # westend test stake block: 6000000
-    # kusama test stake block: 8124580
-    # polkadot test stake block: 5645004
-
-    # polkadot test rewards block: 5704983
     mapping:
+      file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
