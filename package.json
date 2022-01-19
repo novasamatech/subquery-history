@@ -23,7 +23,6 @@
     "@polkadot/api": "^6",
     "@subql/types": "^0.12.0",
     "typescript": "^4.1.3",
-    "@subql/cli": "^0.16.2",
-    "@kiltprotocol/type-definitions": "^0.1.23"
+    "@subql/cli": "^0.16.2"
   }
 }
