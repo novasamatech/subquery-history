@@ -34,7 +34,10 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
             return await api.query.staking.payee(accountAddress)
         }
 
-        const payees = await api.query.staking.payee.multi(allAccountsInBlock);
+        // TODO: Commented code doesn't work now, may be fixed later
+        // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
+        const payees = await api.queryMulti(allAccountsInBlock.map(account => ([api.query.staking.payee, account])));
+
         const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
 
         let destinationByAddress: {[address: string]: RewardDestination} = {}
@@ -94,7 +97,9 @@ export async function cachedController(accountAddress: string, event: SubstrateE
             return accountId.toString()
         }
 
-        const bonded = await api.query.staking.bonded.multi(controllerNeedAccounts);
+        // TODO: Commented code doesn't work now, may be fixed later
+        // const bonded = await api.query.staking.bonded.multi(controllerNeedAccounts);
+        const bonded = await api.queryMulti(controllerNeedAccounts.map(account => ([api.query.staking.bonded, account])));
         const controllers = bonded.map(bonded => { return bonded.toString() });
         
         let bondedByAddress: {[address: string]: string} = {}
