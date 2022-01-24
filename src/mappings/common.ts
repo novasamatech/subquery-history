@@ -54,7 +54,7 @@ export function extrinsicIdFromBlockAndIdx(blockNumber: number, extrinsicIdx: nu
 }
 
 export function timestamp(block: SubstrateBlock): bigint {
-    return BigInt(Math.round((block.timestamp.getTime() / 1000)))
+    return BigInt(Math.round(block.timestamp ? block.timestamp.getTime() / 1000 : -1))
 }
 
 export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
