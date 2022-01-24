@@ -75,24 +75,28 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
     let {event: {data: [accountId, amount]}} = event
     let accountAddress = accountId.toString()
 
-    const payee = await cachedRewardDestination(accountAddress, event)
-    if (payee.isStaked) {
-        let amountBalance = (amount as Balance).toBigInt()
-        let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
+    try {
+        const payee = await cachedRewardDestination(accountAddress, event)
+        if (payee.isStaked) {
+            let amountBalance = (amount as Balance).toBigInt()
+            let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 
-        const element = new StakeChange(eventId(event));
-        if (event.extrinsic !== undefined) {
-            element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+            const element = new StakeChange(eventId(event));
+            if (event.extrinsic !== undefined) {
+                element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
+            }
+            element.blockNumber = event.block.block.header.number.toNumber()
+            element.eventIdx = event.idx
+            element.timestamp = timestamp(event.block)
+            element.address = accountAddress
+            element.amount = amountBalance
+            element.accumulatedAmount = accumulatedAmount
+            element.type = "rewarded"
+
+            await element.save()
         }
-        element.blockNumber = event.block.block.header.number.toNumber()
-        element.eventIdx = event.idx
-        element.timestamp = timestamp(event.block)
-        element.address = accountAddress
-        element.amount = amountBalance
-        element.accumulatedAmount = accumulatedAmount
-        element.type = "rewarded"
-
-        await element.save()
+    } catch (e) {
+        logger.warn(e)
     }
 }
 
