@@ -73,30 +73,31 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
 
 export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Promise<void> {
     let {event: {data: [accountId, amount]}} = event
+
+    if (accountId.toRawType() === 'Balance') {
+        return
+    }
+
     let accountAddress = accountId.toString()
+    const payee = await cachedRewardDestination(accountAddress, event)
+    
+    if (payee.isStaked) {
+        let amountBalance = (amount as Balance).toBigInt()
+        let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 
-    try {
-        const payee = await cachedRewardDestination(accountAddress, event)
-        if (payee.isStaked) {
-            let amountBalance = (amount as Balance).toBigInt()
-            let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
-
-            const element = new StakeChange(eventId(event));
-            if (event.extrinsic !== undefined) {
-                element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
-            }
-            element.blockNumber = event.block.block.header.number.toNumber()
-            element.eventIdx = event.idx
-            element.timestamp = timestamp(event.block)
-            element.address = accountAddress
-            element.amount = amountBalance
-            element.accumulatedAmount = accumulatedAmount
-            element.type = "rewarded"
-
-            await element.save()
+        const element = new StakeChange(eventId(event));
+        if (event.extrinsic !== undefined) {
+            element.extrinsicHash = event.extrinsic?.extrinsic.hash.toString()
         }
-    } catch (e) {
-        logger.warn(e)
+        element.blockNumber = event.block.block.header.number.toNumber()
+        element.eventIdx = event.idx
+        element.timestamp = timestamp(event.block)
+        element.address = accountAddress
+        element.amount = amountBalance
+        element.accumulatedAmount = accumulatedAmount
+        element.type = "rewarded"
+
+        await element.save()
     }
 }
 
