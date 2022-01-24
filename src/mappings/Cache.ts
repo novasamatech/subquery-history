@@ -10,7 +10,7 @@ let controllersByStash: {[blockId: string]: {[address: string]: string}} = {}
 export async function cachedRewardDestination(accountAddress: string, event: SubstrateEvent): Promise<RewardDestination> {
     const blockId = blockNumber(event)
     let cachedBlock = rewardDestinationByAddress[blockId]
-    
+
     if (cachedBlock !== undefined) {
         return cachedBlock[accountAddress]
     } else {
@@ -36,9 +36,9 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
 
         const payees = await api.query.staking.payee.multi(allAccountsInBlock);
         const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
-        
+
         let destinationByAddress: {[address: string]: RewardDestination} = {}
-        
+
         // something went wrong, so just query for single accountAddress
         if (rewardDestinations.length !== allAccountsInBlock.length) {
             const payee = await api.query.staking.payee(accountAddress)

@@ -62,7 +62,7 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     element.blockNumber = blockNumber
     element.extrinsicHash = extrinsic.extrinsic.hash.toString()
     element.extrinsicIdx = extrinsicIdx
-    element.timestamp = timestamp(extrinsic.block)
+    element.timestamp = timestamp(extrinsic.block)    
     element.extrinsic = {
         hash: extrinsic.extrinsic.hash.toString(),
         module: extrinsic.extrinsic.method.section,
