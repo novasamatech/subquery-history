@@ -3,7 +3,7 @@ import {SubstrateExtrinsic} from "@subql/types";
 import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
-import { Vec } from '@polkadot/types';
+import { Vec, GenericEventData } from '@polkadot/types';
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -59,6 +59,11 @@ export function timestamp(block: SubstrateBlock): bigint {
 
 export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
     if (extrinsic) {
+        const withdrawFee = exportFeeFromBalancesWithdrawEvent(extrinsic)
+        if (withdrawFee !== BigInt(0)) {
+            return withdrawFee.toString();
+        }
+
         let balancesFee = exportFeeFromBalancesDepositEvent(extrinsic)
         let treasureFee = exportFeeFromTreasureDepositEvent(extrinsic)
 
@@ -67,6 +72,31 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
     } else {
         return BigInt(0).toString()
     } 
+}
+
+export function getEventData(event: SubstrateEvent): GenericEventData {
+    return event.event.data
+}
+
+function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic): bigint {
+    const eventRecord = extrinsic.events.find((event) => {
+        return event.event.method == "Withdraw" && event.event.section == "balances"
+    })
+    
+    if (eventRecord !== undefined) {
+        const {
+            event: {
+                data: [ accountid, fee ]
+            }
+        } = eventRecord
+
+        const extrinsicSigner = extrinsic.extrinsic.signer.toString()
+        const withdrawAccountId = accountid.toString()
+        
+        return extrinsicSigner === withdrawAccountId ? (fee as Balance).toBigInt() :  BigInt(0)
+    }
+
+    return BigInt(0)
 }
 
 function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigint {
@@ -78,9 +108,9 @@ function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigin
         const {event: {data: [, fee]}}= eventRecord
 
         return (fee as Balance).toBigInt()
-    } else  {
-        return BigInt(0)
     }
+
+    return BigInt(0)
 }
 
 function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigint {
