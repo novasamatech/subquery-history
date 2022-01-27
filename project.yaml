@@ -8,6 +8,8 @@ schema:
 network:
   genesisHash: '0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108'
   endpoint: wss://rpc.shiden.astar.network#
+  chaintypes:
+    file: ./dist/chaintypes.js
 
 dataSources:
   - name: main
