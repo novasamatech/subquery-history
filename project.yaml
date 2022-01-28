@@ -9,12 +9,12 @@ network:
   genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b'
   endpoint: wss://edgeware.api.onfinality.io/public-ws
   chaintypes:
-    file: './src/types.json'
+    file: ./dist/chaintypes.js
 
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 1000000
     mapping:
       file: ./dist/index.js
       handlers:
