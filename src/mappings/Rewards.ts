@@ -93,6 +93,10 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
             let {event: {data: [account, _]}} = eventRecord
             
+            if (account.toRawType() === 'Balance') {
+                return
+            }
+
             let accountAddress = account.toString()
             let rewardDestination = await cachedRewardDestination(accountAddress, eventRecord as SubstrateEvent)
 

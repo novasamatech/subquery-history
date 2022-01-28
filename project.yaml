@@ -19,6 +19,11 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleReward
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Reward
         - handler: handleRewarded
           kind: substrate/EventHandler
           filter:
