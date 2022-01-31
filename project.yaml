@@ -9,12 +9,12 @@ network:
   genesisHash: '0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755'
   endpoint: wss://basilisk.api.onfinality.io/public-ws
   chaintypes:
-    file: './src/types.json'
+    file: ./dist/chaintypes.js
 
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 129442
     mapping:
       file: ./dist/index.js
       handlers:
