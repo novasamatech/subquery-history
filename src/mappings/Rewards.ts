@@ -208,7 +208,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
     const eraWrapped = await api.query.staking.currentEra()
     let validatorsSet = new Set()
-    let slashEra
+    let slashEra = null
 
     if (eraWrapped.unwrap) {
         const currentEra = eraWrapped.unwrap()
@@ -227,7 +227,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         validatorsSet = new Set(validatorsInSlashEra)
     }
 
-    const initialValidator: string = ""
+    const initialValidator = null
 
     await buildRewardEvents(
         slashEvent.block,
@@ -240,7 +240,6 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
             return validatorsSet.has(eventAccount) ? eventAccount : currentValidator
         },
         (validator, eventIdx, stash, amount) => {
-
             return {
                 eventIdx: eventIdx,
                 amount: amount,
