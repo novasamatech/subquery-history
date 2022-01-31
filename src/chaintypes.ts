@@ -1,3 +1,12 @@
-import { spec } from '@edgeware/node-types';
+import { spec } from "@edgeware/node-types";
 
-export default spec;
+const RewardDestinationTo257 = {
+  "_enum": ["Staked", "Stashed", "Controller"]
+}
+export default {
+  types: {
+    RewardDestinationTo257,
+    Signature: '[u8; 60]',
+  },
+  ...spec
+};
