@@ -9,7 +9,7 @@ network:
   genesisHash: '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21'
   endpoint: wss://spiritnet.kilt.io/
   chaintypes:
-    file: './src/types.json'
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
