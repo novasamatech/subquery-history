@@ -25,5 +25,8 @@
     "typescript": "^4.1.3",
     "@subql/cli": "^0.16.2",
     "@edgeware/node-types": "^3.6.2-wako"
+  },
+  "exports": {
+    "chaintypes": "./src/chaintypes.ts"
   }
 }

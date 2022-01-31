@@ -75,6 +75,10 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
     let {event: {data: [accountId, amount]}} = event
     let accountAddress = accountId.toString()
 
+    if (accountId.toRawType() === 'Balance') {
+        return
+    }
+
     const payee = await cachedRewardDestination(accountAddress, event)
     if (payee.isStaked) {
         let amountBalance = (amount as Balance).toBigInt()
