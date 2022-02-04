@@ -6,15 +6,15 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed'
-  endpoint: wss://bifrost-rpc.liebi.com/ws
+  genesisHash: '0x9af9a64e6e4da8e3073901c3ff0cc4c3aad9563786d89daf6ad820b6e14a0b8b'
+  endpoint: wss://kintsugi.api.onfinality.io/public-ws
   chaintypes:
     file: './src/types.json'
 
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 2400
     mapping:
       file: ./dist/index.js
       handlers:
