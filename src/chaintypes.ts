@@ -1,39 +1,43 @@
-import definitions, { RpcFunctionDefinition } from "@interlay/interbtc-types";
 import { OverrideBundleType } from '@polkadot/types/types';
 
 const types = {
   types: [
     {
+      // on all versions
       minmax: [0, undefined],
-      types: definitions.types[0].types
+      types: {
+        Record: 'Vec<u8>',
+        Technics: 'Vec<u8>',
+        Economics: '{}',
+        Report: {
+          index: 'LiabilityIndex',
+          sender: 'AccountId',
+          payload: 'Vec<u8>',
+          signature: 'MultiSignature'
+        },
+        ReportFor: 'Report',
+        Agreement: {
+          technics: 'Technics',
+          economics: 'Economics',
+          promisee: 'AccountId',
+          promisor: 'AccountId',
+          promisee_signature: 'MultiSignature',
+          promisor_signature: 'MultiSignature'
+        },
+        LiabilityIndex: 'u32'
+      }
     }
-  ],
-  rpc: definitions.rpc,
-  instances: definitions.instances,
+  ]
 }
 
 const typesBundle: OverrideBundleType = {
   spec: {
-    interlay: types,
-    interbtc: types,
-    kintsugi: types
+    robonomics: types,
   },
 }
 
 export default {
   types: {
-    GenericMultiAddress: {
-      _enum: {
-        Id: 'AccountId',
-        Index: 'Compact<AccountIndex>',
-        Raw: 'Bytes',
-        Address32: 'H256',
-        Address20: 'H160'  
-      }
-    },
-    MultiAddress: "GenericMultiAddress",
-    Address: "MultiAddress",
-    LookupSource: "Address"
   },
   typesBundle
 };
