@@ -82,7 +82,7 @@ const types = {
 
 const typesBundle: OverrideBundleType = {
   spec: {
-    robonomics: types,
+    "encointer-parachain": types,
   },
 }
 
