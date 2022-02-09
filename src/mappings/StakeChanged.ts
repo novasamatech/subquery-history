@@ -73,9 +73,14 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
 
 export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Promise<void> {
     let {event: {data: [accountId, amount]}} = event
-    let accountAddress = accountId.toString()
 
+    if (accountId.toRawType() === 'Balance') {
+        return
+    }
+
+    let accountAddress = accountId.toString()
     const payee = await cachedRewardDestination(accountAddress, event)
+    
     if (payee.isStaked) {
         let amountBalance = (amount as Balance).toBigInt()
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
