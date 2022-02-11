@@ -17,6 +17,7 @@
   "author": "Jay Ji",
   "license": "Apache-2.0",
   "dependencies": {
+    "@zeitgeistpm/type-defs": "^0.4.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
