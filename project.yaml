@@ -6,10 +6,8 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x631ccc82a078481584041656af292834e1ae6daab61d2875b4dd0c14bb9b17bc'
-  endpoint: wss://kusama.rpc.robonomics.network
-  chaintypes:
-    file: './dist/chaintypes.js'
+  genesisHash: '0x6811a339673c9daa897944dcdac99c6e2939cc88245ed21951a0a3c9a2be75bc'
+  endpoint: wss://picasso-rpc.composable.finance
 
 dataSources:
   - name: main
