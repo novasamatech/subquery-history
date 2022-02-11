@@ -201,23 +201,24 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         // already processed reward previously
         return;
     }
-
-    const currentEra = (await api.query.staking.currentEra()).unwrap()
+    const eraWrapped = await api.query.staking.currentEra()
+    const currentEra = Number(eraWrapped.toString())
     const slashDeferDuration = api.consts.staking.slashDeferDuration
+    let validatorsSet = new Set()
 
-    const slashEra = slashDeferDuration == undefined 
-    ? currentEra.toNumber()
-    : currentEra.toNumber() - slashDeferDuration.toNumber()
+    const slashEra = !slashDeferDuration ? currentEra : currentEra - slashDeferDuration.toNumber()
 
-    const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
-    const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
-        let [, validatorId] = key.args
+    if (api.query.staking.erasStakersClipped) {
+        const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
+        const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
+            let [, validatorId] = key.args
 
-        return validatorId.toString()
-    })
-    const validatorsSet = new Set(validatorsInSlashEra)
+            return validatorId.toString()
+        })
+        validatorsSet = new Set(validatorsInSlashEra)
+    }
 
-    const initialValidator: string = ""
+    const initialValidator = null
 
     await buildRewardEvents(
         slashEvent.block,
