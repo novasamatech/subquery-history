@@ -9,7 +9,7 @@ network:
   genesisHash: '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b'
   endpoint: wss://moonriver.api.onfinality.io/public-ws
   chaintypes:
-    file: './src/types.yaml'
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
