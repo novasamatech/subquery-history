@@ -9,7 +9,7 @@ network:
   genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d'
   endpoint: wss://wss.api.moonbeam.network
   chaintypes:
-    file: './src/types.json'
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
