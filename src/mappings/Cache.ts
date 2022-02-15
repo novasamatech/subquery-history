@@ -1,6 +1,6 @@
 import {SubstrateEvent} from "@subql/types";
-import {blockNumber, eventId, timestamp} from "./common";
-import {Balance, AccountId} from "@polkadot/types/interfaces";
+import {blockNumber} from "./common";
+import {AccountId} from "@polkadot/types/interfaces";
 import {RewardDestination} from "@polkadot/types/interfaces/staking";
 
 // Due to memory consumption optimization `rewardDestinationByAddress` contains only one key
