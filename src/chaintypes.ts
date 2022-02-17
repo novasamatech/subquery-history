@@ -1,5 +1,14 @@
-import type { OverrideBundleDefinition } from '@polkadot/types/types';
-
+import type { OverrideBundleType } from '@polkadot/types/types';
 import { versionedKhala } from '@phala/typedefs';
 
-export default versionedKhala as OverrideBundleDefinition;
+const typesBundle: OverrideBundleType = {
+  spec: {
+    khala: {
+      types: versionedKhala
+    },
+  },
+}
+
+export default {
+  typesBundle
+};
