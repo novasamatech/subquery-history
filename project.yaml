@@ -9,7 +9,7 @@ network:
   genesisHash: '0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d'
   endpoint: wss://khala.api.onfinality.io/public-ws
   chaintypes:
-    file: './src/types.yaml'
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
