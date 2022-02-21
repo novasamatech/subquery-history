@@ -1,7 +1,7 @@
 {
-  "name": "fearless",
+  "name": "subquery-nova",
   "version": "1.0.0",
-  "description": "This is an example of using 1-N relations",
+  "description": "Nova SubQuery project",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -b",
