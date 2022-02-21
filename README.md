@@ -1,8 +1,6 @@
-# SubQuery Example - Entity relations
+# Nova SubQuery project
 
-This subquery indexes balance transfers between accounts, it is designed to demonstrate the many-to-many relationship within these entities.
- 
-This subquery also indexes the utility batchAll calls which are formated in tree structure, and we established an one-to-many relationship within those entities,  allow us to understand the actual actions of this extrinsic and know its position in the tree.
+This subquery project indexes balance transfers, staking and staking rewards for more than 29 substrate networks. 
 
 # Get Started
 ### 1. install dependencies
