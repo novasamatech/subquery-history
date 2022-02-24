@@ -1,9 +1,9 @@
 name: Deploy subquery production
 
 on:
-  push:
+  pull_request:
     branches:
-      - "master"
+      ['master']
 
 env:
   SUBQUERY_CLI_VERSION: 0.2.2
@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        chain: [nova-wallet-zeitgeist, nova-wallet-altair, nova-wallet-astar]
+        chain: [zeitgeist, altair, astar]
     steps:
       - uses: actions/checkout@v2
 
@@ -34,9 +34,9 @@ jobs:
         run: |
           subquery --token ${{ secrets.SUBQUERY_TOKEN }} deployment deploy \
             --org ${{ env.SUBQUERY_ORG }} \
-            --key ${{ matrix.chain }} \
+            --key nova-wallet-${{ matrix.chain }} \
             --branch ${{ steps.branch-name.outputs.current_branch }} \
-            --sub-folder subql/${{ matrix.chain }} \
+            --sub-folder networks/${{ matrix.chain }} \
             --type stage \
             --indexer-image-version v0.27.2-0 \
             --query-image-version v0.10.1-0
