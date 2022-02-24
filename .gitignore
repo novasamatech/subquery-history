@@ -5,3 +5,4 @@ src/types
 .idea
 .DS_Store
 yarn.lock
+.vscode
