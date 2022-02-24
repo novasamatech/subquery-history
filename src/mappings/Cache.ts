@@ -34,6 +34,12 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
             return await api.query.staking.payee(accountAddress)
         }
 
+        // TODO: Commented code doesn't work now, may be fixed later
+        // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
+        const payees = await api.queryMulti(allAccountsInBlock.map(account => ([api.query.staking.payee, account])));
+
+        const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
+        
         let destinationByAddress: {[address: string]: RewardDestination} = {}
 
         allAccountsInBlock.forEach((account, index) => { 
