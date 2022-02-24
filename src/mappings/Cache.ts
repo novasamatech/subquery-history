@@ -1,6 +1,6 @@
 import {SubstrateEvent} from "@subql/types";
-import {blockNumber, eventId, timestamp} from "./common";
-import {Balance, AccountId} from "@polkadot/types/interfaces";
+import {blockNumber} from "./common";
+import {AccountId} from "@polkadot/types/interfaces";
 import {RewardDestination} from "@polkadot/types/interfaces/staking";
 
 // Due to memory consumption optimization `rewardDestinationByAddress` contains only one key
@@ -34,24 +34,16 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
             return await api.query.staking.payee(accountAddress)
         }
 
-        // TODO: Commented code doesn't work now, may be fixed later
-        // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
-        const payees = await api.queryMulti(allAccountsInBlock.map(account => ([api.query.staking.payee, account])));
-
-        const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
-        
         let destinationByAddress: {[address: string]: RewardDestination} = {}
-        
-        // something went wrong, so just query for single accountAddress
-        if (rewardDestinations.length !== allAccountsInBlock.length) {
-            const payee = await api.query.staking.payee(accountAddress)
-            destinationByAddress[accountAddress] = payee
-            rewardDestinationByAddress[blockId] = destinationByAddress
-            return payee
-        }
+
         allAccountsInBlock.forEach((account, index) => { 
             let accountAddress = account.toString()
-            let rewardDestination = rewardDestinations[index]
+            // IMPORTANT: This is only Robonomics fix due to it has not Payee function, stash by default
+            let rewardDestination =  {
+                isStash: true,
+                type: 'Stash'
+            } as RewardDestination
+
             destinationByAddress[accountAddress] = rewardDestination
         })
         rewardDestinationByAddress[blockId] = destinationByAddress

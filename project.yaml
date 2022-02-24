@@ -6,9 +6,10 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
-  endpoint: wss://polkadot.api.onfinality.io/public-ws
-  dictionary: 'https://api.subquery.network/sq/subquery/dictionary-polkadot'
+  genesisHash: '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060'
+  endpoint: wss://rpc-0.zeitgeist.pm
+  chaintypes:
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
@@ -54,11 +55,21 @@ dataSources:
           filter:
             module: balances
             method: Transfer
-        - handler: handleTransferKeepAlive
+        - handler: handleAssetTransfer
           kind: substrate/EventHandler
           filter:
-            module: balances
-            method: transfer_keep_alive
+            module: assets
+            method: Transferred
+        - handler: handleCurrencyTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: currencies
+            method: Transferred
+        - handler: handleTokenTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: tokens
+            method: Transfer
         - handler: handleNewEra
           kind: substrate/EventHandler
           filter:
