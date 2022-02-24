@@ -1,7 +1,7 @@
 {
-  "name": "fearless",
+  "name": "subquery-nova",
   "version": "1.0.0",
-  "description": "This is an example of using 1-N relations",
+  "description": "Nova SubQuery project",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -b",
@@ -21,11 +21,11 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@zeitgeistpm/type-defs": "^0.4.0",
+    "@acala-network/type-definitions": "^4.0.1",
     "@polkadot/api": "^7",
+    "@subql/cli": "^0.21.0",
     "@subql/types": "^0.14.0",
-    "typescript": "^4.1.3",
-    "@subql/cli": "^0.21.0"
+    "typescript": "^4.1.3"
   },
   "exports": {
     "chaintypes": "./src/chaintypes.ts"

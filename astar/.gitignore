@@ -1,0 +1,7 @@
+node_modules
+dist
+src/types
+.data
+.idea
+.DS_Store
+yarn.lock
