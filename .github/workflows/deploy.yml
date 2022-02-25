@@ -26,9 +26,15 @@ jobs:
           curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ env.SUBQUERY_CLI_VERSION }}/subquery-linux-x86_64.zip
           unzip subquery-linux-x86_64.zip -d $HOME/.local/bin/
           rm -rf subquery-linux-x86_64.zip
+
+      - name: Copy file in --sub-folder
+        run: |
           scp -r src networks/${{ matrix.chain }}
           scp ./schema.graphql networks/${{ matrix.chain }}
           scp ./tsconfig.json networks/${{ matrix.chain }}
+          ls -lha
+          ls -lha networks/${{ matrix.chain }}
+
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v5.1
