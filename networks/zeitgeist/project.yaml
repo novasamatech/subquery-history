@@ -4,19 +4,19 @@ version: 1.0.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
-  file: ../../schema.graphql
+  file: ./schema.graphql
 network:
   genesisHash: '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060'
   endpoint: wss://rpc-0.zeitgeist.pm
   chaintypes:
-    file: '../../dist/chainTypes/zeitgeist/chaintypes.js'
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ../../dist/index.js
+      file: ./dist/src/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler

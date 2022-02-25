@@ -4,7 +4,7 @@ version: 1.0.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
-  file: ../../schema.graphql
+  file: ./schema.graphql
 network:
   genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6'
   endpoint: wss://rpc.astar.network
@@ -14,7 +14,7 @@ dataSources:
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ../../dist/index.js
+      file: ./dist/src/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler

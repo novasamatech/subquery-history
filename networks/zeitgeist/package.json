@@ -1,20 +1,13 @@
 {
-  "name": "subquery-nova",
+  "name": "subquery-nova-zeitgeist",
   "version": "1.0.0",
-  "description": "Nova SubQuery project",
-  "main": "dist/index.js",
+  "description": "Project for getting operation history fo Zeitgeist",
   "scripts": {
     "build": "tsc -b",
     "prepack": "rm -rf dist && npm build",
-    "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
     "codegen": "npx subql codegen"
   },
-  "files": [
-    "dist",
-    "schema.graphql",
-    "project.yaml"
-  ],
-  "author": "Jay Ji",
+  "author": "",
   "license": "Apache-2.0",
   "dependencies": {
     "@zeitgeistpm/type-defs": "^0.4.0",
@@ -25,8 +18,5 @@
     "@subql/cli": "^0.19.0",
     "@subql/types": "^0.13.0",
     "typescript": "^4.5.5"
-  },
-  "exports": {
-    "chaintypes": "./src/chaintypes.ts"
   }
 }

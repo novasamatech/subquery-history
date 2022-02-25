@@ -1,0 +1,21 @@
+{
+  "name": "subquery-nova-astar",
+  "version": "1.0.0",
+  "description": "Project for getting operation history fo Astar",
+  "scripts": {
+    "build": "tsc -b",
+    "prepack": "rm -rf dist && npm build",
+    "codegen": "npx subql codegen"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@polkadot/api": "^7",
+    "@subql/cli": "^0.19.0",
+    "@subql/types": "^0.13.0",
+    "typescript": "^4.5.5"
+  }
+}

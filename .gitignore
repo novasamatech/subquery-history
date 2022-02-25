@@ -6,3 +6,6 @@ src/types
 .DS_Store
 yarn.lock
 .vscode
+/**/src
+/**/schema.graphql
+/**/tsconfig.json
