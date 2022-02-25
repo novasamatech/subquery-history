@@ -14,7 +14,7 @@ dataSources:
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ../../dist/src/index.js
+      file: ../../dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
