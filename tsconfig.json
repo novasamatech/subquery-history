@@ -8,14 +8,13 @@
     "resolveJsonModule": true,
     "module": "commonjs",
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "src",
     "target": "es2020",
     "skipLibCheck": true,
     "strictNullChecks": false
   },
   "include": [
     "src/**/*",
-    "./chaintypes.ts",
     "node_modules/@subql/types/dist/global.d.ts"
   ]
 }
