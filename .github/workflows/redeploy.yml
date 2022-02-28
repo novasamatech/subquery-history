@@ -1,9 +1,6 @@
-name: Deploy subquery to stage
+name: Redeploy subquery to stage
 
-on:
-  pull_request:
-    branches:
-      ['master']
+on: [workflow_dispatch]
 
 env:
   SUBQUERY_CLI_VERSION: 0.2.2

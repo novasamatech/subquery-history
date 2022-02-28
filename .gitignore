@@ -6,4 +6,3 @@ src/types
 .DS_Store
 yarn.lock
 .vscode
-/**/src
