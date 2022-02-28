@@ -4,7 +4,7 @@
   "description": "Project for getting operation history fo Astar",
   "scripts": {
     "build": "tsc -b",
-    "prebuild": "scp -r ../../src ./ & scp ../../schema.graphql ./ & scp ../../tsconfig.json ./",
+    "prebuild": "scp -r ../../src ./ & scp ../../tsconfig.json ./",
     "prepack": "rm -rf dist && npm build",
     "codegen": "npx subql codegen",
     "validate": "./node_modules/.bin/subql validate"
