@@ -2,6 +2,7 @@
   "name": "subquery-nova-altair",
   "version": "1.0.0",
   "description": "Project for getting operation history fo Altair",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc -b",
     "prepack": "rm -rf dist && npm build",
