@@ -4,7 +4,7 @@
   "description": "Project for getting Altair operation history",
   "scripts": {
     "build": "tsc -b",
-    "prepack": "rm -rf dist && npm build",
+    "prebuild": "scp -r ../../src ./",
     "codegen": "npx subql codegen"
   },
   "author": "",
