@@ -4,8 +4,9 @@
   "description": "Project for getting operation history fo Altair",
   "scripts": {
     "build": "tsc -b",
-    "prebuild": "scp -r ../../src ./",
-    "codegen": "npx subql codegen"
+    "prepack": "rm -rf dist && npm build",
+    "codegen": "npx subql codegen",
+    "validate": "./node_modules/.bin/subql validate"
   },
   "author": "",
   "license": "Apache-2.0",
