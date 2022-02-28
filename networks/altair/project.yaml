@@ -16,7 +16,7 @@ dataSources:
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ./dist/index.js
+      file: ./networks/altair/dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
