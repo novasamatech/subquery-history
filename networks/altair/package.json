@@ -9,6 +9,11 @@
     "codegen": "npx subql codegen",
     "validate": "./node_modules/.bin/subql validate"
   },
+  "files": [
+    "dist",
+    "schema.graphql",
+    "project.yaml"
+  ],
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
