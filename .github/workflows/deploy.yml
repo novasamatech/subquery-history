@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        chain: [altair]
+        chain: [altair, astar]
     steps:
       - uses: actions/checkout@v2
 

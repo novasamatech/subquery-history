@@ -4,9 +4,16 @@
   "description": "Project for getting operation history fo Astar",
   "scripts": {
     "build": "tsc -b",
-    "prebuild": "scp -r ../../src ./",
-    "codegen": "npx subql codegen"
+    "prebuild": "scp -r ../../src ./ & scp ../../schema.graphql ./ & scp ../../tsconfig.json ./",
+    "prepack": "rm -rf dist && npm build",
+    "codegen": "npx subql codegen",
+    "validate": "./node_modules/.bin/subql validate"
   },
+  "files": [
+    "dist",
+    "schema.graphql",
+    "project.yaml"
+  ],
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
