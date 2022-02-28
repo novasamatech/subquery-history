@@ -1,13 +1,13 @@
 {
-  "name": "subquery-nova-altair",
+  "name": "subquery-nova",
   "version": "1.0.0",
-  "description": "Project for getting operation history fo Altair",
+  "description": "Nova SubQuery project",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -b",
-    "prebuild": "scp -r ../../src ./ & scp ../../tsconfig.json ./",
     "prepack": "rm -rf dist && npm build",
-    "codegen": "npx subql codegen",
+    "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
+    "codegen": "./node_modules/.bin/subql codegen",
     "validate": "./node_modules/.bin/subql validate"
   },
   "files": [
@@ -15,15 +15,18 @@
     "schema.graphql",
     "project.yaml"
   ],
-  "author": "",
+  "author": "Jay Ji",
   "license": "Apache-2.0",
   "dependencies": {
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@polkadot/api": "^7",
-    "@subql/cli": "^0.19.0",
-    "@subql/types": "^0.13.0",
-    "typescript": "^4.5.5"
+    "@subql/types": "^0.14.0",
+    "typescript": "^4.1.3",
+    "@subql/cli": "^0.21.0"
+  },
+  "exports": {
+    "chaintypes": "./src/chaintypes.ts"
   }
 }

@@ -12,8 +12,6 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import {u64} from "@polkadot/types";
 
 export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promise<void> {
-
-    logger.info("Current directory path is:" + __dirname)
     const { isSigned } = extrinsic.extrinsic;
     if (isSigned) {
         let failedTransfers = findFailedTransferCalls(extrinsic)
