@@ -1,6 +1,12 @@
 name: Redeploy subquery to stage
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+          version:
+            description: 'networks'
+            required: true
+            default: '[astar]'
 
 env:
   SUBQUERY_CLI_VERSION: 0.2.2
@@ -13,7 +19,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        chain: [zeitgeist, altair, astar]
+        chain: ${{ github.event.inputs.version }}
     steps:
       - uses: actions/checkout@v2
 
