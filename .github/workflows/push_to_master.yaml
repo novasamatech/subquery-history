@@ -3,7 +3,7 @@ name: Deploy subquery to stage
 on:
   pull_request:
     branches:
-      ['master']
+      ['common']
 
 env:
   SUBQUERY_CLI_VERSION: 0.2.2
