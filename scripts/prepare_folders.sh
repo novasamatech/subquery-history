@@ -1,3 +1,4 @@
+#!/bin/bash
 SCRIPT_PATH=$(dirname "$0")
 MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 
