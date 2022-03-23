@@ -1,5 +1,5 @@
 import { Codec } from "@polkadot/types/types";
-import { HistoryElement } from "../types";
+import { AssetTransfer, HistoryElement } from "../types";
 import { SubstrateEvent } from "@subql/types";
 import {
   blockNumber,
@@ -111,15 +111,28 @@ async function createTransfer({
     element.extrinsicIdx = event.extrinsic.idx;
   }
 
-  element.transfer = {
-    assetId,
-    amount: amount.toString(),
-    from: from.toString(),
-    to: to.toString(),
-    fee: calculateFeeAsString(event.extrinsic),
-    eventIdx: event.idx,
-    success: true,
-  };
+  if (assetId) {
+    const assetTransfer = new AssetTransfer(element.id);
+    assetTransfer.assetId = assetId;
+    assetTransfer.amount = amount.toString();
+    assetTransfer.from = from.toString();
+    assetTransfer.to = to.toString();
+    assetTransfer.fee = calculateFeeAsString(event.extrinsic);
+    assetTransfer.eventIdx = event.idx;
+    assetTransfer.success = true;
+    assetTransfer.save();
+
+    element.assetTransferId = assetTransfer.id
+  } else {
+    element.transfer = {
+      amount: amount.toString(),
+      from: from.toString(),
+      to: to.toString(),
+      fee: calculateFeeAsString(event.extrinsic),
+      eventIdx: event.idx,
+      success: true,
+    };  
+  }
 
   await element.save();
 }
