@@ -1,4 +1,5 @@
 type Transfer @jsonField {
+  assetId: String,
   amount: String!
   to: String!
   from: String!
@@ -65,7 +66,7 @@ type IndividualExposure @jsonField {
 type StakeChange @entity {
   id: ID!
   blockNumber: Int!
-  extrinsicHash: String!
+  extrinsicHash: String
   eventIdx: Int!
   timestamp: BigInt! @index
   address: String! @index
