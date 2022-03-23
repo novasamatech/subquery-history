@@ -35,7 +35,7 @@ jobs:
           subquery --token ${{ secrets.SUBQUERY_TOKEN }} deployment deploy \
             --org ${{ env.SUBQUERY_ORG }} \
             --key nova-wallet-${{ matrix.chain }} \
-            --branch ${{ steps.branch-name.outputs.current_branch }} \
+            --branch deploy \
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
             --indexer-image-version v0.29.1 \
