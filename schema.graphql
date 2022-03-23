@@ -7,9 +7,8 @@ type Transfer @jsonField {
   success: Boolean!
 }
 
-type AssetTransfer @entity {
-  id: ID!
-  assetId: String! @index
+type AssetTransfer @jsonField {
+  assetId: String!
   amount: String!
   to: String!
   from: String!

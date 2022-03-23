@@ -43,36 +43,14 @@ function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, s
     return historyElement
 }
 
-function objectToAssetTransfer(
-    id: string, 
-    { assetId, amount, to, from, fee, eventIdx, success }
-) {
-    const assetTransfer = new AssetTransfer(id)
-
-    assetTransfer.assetId = assetId;
-    assetTransfer.amount = amount;
-    assetTransfer.to = to;
-    assetTransfer.from = from;
-    assetTransfer.fee = fee;
-    assetTransfer.eventIdx = eventIdx;
-    assetTransfer.success = success;
-
-    assetTransfer.save()
-
-    return assetTransfer
-}
-
 async function saveFailedTransfers(transfers: Array<Transfer | AssetTransfer>, extrinsic: SubstrateExtrinsic): Promise<void> {
     let promises = transfers.map(transfer => {
         const elementFrom = createHistoryElement(extrinsic, transfer.from, `-from`);
         const elementTo = createHistoryElement(extrinsic, transfer.to, `-to`);
 
         if ('assetId' in transfer) {
-            const assetTransferFrom = objectToAssetTransfer(elementFrom.id, transfer)
-            elementFrom.assetTransferId = assetTransferFrom.id
-
-            const assetTransferTo = objectToAssetTransfer(elementTo.id, transfer)
-            elementTo.assetTransferId = assetTransferTo.id
+            elementFrom.assetTransfer = transfer
+            elementTo.assetTransfer = transfer
         } else {
             elementFrom.transfer = transfer
             elementTo.transfer = transfer
