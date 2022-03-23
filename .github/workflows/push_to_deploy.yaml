@@ -6,7 +6,7 @@ on:
       - 'deploy'
 
 env:
-  SUBQUERY_CLI_VERSION: 0.2.2
+  SUBQUERY_CLI_VERSION: 0.2.4
   SUBQUERY_ORG: nova-wallet
 
 jobs:
