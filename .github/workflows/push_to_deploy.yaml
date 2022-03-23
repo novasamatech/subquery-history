@@ -1,0 +1,43 @@
+name: Deploy subquery to stage
+
+on:
+  push:
+    branches:
+      - 'deploy'
+
+env:
+  SUBQUERY_CLI_VERSION: 0.2.2
+  SUBQUERY_ORG: nova-wallet
+
+jobs:
+  deploy-subquery:
+    name: Deploy subquery
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain: [acala, altair, astar, basilisk, bifrost]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          mkdir -p $HOME/.local/bin
+          curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ env.SUBQUERY_CLI_VERSION }}/subquery-linux-x86_64.zip
+          unzip subquery-linux-x86_64.zip -d $HOME/.local/bin/
+          rm -rf subquery-linux-x86_64.zip
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v5.1
+
+      - name: Deploy
+        run: |
+          subquery --token ${{ secrets.SUBQUERY_TOKEN }} deployment deploy \
+            --org ${{ env.SUBQUERY_ORG }} \
+            --key nova-wallet-${{ matrix.chain }} \
+            --branch deploy \
+            --sub-folder ./networks/${{ matrix.chain }} \
+            --type stage \
+            --indexer-image-version v0.29.1 \
+            --query-image-version v0.12.0 \
+            --force

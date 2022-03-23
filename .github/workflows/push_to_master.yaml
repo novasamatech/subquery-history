@@ -1,0 +1,44 @@
+name: Make pull request to deploy branch
+
+on: [pull_request]
+
+env:
+  SUBQUERY_CLI_VERSION: 0.2.2
+  SUBQUERY_ORG: nova-wallet
+
+jobs:
+  make_pr_to_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to current branch
+        uses: actions/checkout@master
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Prepare brach to commit
+        run: bash ./scripts/prepare_folders.sh
+
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add ./*
+          git commit -m "Prepare to pull request to deploy branch"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: refs/heads/update-deploy-${{github.run_number}}
+
+      - uses: repo-sync/pull-request@v2
+        name: pull-request
+        with:
+          source_branch: "update-deploy-${{github.run_number}}"
+          destination_branch: "deploy"
+          pr_title: "Update deploy branch"
+          pr_body: |
+              Update deploy branch
+          pr_reviewer: "stepanLav"
+          pr_draft: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
