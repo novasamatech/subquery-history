@@ -16,7 +16,7 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Prepare brach to commit
-        run: sh ./scripts/prepare_folders.sh
+        run: bash ./scripts/prepare_folders.sh
 
       - name: Commit files
         run: |
