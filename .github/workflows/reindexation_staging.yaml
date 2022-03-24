@@ -1,21 +1,33 @@
-name: Deploy subquery to stage (without reindex)
+name: Reindex staging
 
 on:
-  push:
-    branches:
-      - 'deploy'
+  workflow_dispatch:
+    inputs:
+      networks:
+        description: 'Which networks will reindex? Example input:"altair,astar"'
+        required: true
+        type: string
 
 env:
   SUBQUERY_CLI_VERSION: 0.2.4
   SUBQUERY_ORG: nova-wallet
 
 jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - id: set-matrix
+      run: echo "::set-output name=matrix::{\"chains\":[${{ github.event.inputs.networks }}]}"
+
   deploy-subquery:
+    needs: setup
     name: Deploy subquery
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        chain: [acala, altair, astar, basilisk, bifrost]
+      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
 
     steps:
       - uses: actions/checkout@v2
@@ -39,4 +51,5 @@ jobs:
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
             --indexer-image-version v0.29.1 \
-            --query-image-version v0.12.0
+            --query-image-version v0.12.0 \
+            --force
