@@ -2,10 +2,6 @@ name: Make pull request to deploy branch
 
 on: [pull_request]
 
-env:
-  SUBQUERY_CLI_VERSION: 0.2.2
-  SUBQUERY_ORG: nova-wallet
-
 jobs:
   create_pull_request:
     runs-on: ubuntu-latest
