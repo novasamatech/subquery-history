@@ -25,7 +25,6 @@ export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promi
     }
 }
 
-
 function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, suffix: string = '') {
     let extrinsicHash = extrinsic.extrinsic.hash.toString();
     let blockNumber = extrinsic.block.block.header.number.toNumber();
@@ -75,7 +74,7 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
 }
 
 /// Success Transfer emits Transfer event that is handled at Transfers.ts handleTransfer()
-function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | null {
+function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<Transfer | AssetTransfer> | null {
     if (extrinsic.success) {
         return null;
     }
@@ -86,19 +85,21 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Transfer[] | nu
     }
 
     let sender = extrinsic.extrinsic.signer
-    return transferCallsArgs.map(tuple => {
-        let blockNumber = extrinsic.block.block.header.number.toNumber();
-        return {
-            extrinsicHash: extrinsic.extrinsic.hash.toString(),
-            amount: tuple[1].toString(),
-            assetId: tuple[2],
+    return transferCallsArgs.map(([address, amount, assetId]) => {
+        const transfer: Transfer =  {
+            amount: amount.toString(),
             from: sender.toString(),
-            to: tuple[0],
-            blockNumber: blockNumber,
+            to: address,
             fee: calculateFeeAsString(extrinsic),
             eventIdx: -1,
             success: false
         }
+
+        if (assetId) {
+            (transfer as AssetTransfer).assetId = assetId
+        }
+
+        return transfer;
     })
 }
 
