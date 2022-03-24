@@ -111,25 +111,22 @@ async function createTransfer({
     element.extrinsicIdx = event.extrinsic.idx;
   }
 
+  const transfer = {
+    amount: amount.toString(),
+    from: from.toString(),
+    to: to.toString(),
+    fee: calculateFeeAsString(event.extrinsic),
+    eventIdx: event.idx,
+    success: true,
+  }
+
   if (assetId) {
     element.assetTransfer = {
+      ...transfer,
       assetId: assetId,
-      amount: amount.toString(),
-      from: from.toString(),
-      to: to.toString(),
-      fee: calculateFeeAsString(event.extrinsic),
-      eventIdx: event.idx,
-      success: true,
     };
   } else {
-    element.transfer = {
-      amount: amount.toString(),
-      from: from.toString(),
-      to: to.toString(),
-      fee: calculateFeeAsString(event.extrinsic),
-      eventIdx: event.idx,
-      success: true,
-    };
+    element.transfer = transfer
   }
 
   await element.save();
