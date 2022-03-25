@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chain: [acala, altair, astar, basilisk, bifrost, bit-country, calamari, centrifuge, clover, crab, edgeware]
+        chain: [acala, altair, astar, basilisk, bifrost, bit-country, calamari, centrifuge, clover, crab, edgeware, karura, statemine]
 
     steps:
       - uses: actions/checkout@v2
