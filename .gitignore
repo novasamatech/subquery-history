@@ -5,3 +5,8 @@ src/types
 .idea
 .DS_Store
 yarn.lock
+.venv
+.vscode
+__pycache__
+temporary
+.pytest_cache
