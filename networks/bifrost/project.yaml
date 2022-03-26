@@ -6,15 +6,17 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
-  endpoint: wss://statemine-rpc.polkadot.io
+  genesisHash: '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed'
+  endpoint: wss://bifrost-rpc.liebi.com/ws
+  chaintypes:
+    file: './BifrostTypes.json'
 
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ./dist/index.js
+      file: ./dist/src/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler

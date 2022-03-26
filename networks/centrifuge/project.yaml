@@ -6,15 +6,17 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
-  endpoint: wss://statemine-rpc.polkadot.io
+  genesisHash: '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82'
+  endpoint: wss://fullnode.parachain.centrifuge.io
+  chaintypes:
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ./dist/index.js
+      file: ./dist/src/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler

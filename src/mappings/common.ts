@@ -3,10 +3,11 @@ import {SubstrateExtrinsic} from "@subql/types";
 import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
-import { Vec } from '@polkadot/types';
+import { Vec, GenericEventData } from '@polkadot/types';
 
 const batchCalls = ["batch", "batchAll"]
-const transferCalls = ["transfer", "transferKeepAlive"]
+const transferCalls = ["transfer", "transferKeepAlive", "transferAll"]
+const ormlSections = ["currencies", "tokens"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
     return [...new Set(array)];
@@ -22,6 +23,14 @@ export function isProxy(call: CallBase<AnyTuple>) : boolean {
 
 export function isTransfer(call: CallBase<AnyTuple>) : boolean {
     return call.section == "balances" && transferCalls.includes(call.method)
+}
+
+export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "assets" && transferCalls.includes(call.method)
+}
+
+export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
+    return ormlSections.includes(call.section) && transferCalls.includes(call.method)
 }
 
 export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTuple>[] {
@@ -72,6 +81,10 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
     } else {
         return BigInt(0).toString()
     } 
+}
+
+export function getEventData(event: SubstrateEvent): GenericEventData {
+    return event.event.data
 }
 
 function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic): bigint {
