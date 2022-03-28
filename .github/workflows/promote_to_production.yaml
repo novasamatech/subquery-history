@@ -1,0 +1,58 @@
+name: Promote staging to production
+
+on:
+  workflow_dispatch:
+    inputs:
+      networks:
+        description: 'Which networks will promote? Example input:"altair,astar"'
+        required: true
+        type: string
+
+env:
+  SUBQUERY_CLI_VERSION: 0.2.4
+  SUBQUERY_ORG: nova-wallet
+
+jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - id: set-matrix
+      run: echo "::set-output name=matrix::{\"chains\":[${{ github.event.inputs.networks }}]}"
+
+  deploy-subquery:
+    needs: setup
+    name: Deploy subquery
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ./tests/requirements.txt
+          pip install -e .
+
+      - name: Check current stage status
+        run: python -m pytest ./tests/test_projects.py
+
+      - name: Install dependencies for promote
+        run: |
+          mkdir -p $HOME/.local/bin
+          curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ env.SUBQUERY_CLI_VERSION }}/subquery-linux-x86_64.zip
+          unzip subquery-linux-x86_64.zip -d $HOME/.local/bin/
+          rm -rf subquery-linux-x86_64.zip
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v5.1
+
+      - name: Promote to production
+        run: |
+          subquery --token ${{ secrets.SUBQUERY_TOKEN }} deployment promote \
+            --org ${{ env.SUBQUERY_ORG }} \
+            --key nova-wallet-${{ matrix.chain }}
