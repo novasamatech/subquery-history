@@ -21,7 +21,7 @@ export function isProxy(call: CallBase<AnyTuple>) : boolean {
     return call.section == "proxy" && call.method == "proxy"
 }
 
-export function isTransfer(call: CallBase<AnyTuple>) : boolean {
+export function isNativeTransfer(call: CallBase<AnyTuple>) : boolean {
     return (
         (call.section == "balances" && transferCalls.includes(call.method)) ||
         (call.section == "currencies" && call.method == "transferNativeCurrency")
@@ -36,7 +36,7 @@ export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
     return ormlSections.includes(call.section) && transferCalls.includes(call.method)
 }
 
-export function isTransferAll(call: CallBase<AnyTuple>) : boolean {
+export function isNativeTransferAll(call: CallBase<AnyTuple>) : boolean {
     return call.section == "balances" && call.method === "transferAll"
 }
 
