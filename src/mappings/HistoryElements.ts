@@ -1,19 +1,27 @@
 import {SubstrateExtrinsic} from '@subql/types';
 import {AssetTransfer, HistoryElement, Transfer} from "../types";
 import {
-    callFromProxy, callsFromBatch,
+    callFromProxy,
+    callsFromBatch,
     calculateFeeAsString,
-    extrinsicIdFromBlockAndIdx, isBatch, isProxy,
-    isTransfer,
+    extrinsicIdFromBlockAndIdx,
+    isBatch,
+    isProxy,
     timestamp,
+    isNativeTransfer,
     isAssetTransfer,
     isOrmlTransfer,
-    isTransferAll,
-    isOrmlTransferAll
+    isNativeTransferAll,
+    isOrmlTransferAll,
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {u64} from "@polkadot/types";
+
+type TransferData = {
+    isTransferAll: boolean,
+    transfer: Transfer | AssetTransfer,
+}
 
 export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promise<void> {
     const { isSigned } = extrinsic.extrinsic;
@@ -44,20 +52,28 @@ function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, s
     return historyElement
 }
 
-async function saveFailedTransfers(transfers: Array<Transfer | AssetTransfer>, extrinsic: SubstrateExtrinsic): Promise<void> {
-    let promises = transfers.map(transfer => {
-        const elementFrom = createHistoryElement(extrinsic, transfer.from, `-from`);
-        const elementTo = createHistoryElement(extrinsic, transfer.to, `-to`);
+function addTransferToHistoryElement(element: HistoryElement, transfer: Transfer | AssetTransfer) {
+    if ('assetId' in transfer) {
+        element.assetTransfer = transfer
+    } else {
+        element.transfer = transfer
+    }
+}
 
-        if ('assetId' in transfer) {
-            elementFrom.assetTransfer = transfer
-            elementTo.assetTransfer = transfer
-        } else {
-            elementFrom.transfer = transfer
-            elementTo.transfer = transfer
+async function saveFailedTransfers(transfers: Array<TransferData>, extrinsic: SubstrateExtrinsic): Promise<void> {
+    let promises = transfers.map(({ isTransferAll, transfer }) => {
+        const elementFrom = createHistoryElement(extrinsic, transfer.from, `-from`);
+        addTransferToHistoryElement(elementFrom, transfer)
+
+        // FIXME: Try to find more appropriate way to handle failed transferAll events
+        if (!isTransferAll) {
+            const elementTo = createHistoryElement(extrinsic, transfer.to, `-to`);
+            addTransferToHistoryElement(elementTo, transfer)
+
+            return [elementTo.save(), elementFrom.save()]
         }
 
-        return [elementTo.save(), elementFrom.save()]
+        return [elementFrom.save()]
     })
     await Promise.allSettled(promises)
 }
@@ -76,7 +92,7 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
 }
 
 /// Success Transfer emits Transfer event that is handled at Transfers.ts handleTransfer()
-function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<Transfer | AssetTransfer> | null {
+function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferData> | null {
     if (extrinsic.success) {
         return null;
     }
@@ -87,7 +103,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<Transfer 
     }
 
     let sender = extrinsic.extrinsic.signer
-    return transferCallsArgs.map(([address, amount, assetId]) => {
+    return transferCallsArgs.map(([isTransferAll, address, amount, assetId]) => {
         const transfer: Transfer =  {
             amount: amount.toString(),
             from: sender.toString(),
@@ -101,21 +117,24 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<Transfer 
             (transfer as AssetTransfer).assetId = assetId
         }
 
-        return transfer;
+        return {
+            isTransferAll,
+            transfer,
+        }
     })
 }
 
-function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [string, bigint, string?][] {
-    if (isTransfer(causeCall)) {
-        return [extractArgsFromTransfer(causeCall)]
+function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [boolean, string, bigint, string?][] {
+    if (isNativeTransfer(causeCall)) {
+        return [[false, ...extractArgsFromTransfer(causeCall)]]
     } else if (isAssetTransfer(causeCall)) {
-        return [extractArgsFromAssetTransfer(causeCall)]
+        return [[false, ...extractArgsFromAssetTransfer(causeCall)]]
     } else if (isOrmlTransfer(causeCall)) {
-        return [extractArgsFromOrmlTransfer(causeCall)]
-    } else if (isTransferAll(causeCall)) {
-        return [extractArgsFromTransferAll(causeCall)]
+        return [[false, ...extractArgsFromOrmlTransfer(causeCall)]]
+    } else if (isNativeTransferAll(causeCall)) {
+        return [[true, ...extractArgsFromTransferAll(causeCall)]]
     } else if (isOrmlTransferAll(causeCall)) {
-        return [extractArgsFromOrmlTransferAll(causeCall)]
+        return [[true, ...extractArgsFromOrmlTransferAll(causeCall)]]
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
