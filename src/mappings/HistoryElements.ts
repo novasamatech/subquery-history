@@ -7,7 +7,9 @@ import {
     isTransfer,
     timestamp,
     isAssetTransfer,
-    isOrmlTransfer
+    isOrmlTransfer,
+    isTransferAll,
+    isOrmlTransferAll
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -110,6 +112,10 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [string, bi
         return [extractArgsFromAssetTransfer(causeCall)]
     } else if (isOrmlTransfer(causeCall)) {
         return [extractArgsFromOrmlTransfer(causeCall)]
+    } else if (isTransferAll(causeCall)) {
+        return [extractArgsFromTransferAll(causeCall)]
+    } else if (isOrmlTransferAll(causeCall)) {
+        return [extractArgsFromOrmlTransferAll(causeCall)]
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
@@ -153,4 +159,18 @@ function extractArgsFromOrmlTransfer(call: CallBase<AnyTuple>): [string, bigint,
     ]
 }
 
+function extractArgsFromTransferAll(call: CallBase<AnyTuple>): [string, bigint] {
+    const [destinationAddress] = call.args
 
+    return [destinationAddress.toString(), BigInt(0)]
+}
+
+function extractArgsFromOrmlTransferAll(call: CallBase<AnyTuple>): [string, bigint, string] {
+    const [destinationAddress, currencyId] = call.args
+
+    return [
+        destinationAddress.toString(),
+        BigInt(0),
+        currencyId.toHex().toString()
+    ]
+}
