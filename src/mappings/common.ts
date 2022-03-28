@@ -6,7 +6,7 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
 
 const batchCalls = ["batch", "batchAll"]
-const transferCalls = ["transfer", "transferKeepAlive", "transferAll"]
+const transferCalls = ["transfer", "transferKeepAlive"]
 const ormlSections = ["currencies", "tokens"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
@@ -21,8 +21,27 @@ export function isProxy(call: CallBase<AnyTuple>) : boolean {
     return call.section == "proxy" && call.method == "proxy"
 }
 
-export function isTransfer(call: CallBase<AnyTuple>) : boolean {
-    return call.section == "balances" && transferCalls.includes(call.method)
+export function isNativeTransfer(call: CallBase<AnyTuple>) : boolean {
+    return (
+        (call.section == "balances" && transferCalls.includes(call.method)) ||
+        (call.section == "currencies" && call.method == "transferNativeCurrency")
+    )
+}
+
+export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "assets" && transferCalls.includes(call.method)
+}
+
+export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
+    return ormlSections.includes(call.section) && transferCalls.includes(call.method)
+}
+
+export function isNativeTransferAll(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "balances" && call.method === "transferAll"
+}
+
+export function isOrmlTransferAll(call: CallBase<AnyTuple>) : boolean {
+    return ormlSections.includes(call.section) && call.method === "transferAll"
 }
 
 export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
