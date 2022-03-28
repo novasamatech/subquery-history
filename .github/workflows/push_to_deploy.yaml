@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chain: [acala, altair, astar, basilisk, bifrost, bit-country, calamari, centrifuge, clover, crab, edgeware, karura, statemine]
+        chain: [acala, altair, astar, basilisk, bifrost, bit-country, calamari, centrifuge, clover, crab, edgeware, encointer, integritee, interlay, karura, khala, kico, kilt, kintsugi, litmus, moonbeam, moonriver, parallel, parallel-heiko, picasso, quartz, robonomics, shadow, shiden, statemine, statemint, subsocial, zeitgeist]
 
     steps:
       - uses: actions/checkout@v2
@@ -39,4 +39,5 @@ jobs:
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
             --indexer-image-version v0.29.1 \
-            --query-image-version v0.12.0
+            --query-image-version v0.12.0 \
+            --force
