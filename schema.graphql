@@ -7,6 +7,16 @@ type Transfer @jsonField {
   success: Boolean!
 }
 
+type AssetTransfer @jsonField {
+  assetId: String!
+  amount: String!
+  to: String!
+  from: String!
+  fee: String!
+  eventIdx: Int!
+  success: Boolean!
+}
+
 type Reward @jsonField {
   eventIdx: Int!
   amount: String!
@@ -33,12 +43,13 @@ type HistoryElement @entity {
   id: ID!
   blockNumber: Int!
   extrinsicIdx: Int
-  extrinsicHash: String!
+  extrinsicHash: String
   timestamp: BigInt! @index
   address: String! @index
   reward: Reward
   extrinsic: Extrinsic
   transfer: Transfer
+  assetTransfer: AssetTransfer
 }
 
 type EraValidatorInfo @entity {
@@ -65,7 +76,7 @@ type IndividualExposure @jsonField {
 type StakeChange @entity {
   id: ID!
   blockNumber: Int!
-  extrinsicHash: String!
+  extrinsicHash: String
   eventIdx: Int!
   timestamp: BigInt! @index
   address: String! @index
