@@ -39,5 +39,4 @@ jobs:
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
             --indexer-image-version v0.29.1 \
-            --query-image-version v0.12.0 \
-            --force
+            --query-image-version v0.12.0
