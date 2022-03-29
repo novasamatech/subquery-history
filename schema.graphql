@@ -48,6 +48,16 @@ type AssetTransfer @jsonField {
   success: Boolean!
 }
 
+type AssetTransfer @jsonField {
+  assetId: String!
+  amount: String!
+  to: String!
+  from: String!
+  fee: String!
+  eventIdx: Int!
+  success: Boolean!
+}
+
 type Reward @jsonField {
   eventIdx: Int!
   amount: String!

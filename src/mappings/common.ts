@@ -44,14 +44,6 @@ export function isOrmlTransferAll(call: CallBase<AnyTuple>) : boolean {
     return ormlSections.includes(call.section) && call.method === "transferAll"
 }
 
-export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
-    return call.section == "assets" && transferCalls.includes(call.method)
-}
-
-export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
-    return ormlSections.includes(call.section) && transferCalls.includes(call.method)
-}
-
 export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTuple>[] {
     return batchCall.args[0] as Vec<CallBase<AnyTuple>>
 }
