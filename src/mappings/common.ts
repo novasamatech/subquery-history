@@ -32,6 +32,14 @@ export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
     return call.section == "assets" && transferCalls.includes(call.method)
 }
 
+export function isEvmTransaction(call: CallBase<AnyTuple>): boolean {
+    return call.section === "ethereum" && call.method === "transact"
+}
+
+export function isEvmExecutedEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'ethereum' && event.event.method === "Executed"
+}
+
 export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
     return ormlSections.includes(call.section) && transferCalls.includes(call.method)
 }

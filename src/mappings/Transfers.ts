@@ -7,6 +7,8 @@ import {
   calculateFeeAsString,
   timestamp,
   getEventData,
+  isEvmTransaction,
+  isEvmExecutedEvent
 } from "./common";
 
 type TransferPayload = {
@@ -107,8 +109,14 @@ async function createTransfer({
   element.timestamp = timestamp(event.block);
   element.blockNumber = blockNumber(event);
   if (event.extrinsic !== undefined) {
-    element.extrinsicHash = event.extrinsic.extrinsic.hash.toString();
-    element.extrinsicIdx = event.extrinsic.idx;
+    if (isEvmTransaction(event.extrinsic.extrinsic.method) && event.idx === 250 && event.extrinsic.extrinsic.hash.toString() === "0x52e14d272d378cee198b0774fa1e6fb7ccf3f16611e31c18defee37aa501c188") {
+      const executedEvent = event.extrinsic.events.find(isEvmExecutedEvent)
+      element.extrinsicHash = executedEvent?.event.data?.[2]?.toString() || event.extrinsic.extrinsic.hash.toString();
+    } else {
+      element.extrinsicHash = event.extrinsic.extrinsic.hash.toString();
+    }
+
+    element.extrinsicIdx = event.extrinsic.idx;  
   }
 
   const transfer = {
