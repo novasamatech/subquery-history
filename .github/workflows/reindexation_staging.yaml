@@ -4,13 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       networks:
-        description: 'Which networks will reindex? Example input:"altair,astar"'
+        description: 'Which networks will reindex?'
         required: true
         type: string
 
 env:
-  SUBQUERY_CLI_VERSION: 0.2.4
+  SUBQUERY_CLI_VERSION: 0.2.5
   SUBQUERY_ORG: nova-wallet
+  INDEXER_IMAGE_VERSION: v0.31.1
+  QUERY_IMAGE_VERSION: v0.13.0
 
 jobs:
 
@@ -20,13 +22,37 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
     - id: set-matrix
-      run: echo "::set-output name=matrix::{\"chains\":[${{ github.event.inputs.networks }}]}"
+      run: |
+        list_elements=(${{ github.event.inputs.networks }})
+        JSON="{\"include\":["
+
+        for item in ${list_elements[*]}
+        do
+            JSONline="{\"chain\": \"$item\"},"
+
+            if [[ "$JSON" != *"$JSONline"* ]]; then
+                JSON="$JSON$JSONline"
+            fi
+            echo $item
+        done <<< "$DIFF"
+
+        # Remove last "," and add closing brackets
+        if [[ $JSON == *, ]]; then
+          JSON="${JSON%?}"
+        fi
+        JSON="$JSON]}"
+        echo $JSON
+
+        echo "::set-output name=matrix::$( echo "$JSON" )"
+
 
   deploy-subquery:
     needs: setup
     name: Deploy subquery
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
+      max-parallel: 10
       matrix: ${{fromJson(needs.setup.outputs.matrix)}}
 
     steps:
@@ -50,6 +76,7 @@ jobs:
             --branch deploy \
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
-            --indexer-image-version v0.29.1 \
-            --query-image-version v0.12.0 \
+            --indexer-image-version ${{ env.INDEXER_IMAGE_VERSION }} \
+            --query-image-version ${{ env.QUERY_IMAGE_VERSION }} \
+            --indexer-batch-size 10 \
             --force

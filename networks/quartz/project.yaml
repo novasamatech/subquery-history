@@ -8,6 +8,7 @@ schema:
 network:
   genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554'
   endpoint: wss://us-ws-quartz.unique.network
+  dictionary: https://api.subquery.network/sq/subquery/quartz-dictionary
 
 dataSources:
   - name: main

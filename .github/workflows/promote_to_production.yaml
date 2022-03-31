@@ -4,13 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       networks:
-        description: 'Which networks will promote? Example input:"altair,astar"'
+        description: 'Which networks will promote?'
         required: true
         type: string
 
 env:
-  SUBQUERY_CLI_VERSION: 0.2.4
+  SUBQUERY_CLI_VERSION: 0.2.5
   SUBQUERY_ORG: nova-wallet
+  SUBQUERY_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
+
 
 jobs:
 
@@ -20,14 +22,39 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
     - id: set-matrix
-      run: echo "::set-output name=matrix::{\"chains\":[${{ github.event.inputs.networks }}]}"
+      run: |
+        list_elements=(${{ github.event.inputs.networks }})
+        JSON="{\"include\":["
+
+        for item in ${list_elements[*]}
+        do
+            JSONline="{\"chain\": \"$item\"},"
+
+            if [[ "$JSON" != *"$JSONline"* ]]; then
+                JSON="$JSON$JSONline"
+            fi
+            echo $item
+        done <<< "$DIFF"
+
+        # Remove last "," and add closing brackets
+        if [[ $JSON == *, ]]; then
+          JSON="${JSON%?}"
+        fi
+        JSON="$JSON]}"
+        echo $JSON
+
+        echo "::set-output name=matrix::$( echo "$JSON" )"
 
   deploy-subquery:
     needs: setup
     name: Deploy subquery
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
+      max-parallel: 10
       matrix: ${{fromJson(needs.setup.outputs.matrix)}}
+    env:
+      PROJECT_KEY: nova-wallet-${{ matrix.chain }}
 
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +63,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r ./tests/requirements.txt
-          pip install -e .
 
       - name: Check current stage status
         run: python -m pytest ./tests/test_projects.py

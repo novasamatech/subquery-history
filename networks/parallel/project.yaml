@@ -8,6 +8,7 @@ schema:
 network:
   genesisHash: '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97'
   endpoint: wss://rpc.parallel.fi
+  dictionary: https://api.subquery.network/sq/subquery/parallel-dictionary
 
 dataSources:
   - name: main

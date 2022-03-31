@@ -6,16 +6,52 @@ on:
       - 'deploy'
 
 env:
-  SUBQUERY_CLI_VERSION: 0.2.4
+  SUBQUERY_CLI_VERSION: 0.2.5
   SUBQUERY_ORG: nova-wallet
+  INDEXER_IMAGE_VERSION: v0.31.1
+  QUERY_IMAGE_VERSION: v0.13.0
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v2
+
+    - id: set-matrix
+      run: |
+        folders=($(ls ./networks))
+
+        JSON="{\"include\":["
+
+        for item in ${folders[*]}
+        do
+            JSONline="{\"chain\": \"$item\"},"
+
+            if [[ "$JSON" != *"$JSONline"* ]]; then
+                JSON="$JSON$JSONline"
+            fi
+            echo $item
+        done <<< "$DIFF"
+
+        # Remove last "," and add closing brackets
+        if [[ $JSON == *, ]]; then
+          JSON="${JSON%?}"
+        fi
+        JSON="$JSON]}"
+        echo $JSON
+
+        echo "::set-output name=matrix::$( echo "$JSON" )"
+
   deploy-subquery:
+    needs: setup
     name: Deploy subquery
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        chain: [acala, altair, astar, basilisk, bifrost, bit-country, calamari, centrifuge, clover, crab, edgeware, encointer, integritee, interlay, karura, khala, kico, kilt, kintsugi, litmus, moonbeam, moonriver, parallel, parallel-heiko, picasso, quartz, robonomics, shadow, shiden, statemine, statemint, subsocial, zeitgeist]
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{fromJson(needs.setup.outputs.matrix)}}
 
     steps:
       - uses: actions/checkout@v2
@@ -38,5 +74,6 @@ jobs:
             --branch deploy \
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
-            --indexer-image-version v0.29.1 \
-            --query-image-version v0.12.0
+            --indexer-image-version ${{ env.INDEXER_IMAGE_VERSION }} \
+            --query-image-version ${{ env.QUERY_IMAGE_VERSION }} \
+            --indexer-batch-size 10
