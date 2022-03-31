@@ -6,11 +6,8 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
-  endpoint: wss://acala-rpc-0.aca-api.network
-  dictionary: https://api.subquery.network/sq/subquery/acala-dictionary
-  chaintypes:
-    file: './dist/chaintypes.js'
+  genesisHash: '0x67f9723393ef76214df0118c34bbbd3dbebc8ed46a10973a8c969d48fe7598c9'
+  endpoint: wss://westmint-rpc.polkadot.io
 
 dataSources:
   - name: main
@@ -56,21 +53,11 @@ dataSources:
           filter:
             module: balances
             method: Transfer
-        - handler: handleAssetTransfer
+        - handler: handleTransferKeepAlive
           kind: substrate/EventHandler
           filter:
-            module: assets
-            method: Transferred
-        - handler: handleCurrencyTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: currencies
-            method: Transferred
-        - handler: handleTokenTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: tokens
-            method: Transfer
+            module: balances
+            method: transfer_keep_alive
         - handler: handleNewEra
           kind: substrate/EventHandler
           filter:

@@ -6,16 +6,15 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
-  endpoint: wss://acala-rpc-0.aca-api.network
-  dictionary: https://api.subquery.network/sq/subquery/acala-dictionary
+  genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8'
+  endpoint: wss://rpc.subsocial.network
   chaintypes:
     file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 500
     mapping:
       file: ./dist/src/index.js
       handlers:
