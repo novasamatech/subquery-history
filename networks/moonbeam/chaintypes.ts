@@ -1,3 +1,5 @@
-import { typesBundleDeprecated } from "moonbeam-types-bundle";
+import { typesBundlePre900 } from "moonbeam-types-bundle";
 
-export default { typesBundle: typesBundleDeprecated };
+export default {
+  typesBundle: typesBundlePre900
+};
