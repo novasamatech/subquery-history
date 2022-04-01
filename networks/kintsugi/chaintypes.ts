@@ -19,9 +19,5 @@ const typesBundle: OverrideBundleType = {
 };
 
 export default {
-  types: {
-    AccountId32: "[u8; 32]",
-    Address: "AccountId32",
-  },
   typesBundle,
 };
