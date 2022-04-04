@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 10
+      max-parallel: 5
       matrix: ${{fromJson(needs.setup.outputs.matrix)}}
 
     steps:
@@ -78,5 +78,5 @@ jobs:
             --type stage \
             --indexer-image-version ${{ env.INDEXER_IMAGE_VERSION }} \
             --query-image-version ${{ env.QUERY_IMAGE_VERSION }} \
-            --indexer-batch-size 10 \
+            --indexer-batch-size 15 \
             --force
