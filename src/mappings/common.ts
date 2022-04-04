@@ -3,10 +3,11 @@ import {SubstrateExtrinsic} from "@subql/types";
 import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
-import { Vec } from '@polkadot/types';
+import { Vec, GenericEventData } from '@polkadot/types';
 
 const batchCalls = ["batch", "batchAll"]
 const transferCalls = ["transfer", "transferKeepAlive"]
+const ormlSections = ["currencies", "tokens"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
     return [...new Set(array)];
@@ -20,8 +21,35 @@ export function isProxy(call: CallBase<AnyTuple>) : boolean {
     return call.section == "proxy" && call.method == "proxy"
 }
 
-export function isTransfer(call: CallBase<AnyTuple>) : boolean {
-    return call.section == "balances" && transferCalls.includes(call.method)
+export function isNativeTransfer(call: CallBase<AnyTuple>) : boolean {
+    return (
+        (call.section == "balances" && transferCalls.includes(call.method)) ||
+        (call.section == "currencies" && call.method == "transferNativeCurrency")
+    )
+}
+
+export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "assets" && transferCalls.includes(call.method)
+}
+
+export function isEvmTransaction(call: CallBase<AnyTuple>): boolean {
+    return call.section === "ethereum" && call.method === "transact"
+}
+
+export function isEvmExecutedEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'ethereum' && event.event.method === "Executed"
+}
+
+export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
+    return ormlSections.includes(call.section) && transferCalls.includes(call.method)
+}
+
+export function isNativeTransferAll(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "balances" && call.method === "transferAll"
+}
+
+export function isOrmlTransferAll(call: CallBase<AnyTuple>) : boolean {
+    return ormlSections.includes(call.section) && call.method === "transferAll"
 }
 
 export function callsFromBatch(batchCall: CallBase<AnyTuple>) : CallBase<AnyTuple>[] {
@@ -54,7 +82,7 @@ export function extrinsicIdFromBlockAndIdx(blockNumber: number, extrinsicIdx: nu
 }
 
 export function timestamp(block: SubstrateBlock): bigint {
-    return BigInt(Math.round((block.timestamp.getTime() / 1000)))
+    return BigInt(Math.round(block.timestamp ? block.timestamp.getTime() / 1000 : -1))
 }
 
 export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
@@ -72,6 +100,10 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic): string {
     } else {
         return BigInt(0).toString()
     } 
+}
+
+export function getEventData(event: SubstrateEvent): GenericEventData {
+    return event.event.data
 }
 
 function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic): bigint {

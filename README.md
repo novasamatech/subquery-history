@@ -1,26 +1,18 @@
-# SubQuery Example - Entity relations
+# SubQuery Nova projects
 
-This subquery indexes balance transfers between accounts, it is designed to demonstrate the many-to-many relationship within these entities.
- 
-This subquery also indexes the utility batchAll calls which are formated in tree structure, and we established an one-to-many relationship within those entities,  allow us to understand the actual actions of this extrinsic and know its position in the tree.
+This repo contains implementation of [SubQuery](https://github.com/subquery/subql) project for many substrate projects which support Nova-wallet.
 
 # Get Started
-### 1. install dependencies
+### 1. Run script for prepare project to run
 ```shell
-yarn
+sh ./scripts/prepare_folders.sh
+```
+### 2. For local run you can use special script in each network directory
+```shell
+sh ./networks/${network}/local-runner.sh
 ```
 
-### 2. generate types
+### For clear project
 ```shell
-yarn codegen
-```
-
-### 3. build
-```shell
-yarn build
-```
-
-### 4. run locally
-```shell
-yarn start:docker
+sh ./scripts/clear_folders.sh
 ```
