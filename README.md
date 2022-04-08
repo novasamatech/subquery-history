@@ -7,6 +7,7 @@ This repo contains implementation of [SubQuery](https://github.com/subquery/subq
 ```shell
 sh ./scripts/prepare_folders.sh
 ```
+
 ### 2. For local run you can use special script in each network directory
 ```shell
 sh ./networks/${network}/local-runner.sh
