@@ -1,24 +1,18 @@
-# Nova SubQuery project
+# SubQuery Nova projects
 
-This subquery project indexes balance transfers, staking and staking rewards for more than 29 substrate networks. 
+This repo contains implementation of [SubQuery](https://github.com/subquery/subql) project for many substrate projects which support Nova-wallet.
 
 # Get Started
-### 1. install dependencies
+### 1. Run script for prepare project to run
 ```shell
-yarn
+sh ./scripts/prepare_folders.sh
+```
+### 2. For local run you can use special script in each network directory
+```shell
+sh ./networks/${network}/local-runner.sh
 ```
 
-### 2. generate types
+### For clear project
 ```shell
-yarn codegen
-```
-
-### 3. build
-```shell
-yarn build
-```
-
-### 4. run locally
-```shell
-yarn start:docker
+sh ./scripts/clear_folders.sh
 ```
