@@ -1,9 +1,7 @@
 name: Deploy subquery to stage (without reindex)
 
 on:
-  push:
-    branches:
-      - 'deploy'
+  workflow_dispatch
 
 env:
   SUBQUERY_CLI_VERSION: 0.2.5
