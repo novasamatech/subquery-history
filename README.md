@@ -1,6 +1,6 @@
 # SubQuery Nova projects
 
-This repo contains implementation of [SubQuery](https://github.com/subquery/subql) project for many substrate projects which support Nova-wallet.
+This repo contains implementation of [SubQuery](https://github.com/subquery/subql) project for many substrate networks which Nova-wallet supports.
 
 # Get Started
 ### 1. Run script for prepare project to run
