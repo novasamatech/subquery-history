@@ -1,9 +1,9 @@
-name: Make pull request to deploy branch
+name: Make pull request to deploy branch after push to master
 
 on:
   push:
     branches:
-      - 'deploy'
+      - 'master'
 
 jobs:
   create_pull_request:
