@@ -10,7 +10,6 @@ import {
   isEvmTransaction,
   isEvmExecutedEvent
 } from "./common";
-import { IS_EVM } from '../../config'
 
 type TransferPayload = {
   event: SubstrateEvent;
@@ -110,7 +109,7 @@ async function createTransfer({
   element.timestamp = timestamp(event.block);
   element.blockNumber = blockNumber(event);
   if (event.extrinsic !== undefined) {
-    if (IS_EVM && isEvmTransaction(event.extrinsic.extrinsic.method)) {
+    if (isEvmTransaction(event.extrinsic.extrinsic.method)) {
       const executedEvent = event.extrinsic.events.find(isEvmExecutedEvent)
       element.extrinsicHash = executedEvent?.event.data?.[2]?.toString() || event.extrinsic.extrinsic.hash.toString();
     } else {

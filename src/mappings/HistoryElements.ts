@@ -19,7 +19,6 @@ import {
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {u64} from "@polkadot/types";
-import { IS_EVM } from '../../config';
 
 type TransferData = {
     isTransferAll: boolean,
@@ -36,7 +35,7 @@ export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promi
         } else {
             await saveExtrinsic(extrinsic)
         }
-    } else if (IS_EVM && isEvmTransaction(extrinsic.extrinsic.method) && extrinsic.success) {
+    } else if (isEvmTransaction(extrinsic.extrinsic.method) && extrinsic.success) {
         await saveEvmExtrinsic(extrinsic)
     }
 }
