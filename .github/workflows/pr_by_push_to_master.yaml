@@ -38,7 +38,7 @@ jobs:
       - name: Checkout to deploy branch
         uses: actions/checkout@master
         with:
-          ref: refs/heads/deploy
+          path: deploy
 
       - name: Merge master to deploy
         run: |
