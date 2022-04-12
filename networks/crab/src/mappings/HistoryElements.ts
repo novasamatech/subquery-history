@@ -13,6 +13,8 @@ import {
     isOrmlTransfer,
     isNativeTransferAll,
     isOrmlTransferAll,
+    isEvmTransaction,
+    isEvmExecutedEvent,
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -32,11 +34,13 @@ export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promi
         } else {
             await saveExtrinsic(extrinsic)
         }
+    } else if (isEvmTransaction(extrinsic.extrinsic.method) && extrinsic.success) {
+        await saveEvmExtrinsic(extrinsic)
     }
 }
 
-function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, suffix: string = '') {
-    let extrinsicHash = extrinsic.extrinsic.hash.toString();
+function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, suffix: string = '', hash?: string) {
+    let extrinsicHash = hash || extrinsic.extrinsic.hash.toString();
     let blockNumber = extrinsic.block.block.header.number.toNumber();
     let extrinsicIdx = extrinsic.idx
     let extrinsicId = extrinsicIdFromBlockAndIdx(blockNumber, extrinsicIdx)
@@ -78,7 +82,7 @@ async function saveFailedTransfers(transfers: Array<TransferData>, extrinsic: Su
     await Promise.allSettled(promises)
 }
 
-async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {    
+async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     const element = createHistoryElement(extrinsic, extrinsic.extrinsic.signer.toString())
 
     element.extrinsic = {
@@ -88,6 +92,29 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
         success: extrinsic.success,
         fee: calculateFeeAsString(extrinsic)
     }
+    await element.save()
+}
+
+async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
+    const executedEvent = extrinsic.events.find(isEvmExecutedEvent)
+    if (!executedEvent) {
+        return
+    }
+
+    const addressFrom = executedEvent.event.data?.[0]?.toString();
+    const hash = executedEvent.event.data?.[2]?.toString();
+    const success = !!(executedEvent.event.data?.[3].toJSON() as any).succeed;
+
+    const element = createHistoryElement(extrinsic, addressFrom, '', hash)
+
+    element.extrinsic = {
+        hash,
+        module: extrinsic.extrinsic.method.section,
+        call: extrinsic.extrinsic.method.method,
+        success,
+        fee: calculateFeeAsString(extrinsic)
+    }
+
     await element.save()
 }
 
@@ -104,7 +131,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
 
     let sender = extrinsic.extrinsic.signer
     return transferCallsArgs.map(([isTransferAll, address, amount, assetId]) => {
-        const transfer: Transfer =  {
+        const transfer: Transfer = {
             amount: amount.toString(),
             from: sender.toString(),
             to: address,

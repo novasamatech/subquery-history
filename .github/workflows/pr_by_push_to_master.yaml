@@ -1,0 +1,43 @@
+name: Make pull request to deploy branch after push to master
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  create_pull_request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to current branch
+        uses: actions/checkout@master
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Prepare brach to commit
+        run: bash ./scripts/prepare_folders.sh
+
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -f networks/**/
+          git commit -m "Prepare to pull request to deploy branch"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: refs/heads/update-deploy-${{github.run_number}}
+
+      - uses: repo-sync/pull-request@v2
+        name: pull-request
+        with:
+          source_branch: "update-deploy-${{github.run_number}}"
+          destination_branch: "deploy"
+          pr_title: "Update deploy branch"
+          pr_body: |
+              Update deploy branch
+          pr_reviewer: "stepanLav"
+          pr_draft: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}

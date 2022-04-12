@@ -10,3 +10,8 @@ yarn.lock
 __pycache__
 temporary
 .pytest_cache
+networks/**/src
+networks/**/docker-compose.yml
+networks/**/local-runner.sh
+networks/**/schema.graphql
+networks/**/tsconfig.json

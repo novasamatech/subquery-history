@@ -119,7 +119,8 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
         initialCallIndex,
         (currentCallIndex, eventAccount) => {
             if (payoutValidators.length > currentCallIndex + 1) {
-                return payoutValidators[currentCallIndex + 1] == eventAccount ? currentCallIndex + 1 : currentCallIndex
+                const index = payoutValidators.indexOf(eventAccount)
+                return index !== -1 && index > currentCallIndex ? index : currentCallIndex
             } else {
                 return currentCallIndex
             }
