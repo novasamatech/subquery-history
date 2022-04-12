@@ -6,7 +6,7 @@ on:
       - 'master'
 
 jobs:
-  create_pull_request:
+  create_new_branch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout to current branch
@@ -29,6 +29,21 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: refs/heads/update-deploy-${{github.run_number}}
+
+
+  create_new_pullrequest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to deploy branch
+        uses: actions/checkout@master
+        with:
+          ref: deploy
+
+      - name: Merge master to deploy
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git merge original/master
 
       - uses: repo-sync/pull-request@v2
         name: pull-request
