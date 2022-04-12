@@ -27,6 +27,7 @@ type TransferData = {
 
 export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promise<void> {
     const { isSigned } = extrinsic.extrinsic;
+
     if (isSigned) {
         let failedTransfers = findFailedTransferCalls(extrinsic)
         if (failedTransfers != null) {
