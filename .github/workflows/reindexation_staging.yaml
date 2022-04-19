@@ -11,11 +11,11 @@ on:
         description: 'Set batch size [Documentation](https://doc.subquery.network/academy/tutorials_examples/batch-size.html#why-change-the-batch-size)'
         required: true
         default: "15"
-      indexer_inamge_version:
+      indexer_image_version:
         description: 'Version of docker image for indexer'
         required: true
         default: v0.33.0
-      query_inamge_version:
+      query_image_version:
         description: 'Version of docker image for query'
         required: true
         default: v0.14.1
@@ -90,7 +90,7 @@ jobs:
             --branch deploy \
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
-            --indexer-image-version ${{ github.event.inputs.query_inamge_version }} \
+            --indexer-image-version ${{ github.event.inputs.query_image_version }} \
             --query-image-version ${{ github.event.inputs.batch_size }} \
             --indexer-batch-size ${{ github.event.inputs.batch_size }} \
             --force
