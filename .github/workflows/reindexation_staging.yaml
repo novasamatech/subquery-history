@@ -7,12 +7,26 @@ on:
         description: 'Which networks will reindex?'
         required: true
         type: string
+      batch_size:
+        description: 'Set batch size [Documentation](https://doc.subquery.network/academy/tutorials_examples/batch-size.html#why-change-the-batch-size)'
+        required: true
+        default: "15"
+      indexer_image_version:
+        description: 'Version of docker image for indexer'
+        required: true
+        default: v0.33.0
+      query_image_version:
+        description: 'Version of docker image for query'
+        required: true
+        default: v0.14.1
+      subquery_cli_version:
+        description: '[CLI](https://github.com/fewensa/subquery-cli/releases) version'
+        required: true
+        default: 0.2.5
+
 
 env:
-  SUBQUERY_CLI_VERSION: 0.2.5
   SUBQUERY_ORG: nova-wallet
-  INDEXER_IMAGE_VERSION: v0.31.1
-  QUERY_IMAGE_VERSION: v0.13.0
 
 jobs:
 
@@ -61,7 +75,7 @@ jobs:
       - name: Install dependencies
         run: |
           mkdir -p $HOME/.local/bin
-          curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ env.SUBQUERY_CLI_VERSION }}/subquery-linux-x86_64.zip
+          curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ github.event.inputs.subquery_cli_version }}/subquery-linux-x86_64.zip
           unzip subquery-linux-x86_64.zip -d $HOME/.local/bin/
           rm -rf subquery-linux-x86_64.zip
       - name: Get branch name
@@ -76,7 +90,7 @@ jobs:
             --branch deploy \
             --sub-folder ./networks/${{ matrix.chain }} \
             --type stage \
-            --indexer-image-version ${{ env.INDEXER_IMAGE_VERSION }} \
-            --query-image-version ${{ env.QUERY_IMAGE_VERSION }} \
-            --indexer-batch-size 15 \
+            --indexer-image-version ${{ github.event.inputs.query_image_version }} \
+            --query-image-version ${{ github.event.inputs.batch_size }} \
+            --indexer-batch-size ${{ github.event.inputs.batch_size }} \
             --force

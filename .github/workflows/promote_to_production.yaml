@@ -7,9 +7,12 @@ on:
         description: 'Which networks will promote?'
         required: true
         type: string
+      subquery_cli_version:
+        description: '[CLI](https://github.com/fewensa/subquery-cli/releases) version'
+        required: true
+        default: 0.2.5
 
 env:
-  SUBQUERY_CLI_VERSION: 0.2.5
   SUBQUERY_ORG: nova-wallet
   SUBQUERY_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
 
@@ -70,7 +73,7 @@ jobs:
       - name: Install dependencies for promote
         run: |
           mkdir -p $HOME/.local/bin
-          curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ env.SUBQUERY_CLI_VERSION }}/subquery-linux-x86_64.zip
+          curl -LO https://github.com/fewensa/subquery-cli/releases/download/v${{ github.event.inputs.subquery_cli_version }}/subquery-linux-x86_64.zip
           unzip subquery-linux-x86_64.zip -d $HOME/.local/bin/
           rm -rf subquery-linux-x86_64.zip
       - name: Get branch name
