@@ -1,7 +1,7 @@
 export default {
   typesBundle: {
     spec: {
-      'nodle': {
+      'nodle-chain': {
         types: [
           {
             // on all versions
