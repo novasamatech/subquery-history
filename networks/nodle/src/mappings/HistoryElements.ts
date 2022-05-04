@@ -19,6 +19,7 @@ import {
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {u64} from "@polkadot/types";
+import { ethereumEncode } from '@polkadot/util-crypto';
 
 type TransferData = {
     isTransferAll: boolean,
@@ -102,7 +103,7 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
         return
     }
 
-    const addressFrom = executedEvent.event.data?.[0]?.toString();
+    const addressFrom = ethereumEncode(executedEvent.event.data?.[0]?.toString());
     const hash = executedEvent.event.data?.[2]?.toString();
     const success = !!(executedEvent.event.data?.[3].toJSON() as any).succeed;
 
