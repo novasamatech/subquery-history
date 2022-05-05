@@ -114,7 +114,7 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
         module: extrinsic.extrinsic.method.section,
         call: extrinsic.extrinsic.method.method,
         success,
-        fee: calculateFeeAsString(extrinsic)
+        fee: calculateFeeAsString(extrinsic, addressFrom)
     }
 
     await element.save()
