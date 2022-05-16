@@ -7,7 +7,7 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f'
-  endpoint: wss://statemint.api.onfinality.io/public-ws
+  endpoint: wss://statemint.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
   dictionary: https://api.subquery.network/sq/subquery/statemint-dictionary
 
 dataSources:

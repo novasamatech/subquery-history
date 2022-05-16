@@ -7,7 +7,7 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0xf195ef30c646663a24a3164b307521174a86f437c586397a43183c736a8383c1'
-  endpoint: wss://integritee.api.onfinality.io/public-ws
+  endpoint: wss://integritee.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
   chaintypes:
     file: ./dist/chaintypes.js
 
