@@ -7,7 +7,7 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b'
-  endpoint: wss://api.kusama.encointer.org
+  endpoint: wss://encointer.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
   chaintypes:
     file: './dist/chaintypes.js'
 

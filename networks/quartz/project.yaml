@@ -7,7 +7,7 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554'
-  endpoint: wss://us-ws-quartz.unique.network
+  endpoint: wss://quartz.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
   dictionary: https://api.subquery.network/sq/subquery/quartz-dictionary
 
 dataSources:
