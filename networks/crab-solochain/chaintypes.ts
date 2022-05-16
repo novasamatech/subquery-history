@@ -1,6 +1,18 @@
 import { OverrideBundleType } from '@polkadot/types/types';
-import { typesBundleForPolkadotApps } from '@darwinia/types/mix';
+import { typesBundle } from '@darwinia/types/mix';
+
+
 
 export default {
-  typesBundle: typesBundleForPolkadotApps as OverrideBundleType
-};
+  types: {
+    ExposureT:{
+      ownRingBalance: "Compact<Balance>",
+      ownKtonBalance: "Compact<Balance>",
+      ownPower: "Power",
+      totalPower: "Power",
+      others: "Vec<IndividualExposure>"
+    },
+    Power: "u32"
+  },
+  typesBundle: typesBundle.spec
+}
