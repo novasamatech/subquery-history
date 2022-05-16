@@ -7,7 +7,7 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe'
-  endpoint: wss://kusama-rpc.polkadot.io
+  endpoint: wss://kusama.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
   dictionary: https://api.subquery.network/sq/subquery/dictionary-kusama
 
 dataSources:
