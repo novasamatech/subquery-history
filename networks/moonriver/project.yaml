@@ -31,6 +31,21 @@ dataSources:
           filter:
             module: staking
             method: Rewarded
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:	
+            module: parachainStaking
+            method: Rewarded
+        - handler: handleParachainDeligation
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Delegation
+        - handler: handleParachainDelegatorLeft
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: DelegatorLeft
         - handler: handleSlash
           kind: substrate/EventHandler
           filter:
