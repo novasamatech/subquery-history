@@ -27,10 +27,6 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     await element.save()
 }
 
-export async function handleParachainDeligation(event: SubstrateEvent): Promise<void> {
-    await handleBonded(event);
-}
-
 export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
@@ -51,10 +47,6 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     element.type = "unbonded"
 
     await element.save()
-}
-
-export async function handleParachainDelegatorLeft(event: SubstrateEvent): Promise<void> {
-    await handleUnbonded(event);
 }
 
 export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<void> {

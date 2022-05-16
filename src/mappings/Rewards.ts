@@ -321,16 +321,16 @@ async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): P
     const {event: {data: [account, amount]}} = rewardEvent
     const eventId = eventIdFromBlockAndIdx(blockNumber, rewardEvent.idx.toString())
     const era = await api.query.parachainStaking.round();
-    const eraIndex = JSON.parse(JSON.stringify(era.toJSON())).current
-    // logger.info(`era: ${eraIndex}`)
+
+    const paymentDelay = api.consts.parachainStaking.rewardPaymentDelay.toHuman();
+    // HACK: used to get data from object
+    const eraIndex = (era.toJSON() as {current: any}).current - Number(paymentDelay)
+
     const validatorEvent = rewardEvent.block.events.find(event =>
         event.event.section == rewardEvent.event.section && 
         event.event.method == rewardEvent.event.method
     )
-
     const validatorId = validatorEvent?.event.data[0].toString()
-
-    // logger.info(`validatorId: ${validatorId}`)
 
     const element = new HistoryElement(eventId);
     element.timestamp = blockTimestamp
@@ -352,7 +352,6 @@ async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): P
 }
 
 export async function handleParachainRewarded (rewardEvent: SubstrateEvent): Promise<void> {
-    // await handleParachainRewardRestakeForAnalytics(rewardEvent)
     await handleParachainRewardForTxHistory(rewardEvent)
     await updateAccumulatedReward(rewardEvent, true)
 }
