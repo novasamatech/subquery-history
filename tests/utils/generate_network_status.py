@@ -65,14 +65,14 @@ def generate_progress_status(network):
     def fill_status_bar(instance):
         if (instance):
             commit = instance.get('version')[0:8]
-            if (instance.get('status') == 'running'):
+            if (instance.get('status') == 'processing'):
+                progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
+            elif (instance.get('status') == 'error' and get_percentage(network, instance.get('id')) == '0'):
+                progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
+            else:
                 percent = get_percentage(network, instance.get('id'))
                 progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
                     percent, percent, instance.get('type').capitalize())
-            elif (instance.get('status') == 'processing'):
-                progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
-            else:
-                progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
         else:
             progress_bar = '![0](https://progress-bar.dev/0?title=Not%20Deployed)'
             commit = '-'
