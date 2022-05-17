@@ -3,6 +3,7 @@ name: Projects healthcheck
 on:
   schedule:
     - cron: '0 0/4 * * *'
+  workflow_dispatch:
 
 env:
  SUBQUERY_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
