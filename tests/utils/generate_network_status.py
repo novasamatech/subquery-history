@@ -69,6 +69,8 @@ def generate_progress_status(network):
                 percent = get_percentage(network, instance.get('id'))
                 progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
                     percent, percent, instance.get('type').capitalize())
+            elif (instance.get('status') == 'processing'):
+                progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
             else:
                 progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
         else:
