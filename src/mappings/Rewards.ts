@@ -89,7 +89,8 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
     for (const eventRecord of rewardEvent.block.events) {
         if (
             eventRecord.event.section == rewardEvent.event.section && 
-            eventRecord.event.method == rewardEvent.event.method) {
+            eventRecord.event.method == rewardEvent.event.method
+        ) {
 
             let {event: {data: [account, _]}} = eventRecord
 
@@ -309,4 +310,48 @@ async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean)
     const newAmount = (amount as Balance).toBigInt()
     accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
     await accumulatedReward.save()
+}
+
+
+async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
+    const extrinsic = rewardEvent.extrinsic;
+    const block = rewardEvent.block;
+    const blockNumber = block.block.header.number.toString()
+    const blockTimestamp = timestamp(block)
+    const {event: {data: [account, amount]}} = rewardEvent
+    const eventId = eventIdFromBlockAndIdx(blockNumber, rewardEvent.idx.toString())
+    const era = await api.query.parachainStaking.round();
+
+    const paymentDelay = api.consts.parachainStaking.rewardPaymentDelay.toHuman();
+    // HACK: used to get data from object
+    const eraIndex = (era.toJSON() as {current: any}).current - Number(paymentDelay)
+
+    const validatorEvent = rewardEvent.block.events.find(event =>
+        event.event.section == rewardEvent.event.section && 
+        event.event.method == rewardEvent.event.method
+    )
+    const validatorId = validatorEvent?.event.data[0].toString()
+
+    const element = new HistoryElement(eventId);
+    element.timestamp = blockTimestamp
+    element.address = account.toString()
+    element.blockNumber = block.block.header.number.toNumber()
+    if (extrinsic !== undefined) {
+        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        element.extrinsicIdx = extrinsic.idx
+    }
+    element.reward = {eventIdx: rewardEvent.idx,
+        amount: amount.toString(),
+        isReward: true,
+        stash: account.toString(),
+        validator: validatorId,
+        era: eraIndex
+    }
+
+    element.save()
+}
+
+export async function handleParachainRewarded (rewardEvent: SubstrateEvent): Promise<void> {
+    await handleParachainRewardForTxHistory(rewardEvent)
+    await updateAccumulatedReward(rewardEvent, true)
 }
