@@ -7,11 +7,37 @@
 SCRIPT_PATH=$(dirname "$0")
 MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 
-SUBQUERY_TOKEN="NDA1NjA2NjA=j8zWM4C1BZS13G9mNmSI"
+SUBQUERY_TOKEN="NDA1NjA2NjA=HxySJFmehS6YBqn1onmQ"
 ORGANISATION="nova-wallet"
-DESCRIPTION="API for saturating Nova Wallet with information. Focuses on the following use cases: 1) Provide complete operation history, including Transfers, Rewards/slashes, Other extrinsics 2) Provide data for staking analytics"
 
-folders=($(ls ${MAIN_DIRECTORY}/networks))
+BASE_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+1) Provide complete operation history, including Transfers, Rewards/slashes, Other extrinsics </br>
+2) Provide data for staking analytics"
+
+DESCRIPTION_WITH_ORML="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+1) Provide complete operation history, including Transfers, Other extrinsics </br>
+2) Provide information about transfers with custom assets in network </br>
+for example to fetch custom assets history you can use that query: </br>
+query {
+    historyElements(first:5, filter:{assetTransfer:{notEqualTo:"null"}}){
+    nodes{
+      assetTransfer
+    }
+  }
+}
+"
+
+DESCRIPTION_WITH_ETH="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+1) Provide complete operation history, including Transfers, Other extrinsics </br>
+2) Provide information about ETH operation which store like usual extrinsic for account.
+"
+
+
+# folders=($(ls ${MAIN_DIRECTORY}/networks))
+folders='hydra'
 
 for item in ${folders[*]}
 do
