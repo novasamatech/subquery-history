@@ -7,42 +7,21 @@
 SCRIPT_PATH=$(dirname "$0")
 MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 
-SUBQUERY_TOKEN="NDA1NjA2NjA=HxySJFmehS6YBqn1onmQ"
+SUBQUERY_TOKEN="${SUBQUERY_TOKEN}"
 ORGANISATION="nova-wallet"
 
-REGULAR_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-- Provide operation history, including Transfers and Extrinsics
-"
+REGULAR_DESCRIPTION="regular"
 
-BASE_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-1) Provide complete operation history, including Transfers, Rewards/slashes, Other extrinsics </br>
-2) Provide data for staking analytics"
+BASE_DESCRIPTION="base"
 
-DESCRIPTION_WITH_ORML="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-1) Provide complete operation history, including Transfers, Other extrinsics </br>
-2) Provide information about transfers with custom assets in network </br>
-for example to fetch custom assets history you can use that query: </br>
-query {
-    historyElements(first:5, filter:{assetTransfer:{notEqualTo:"null"}}){
-    nodes{
-      assetTransfer
-    }
-  }
-}
-"
+DESCRIPTION_WITH_ORML="orml"
 
-DESCRIPTION_WITH_ETH="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-1) Provide complete operation history, including Transfers, Other extrinsics </br>
-2) Provide information about ETH operation which store like usual extrinsic for account.
-"
+DESCRIPTION_WITH_ETH="eth"
 
-ORML_PROJECTS=('karura')
+ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
 BASE_PROJECTS=('polkadot kusama westend')
 ETH_PROJECTS=('moonbeam moonriver astar shiden')
-ASSETS_PROJECTS=('statemine')
+ASSETS_PROJECTS=('statemine parallel parallel-heiko')
 
 folders=($(ls ${MAIN_DIRECTORY}/networks))
 
@@ -65,10 +44,9 @@ for item in ${folders[*]}; do
     DESCRIPTION=${DESCRIPTION_WITH_ETH}
   fi
 
-  printf ${item^}
-  echo ${DESCRIPTION}
+  echo ${item^}' - is a '${DESCRIPTION^^}' project'
   # $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key "nova-wallet-"$item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
 
 done
 
-printf "Done !"
+echo "Done !"
