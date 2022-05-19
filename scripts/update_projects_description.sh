@@ -28,6 +28,11 @@ Focuses on the following use cases: </br>
 - Provide complete operation history, including Transfers, Other extrinsics </br>
 - Provide information about ETH operation which store like usual extrinsic for account."
 
+DESCRIPTION_WITH_ASSETS="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+- Provide complete operation history, including Transfers, Other extrinsics </br>
+- Provide information about transfers with custom assets in network </br>"
+
 ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
 BASE_PROJECTS=('polkadot kusama westend')
 ETH_PROJECTS=('moonbeam moonriver astar shiden')
@@ -51,7 +56,7 @@ for item in ${folders[*]}; do
   fi
 
   if [[ " ${ASSETS_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${DESCRIPTION_WITH_ETH}
+    DESCRIPTION=${DESCRIPTION_WITH_ASSETS}
   fi
 
   echo ${item^}' - is '${DESCRIPTION^^}' project'
