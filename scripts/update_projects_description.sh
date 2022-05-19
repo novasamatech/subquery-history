@@ -21,7 +21,7 @@ DESCRIPTION_WITH_ETH="eth"
 ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
 BASE_PROJECTS=('polkadot kusama westend')
 ETH_PROJECTS=('moonbeam moonriver astar shiden')
-ASSETS_PROJECTS=('statemine parallel parallel-heiko')
+ASSETS_PROJECTS=('statemine parallel parallel-heiko westmint')
 
 folders=($(ls ${MAIN_DIRECTORY}/networks))
 
