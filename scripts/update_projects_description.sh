@@ -10,13 +10,23 @@ MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 SUBQUERY_TOKEN="${SUBQUERY_TOKEN}"
 ORGANISATION="nova-wallet"
 
-REGULAR_DESCRIPTION="regular"
+REGULAR_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+- Provide operation history, including Transfers and Extrinsics"
 
-BASE_DESCRIPTION="base"
+BASE_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+- Provide complete operation history, including Transfers, Rewards/slashes, Other extrinsics </br>
+- Provide data for staking analytics"
 
-DESCRIPTION_WITH_ORML="orml"
+DESCRIPTION_WITH_ORML="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+- Provide complete operation history, including Transfers, Other extrinsics </br>
+- Provide information about transfers with custom assets in network </br>"
 
-DESCRIPTION_WITH_ETH="eth"
+DESCRIPTION_WITH_ETH="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+Focuses on the following use cases: </br>
+- Provide complete operation history, including Transfers, Other extrinsics </br>
+- Provide information about ETH operation which store like usual extrinsic for account."
 
 ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
 BASE_PROJECTS=('polkadot kusama westend')
