@@ -10,6 +10,10 @@ MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 SUBQUERY_TOKEN="NDA1NjA2NjA=HxySJFmehS6YBqn1onmQ"
 ORGANISATION="nova-wallet"
 
+REGULAR_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
+- Provide operation history, including Transfers and Extrinsics
+"
+
 BASE_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
 Focuses on the following use cases: </br>
 1) Provide complete operation history, including Transfers, Rewards/slashes, Other extrinsics </br>
@@ -35,13 +39,36 @@ Focuses on the following use cases: </br>
 2) Provide information about ETH operation which store like usual extrinsic for account.
 "
 
+ORML_PROJECTS=('karura')
+BASE_PROJECTS=('polkadot kusama westend')
+ETH_PROJECTS=('moonbeam moonriver astar shiden')
+ASSETS_PROJECTS=('statemine')
 
-# folders=($(ls ${MAIN_DIRECTORY}/networks))
-folders='hydra'
+folders=($(ls ${MAIN_DIRECTORY}/networks))
 
-for item in ${folders[*]}
-do
-    $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key "nova-wallet-"$item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
+for item in ${folders[*]}; do
+  DESCRIPTION=${REGULAR_DESCRIPTION} #Set regular description for most of projects
+
+  if [[ " ${ORML_PROJECTS[*]} " =~ " ${item} " ]]; then
+    DESCRIPTION=${DESCRIPTION_WITH_ORML}
+  fi
+
+  if [[ " ${BASE_PROJECTS[*]} " =~ " ${item} " ]]; then
+    DESCRIPTION=${BASE_DESCRIPTION}
+  fi
+
+  if [[ " ${ETH_PROJECTS[*]} " =~ " ${item} " ]]; then
+    DESCRIPTION=${DESCRIPTION_WITH_ETH}
+  fi
+
+  if [[ " ${ASSETS_PROJECTS[*]} " =~ " ${item} " ]]; then
+    DESCRIPTION=${DESCRIPTION_WITH_ETH}
+  fi
+
+  printf ${item^}
+  echo ${DESCRIPTION}
+  # $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key "nova-wallet-"$item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
+
 done
 
 printf "Done !"
