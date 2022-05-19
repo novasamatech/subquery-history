@@ -44,7 +44,7 @@ for item in ${folders[*]}; do
     DESCRIPTION=${DESCRIPTION_WITH_ETH}
   fi
 
-  echo ${item^}' - is a '${DESCRIPTION^^}' project'
+  echo ${item^}' - is '${DESCRIPTION^^}' project'
   # $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key "nova-wallet-"$item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
 
 done
