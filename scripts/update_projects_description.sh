@@ -10,28 +10,30 @@ MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 SUBQUERY_TOKEN="${SUBQUERY_TOKEN}"
 ORGANISATION="nova-wallet"
 
-REGULAR_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-- Provide operation history, including Transfers and Extrinsics"
+REGULAR_DESCRIPTION="This project provides an API to retrieve information from the blockchain. It is used by the Nova Wallet project to fetching transaction history. </br>
+It can also be used for your own purposes too! </br>
+</br>
+Use historyElements entity to getting this information: </br>
+- Transfers that have been sent and received. Transfer parameter. </br>
+- Other operation that were submitted in blockchain. Extrinsic parameter."
 
-BASE_DESCRIPTION="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-- Provide complete operation history, including Transfers, Rewards/slashes, Other extrinsics </br>
-- Provide data for staking analytics"
+BASE_DESCRIPTION="This project provides an API to retrieve information from the blockchain. It is used by the Nova Wallet project to fetching transaction history. </br>
+It can also be used for your own purposes too! </br>
+</br>
+Use historyElements entity to getting this information: </br>
+- Transfers that have been sent and received. Transfer parameter. </br>
+- Rewards and slashes for the staking activity. Reward parameter. </br>
+- Other operation that were submitted in blockchain. Extrinsic parameter. </br>
+</br>
+Use accumulatedRewards and accumulatedStake to getting accumulated information about about your stake."
 
-DESCRIPTION_WITH_ORML="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-- Provide complete operation history, including Transfers, Other extrinsics </br>
-- Provide information about transfers with custom assets in network </br>"
-
-DESCRIPTION_WITH_ETH="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-- Provide complete operation history, including Transfers, Other extrinsics </br>
-- Provide information about ETH operation which store like usual extrinsic for account."
-
-DESCRIPTION_WITH_ASSETS="Thats project provide an API for featching information from blockchain. It's using for the Nova Wallet project for showing transaction history </br>
-Focuses on the following use cases: </br>
-- Provide complete operation history, including Transfers, Other extrinsics </br>
-- Provide information about transfers with custom assets in network </br>"
+DESCRIPTION_WITH_CUSTOM_TOKENS="This project provides an API to retrieve information from the blockchain. It is used by the Nova Wallet project to fetching transaction history. </br>
+It can also be used for your own purposes too! </br>
+</br>
+Use historyElements entity to getting this information: </br>
+- Transfers for the main asset in the network that have been sent and received. Transfer parameter. </br>
+- Transfers for additional assets which are also available in the network storing in another parameter - assetTransfer. </br>
+- Other operation that were submitted in blockchain. Extrinsic parameter."
 
 ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
 BASE_PROJECTS=('polkadot kusama westend')
@@ -44,7 +46,7 @@ for item in ${folders[*]}; do
   DESCRIPTION=${REGULAR_DESCRIPTION} #Set regular description for most of projects
 
   if [[ " ${ORML_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${DESCRIPTION_WITH_ORML}
+    DESCRIPTION=${DESCRIPTION_WITH_CUSTOM_TOKENS} #ORML has no different with ASSETS pallet for subquery project
   fi
 
   if [[ " ${BASE_PROJECTS[*]} " =~ " ${item} " ]]; then
@@ -52,11 +54,11 @@ for item in ${folders[*]}; do
   fi
 
   if [[ " ${ETH_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${DESCRIPTION_WITH_ETH}
+    DESCRIPTION=${BASE_DESCRIPTION}  #Use base descripiton as it provide the same information, as Polkadot/Kusama project.
   fi
 
   if [[ " ${ASSETS_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${DESCRIPTION_WITH_ASSETS}
+    DESCRIPTION=${DESCRIPTION_WITH_CUSTOM_TOKENS} #ORML has no different with ASSETS pallet for subquery project
   fi
 
   echo ${item^}' - is '${DESCRIPTION^^}' project'
