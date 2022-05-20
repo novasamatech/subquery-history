@@ -22,7 +22,7 @@ def get_subquery_cli(subquery_cli_version):
         raise ValueError('Can\'t to recognize the operating system')
 
     try:
-        os.makedirs(temporary_path, exist_ok=True)
+        os.makedirs(temporary_path, exist_ok=False)
         wget.download(download_url, out = temporary_path)
         for file in os.listdir(temporary_path):
             with zipfile.ZipFile(temporary_path+'/'+file) as item:

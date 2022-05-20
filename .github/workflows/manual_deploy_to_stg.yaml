@@ -22,7 +22,12 @@ on:
       subquery_cli_version:
         description: '[CLI](https://github.com/fewensa/subquery-cli/releases) version'
         required: true
-        default: 0.2.5
+        default: 0.2.6
+      reindex:
+        description: 'Re-index these networks? ⚠️Attention this will clear all data on stage env⚠️'
+        required: true
+        type: boolean
+        default: false
 
 env:
   SUBQUERY_ORG: nova-wallet
@@ -82,6 +87,7 @@ jobs:
         uses: tj-actions/branch-names@v5.1
 
       - name: Deploy
+        if: ${{ github.event.inputs.reindex == 'false' }}
         run: |
           subquery --token ${{ secrets.SUBQUERY_TOKEN }} deployment deploy \
             --org ${{ env.SUBQUERY_ORG }} \
@@ -91,4 +97,18 @@ jobs:
             --type stage \
             --indexer-image-version ${{ github.event.inputs.indexer_image_version }} \
             --query-image-version ${{ github.event.inputs.query_image_version }} \
-            --indexer-batch-size ${{ github.event.inputs.batch_size }}
+            --batch-size ${{ github.event.inputs.batch_size }}
+
+      - name: Redeploy
+        if: ${{ github.event.inputs.reindex == 'true' }}
+        run: |
+          subquery --token ${{ secrets.SUBQUERY_TOKEN }} deployment deploy \
+            --org ${{ env.SUBQUERY_ORG }} \
+            --key nova-wallet-${{ matrix.chain }} \
+            --branch deploy \
+            --sub-folder ./networks/${{ matrix.chain }} \
+            --type stage \
+            --indexer-image-version ${{ github.event.inputs.indexer_image_version }} \
+            --query-image-version ${{ github.event.inputs.query_image_version }} \
+            --batch-size ${{ github.event.inputs.batch_size }} \
+            --force
