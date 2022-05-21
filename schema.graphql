@@ -90,6 +90,26 @@ type AccumulatedStake @entity {
   amount: BigInt!
 }
 
+type CrowdloanContribute @entity {
+  id: ID!
+  blockNumber: Int!
+  timestamp: BigInt! @index
+  parachain_id: String!
+  address: String! @index
+  amount: BigInt!
+}
+
+type AccumulatedContribute @entity {
+  id: ID!
+  parachains: [ParachainContribution]!
+  amount: BigInt!
+}
+
+type ParachainContribution @jsonField {
+  parachain_id: String!
+  amount: BigInt!
+}
+
 type ErrorEvent @entity {
   id: ID!
   description: String!
