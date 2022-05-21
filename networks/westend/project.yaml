@@ -69,3 +69,8 @@ dataSources:
           filter:
             module: staking
             method: StakersElected
+        - handler: handleContributed
+          kind: substrate/EventHandler
+          filter:
+            module: crowdloan
+            method: Contributed

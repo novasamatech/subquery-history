@@ -94,7 +94,7 @@ type CrowdloanContribute @entity {
   id: ID!
   blockNumber: Int!
   timestamp: BigInt! @index
-  parachain_id: String!
+  parachainId: String!
   address: String! @index
   amount: BigInt!
 }
@@ -102,12 +102,12 @@ type CrowdloanContribute @entity {
 type AccumulatedContribute @entity {
   id: ID!
   parachains: [ParachainContribution]!
-  amount: BigInt!
+  totalContributionAmount: BigInt!
 }
 
 type ParachainContribution @jsonField {
-  parachain_id: String!
-  amount: BigInt!
+  parachainId: String!
+  amount: String!
 }
 
 type ErrorEvent @entity {
