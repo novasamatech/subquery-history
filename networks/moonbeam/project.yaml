@@ -76,3 +76,8 @@ dataSources:
           filter:
             module: staking
             method: StakersElected
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: assets
+            method: Transferred
