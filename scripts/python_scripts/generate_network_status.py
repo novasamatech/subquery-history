@@ -22,7 +22,8 @@ def generate_networks_list():
         headers=["--", "Network", "Stage status",
                  "Prod status", "Stage commit", "Prod commit"],
         value_matrix=generate_value_matrix(),
-        margin=1
+        margin=1,
+        flavor = 'kramdown'
     )
     writer.write_table()
     return writer

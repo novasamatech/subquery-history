@@ -1,7 +1,7 @@
 import json
 import pytest
 import os
-from utils.subquery_cli import use_subquery_cli
+from subquery_cli import use_subquery_cli
 
 subquery_cli_version = '0.2.4'
 token = os.environ['SUBQUERY_TOKEN']
