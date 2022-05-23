@@ -12,18 +12,18 @@ token = os.environ['SUBQUERY_TOKEN']
 
 readme = Template("""
 Projects' status is updated every 4 hours
+# List of deployed projects
+
 {{dapps_table}}
 """)
 
 
 def generate_networks_list():
     writer = MarkdownTableWriter(
-        table_name="List of deployed projects",
         headers=["--", "Network", "Stage status",
                  "Prod status", "Stage commit", "Prod commit"],
         value_matrix=generate_value_matrix(),
-        margin=1,
-        flavor = 'kramdown'
+        margin=1
     )
     writer.write_table()
     return writer
@@ -32,7 +32,7 @@ def generate_networks_list():
 def get_networks_list(folder):
     sub_folders = [name for name in os.listdir(
         folder) if os.path.isdir(os.path.join(folder, name))]
-    return sub_folders
+    return ['polkadot']#sub_folders
 
 
 def get_deployments_list(network: str):
