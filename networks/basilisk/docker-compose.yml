@@ -16,7 +16,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
   subquery-node:
-    image: onfinality/subql-node:latest
+    image: onfinality/subql-node:v0.33.0
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
       # - --batch-size=50
 
   graphql-engine:
-    image: onfinality/subql-query:latest
+    image: onfinality/subql-query:v0.14.1
     ports:
       - 3000:3000
     depends_on:
