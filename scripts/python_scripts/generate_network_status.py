@@ -32,7 +32,7 @@ def generate_networks_list():
 def get_networks_list(folder):
     sub_folders = [name for name in os.listdir(
         folder) if os.path.isdir(os.path.join(folder, name))]
-    return ['polkadot']#sub_folders
+    return sub_folders
 
 
 def get_deployments_list(network: str):
