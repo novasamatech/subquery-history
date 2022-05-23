@@ -15,7 +15,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 390000
     mapping:
       file: ./dist/src/index.js
       handlers:
@@ -30,6 +30,11 @@ dataSources:
           kind: substrate/EventHandler
           filter:
             module: staking
+            method: Rewarded
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:	
+            module: parachainStaking
             method: Rewarded
         - handler: handleSlash
           kind: substrate/EventHandler
