@@ -10,59 +10,82 @@ MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 SUBQUERY_TOKEN="${SUBQUERY_TOKEN}"
 ORGANISATION="nova-wallet"
 
-REGULAR_DESCRIPTION="This project provides an API to retrieve information from the blockchain. It is used by the Nova Wallet project to fetching transaction history. </br>
-It can also be used for your own purposes too! </br>
-</br>
-Use historyElements entity to getting this information: </br>
-- Transfers that have been sent and received. Transfer parameter. </br>
-- Other operation that were submitted in blockchain. Extrinsic parameter."
 
-BASE_DESCRIPTION="This project provides an API to retrieve information from the blockchain. It is used by the Nova Wallet project to fetching transaction history. </br>
+BASE_DESCRIPTION="This project are indexing the blockchain and provides an API to retrieve information about the operations. It is used by the Nova Wallet project to fetching transaction history. </br>
 It can also be used for your own purposes too! </br>
 </br>
-Use historyElements entity to getting this information: </br>
-- Transfers that have been sent and received. Transfer parameter. </br>
-- Rewards and slashes for the staking activity. Reward parameter. </br>
-- Other operation that were submitted in blockchain. Extrinsic parameter. </br>
+⚠️  Make sure that you add filters and sorting rules to your queries  ⚠️
 </br>
-Use accumulatedRewards and accumulatedStake to getting accumulated information about about your stake."
+</br>
+🗒  That project provide access to information about all transfers and extrinsics. To receive that information you can use: </br>
+query {historyElements{nodes{transfer extrinsic}}}
+</br>"
 
-DESCRIPTION_WITH_CUSTOM_TOKENS="This project provides an API to retrieve information from the blockchain. It is used by the Nova Wallet project to fetching transaction history. </br>
-It can also be used for your own purposes too! </br>
+ORML_DESCRIPTION="</br>
+⚙️ This network also uses orml pallet for transfer assets and we proced it too! You can get the information about the orml assets transfer by using query like that:
 </br>
-Use historyElements entity to getting this information: </br>
-- Transfers for the main asset in the network that have been sent and received. Transfer parameter. </br>
-- Transfers for additional assets which are also available in the network storing in another parameter - assetTransfer. </br>
-- Other operation that were submitted in blockchain. Extrinsic parameter."
+query {historyElements{nodes{assetTransfer}}}
+</br>"
+
+ASSETS_DESCRIPTION="</br>
+⚙️ This network also uses Assets pallet for transfer assets and we proced it too! You can get the information about the Assets transfer by using query like that:
+</br>
+query {historyElements{nodes{assetTransfer}}}
+</br>"
+
+STAKING_DESCRIPTION="</br>
+🪙 In that network has staking events on which you can get. For getting history of rewards you can use this one:
+</br>
+query {historyElements{nodes{reward}}}
+</br>
+</br>
+🥞 Also we are collecting information about accumulated staking which include rewards and slashes, you can request it by using:
+</br>
+query {accumulatedRewards{nodes{id amount}}}
+</br>"
+
+STAKING_ANALITIC="</br>
+🧾 As it is collected for rewards it also collected for user stake and you can get it by using this one:</br>
+query {accumulatedStakes{nodes{id amount}}}
+</br> </br>
+
+👨‍🔧 For getting an information about validators you can request it by:
+</br>
+query {eraValidatorInfos{nodes{address era total own others}}}
+</br> </br>
+
+📈 History about your stake changes is available by request:
+</br>
+query {stakeChanges{nodes{blockNumber extrinsicHash address amount accumulatedAmount type}}}
+</br>"
 
 ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
-BASE_PROJECTS=('polkadot kusama westend')
-ETH_PROJECTS=('moonbeam moonriver astar shiden')
-ASSETS_PROJECTS=('statemine parallel parallel-heiko westmint')
+ASSETS_PROJECTS=('statemine parallel parallel-heiko westmint moonbeam moonriver astar shiden')
+HAS_STAKING=('polkadot kusama westend moonbeam moonriver')
+HAS_STAKING_ANALYTIC=('polkadot kusama westend')
 
 folders=($(ls ${MAIN_DIRECTORY}/networks))
 
 for item in ${folders[*]}; do
-  DESCRIPTION=${REGULAR_DESCRIPTION} #Set regular description for most of projects
+  DESCRIPTION=${BASE_DESCRIPTION}
 
   if [[ " ${ORML_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${DESCRIPTION_WITH_CUSTOM_TOKENS} #ORML has no different with ASSETS pallet for subquery project
-  fi
-
-  if [[ " ${BASE_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${BASE_DESCRIPTION}
-  fi
-
-  if [[ " ${ETH_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${BASE_DESCRIPTION}  #Use base descripiton as it provide the same information, as Polkadot/Kusama project.
+    DESCRIPTION+=${ORML_DESCRIPTION}
   fi
 
   if [[ " ${ASSETS_PROJECTS[*]} " =~ " ${item} " ]]; then
-    DESCRIPTION=${DESCRIPTION_WITH_CUSTOM_TOKENS} #ORML has no different with ASSETS pallet for subquery project
+    DESCRIPTION+=${ASSETS_DESCRIPTION}
   fi
 
-  echo ${item^}' - is '${DESCRIPTION^^}' project'
-  # $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key "nova-wallet-"$item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
+  if [[ " ${HAS_STAKING[*]} " =~ " ${item} " ]]; then
+    DESCRIPTION+=${STAKING_DESCRIPTION}
+  fi
+
+  if [[ " ${HAS_STAKING_ANALYTIC[*]} " =~ " ${item} " ]]; then
+    DESCRIPTION+=${STAKING_ANALITIC}
+  fi
+
+  $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key $item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
 
 done
 
