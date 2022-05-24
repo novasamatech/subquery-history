@@ -14,49 +14,48 @@ ORGANISATION="nova-wallet"
 BASE_DESCRIPTION="This project are indexing the blockchain and provides an API to retrieve information about the operations. It is used by the Nova Wallet project to fetching transaction history. </br>
 It can also be used for your own purposes too! </br>
 </br>
-⚠️  Make sure that you add filters and sorting rules to your queries  ⚠️
-</br>
+<mark>Make sure that you add filters and sorting rules to your queries</mark>.</p>
 </br>
 🗒  That project provide access to information about all transfers and extrinsics. To receive that information you can use: </br>
-query {historyElements{nodes{transfer extrinsic}}}
+<code>query {historyElements{nodes{transfer extrinsic}}}</code>
 </br>"
 
 ORML_DESCRIPTION="</br>
 ⚙️ This network also uses orml pallet for transfer assets and we proced it too! You can get the information about the orml assets transfer by using query like that:
 </br>
-query {historyElements{nodes{assetTransfer}}}
+<code>query {historyElements{nodes{assetTransfer}}}</code>
 </br>"
 
 ASSETS_DESCRIPTION="</br>
 ⚙️ This network also uses Assets pallet for transfer assets and we proced it too! You can get the information about the Assets transfer by using query like that:
 </br>
-query {historyElements{nodes{assetTransfer}}}
+<code>query {historyElements{nodes{assetTransfer}}}</code>
 </br>"
 
 STAKING_DESCRIPTION="</br>
 🪙 In that network has staking events on which you can get. For getting history of rewards you can use this one:
 </br>
-query {historyElements{nodes{reward}}}
+<code>query {historyElements{nodes{reward}}}</code>
 </br>
 </br>
 🥞 Also we are collecting information about accumulated staking which include rewards and slashes, you can request it by using:
 </br>
-query {accumulatedRewards{nodes{id amount}}}
+<code>query {accumulatedRewards{nodes{id amount}}}</code>
 </br>"
 
 STAKING_ANALITIC="</br>
 🧾 As it is collected for rewards it also collected for user stake and you can get it by using this one:</br>
-query {accumulatedStakes{nodes{id amount}}}
+<code>query {accumulatedStakes{nodes{id amount}}}</code>
 </br> </br>
 
 👨‍🔧 For getting an information about validators you can request it by:
 </br>
-query {eraValidatorInfos{nodes{address era total own others}}}
+<code>query {eraValidatorInfos{nodes{address era total own others}}}</code>
 </br> </br>
 
 📈 History about your stake changes is available by request:
 </br>
-query {stakeChanges{nodes{blockNumber extrinsicHash address amount accumulatedAmount type}}}
+<code>query {stakeChanges{nodes{blockNumber extrinsicHash address amount accumulatedAmount type}}}</code>
 </br>"
 
 ORML_PROJECTS=('karura acala bifrost interlay kintsugi')
