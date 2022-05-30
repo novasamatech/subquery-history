@@ -7,3 +7,5 @@ pyparsing==3.0.7
 pytest==7.1.1
 tomli==2.0.1
 wget==3.2
+pytablewriter==0.64.2
+Jinja2==3.1.2
