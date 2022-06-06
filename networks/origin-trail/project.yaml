@@ -6,11 +6,8 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b'
-  endpoint: wss://hk.p.bifrost-rpc.liebi.com/ws
-  dictionary: https://api.subquery.network/sq/subquery/bifrost-parachain-dictionary
-  chaintypes:
-    file: './BifrostTypes.json'
+  genesisHash: '0xe7e0962324a3b86c83404dbea483f25fb5dab4c224791c81b756cfc948006174'
+  endpoint: wss://parachain-rpc.origin-trail.network
 
 dataSources:
   - name: main
@@ -30,6 +27,11 @@ dataSources:
           kind: substrate/EventHandler
           filter:
             module: staking
+            method: Rewarded
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:	
+            module: parachainStaking
             method: Rewarded
         - handler: handleSlash
           kind: substrate/EventHandler
@@ -56,6 +58,21 @@ dataSources:
           filter:
             module: balances
             method: Transfer
+        - handler: handleTransferKeepAlive
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: transfer_keep_alive
+        - handler: handleNewEra
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakingElection
+        - handler: handleStakersElected
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakersElected
         - handler: handleAssetTransfer
           kind: substrate/EventHandler
           filter:
@@ -71,18 +88,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleNewEra
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakingElection
-        - handler: handleStakersElected
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakersElected
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
