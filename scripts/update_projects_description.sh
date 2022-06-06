@@ -8,14 +8,15 @@ SCRIPT_PATH=$(dirname "$0")
 MAIN_DIRECTORY=${SCRIPT_PATH%/*}
 
 SUBQUERY_TOKEN="${SUBQUERY_TOKEN}"
-ORGANISATION="nova-wallet"
+ORGANISATION="stepanLav"
 
 
-BASE_DESCRIPTION="Nova SubQuery project is indexing the blockchain and provides a convenient API for fetching operation history & analytics data. It is used by the Nova Wallet (novawallet.io), feel free to use this API for your app! 💖</br>
+BASE_DESCRIPTION="Nova SubQuery project is indexing the blockchain and provides a convenient API for fetching operation history & analytics data. It is used by the Nova Wallet (novawallet.io)</br>
+Feel free to use this API for your app! 💖</br>
 </br>
-<mark>Make sure that you add filters and sorting rules to your queries!</mark>.</p>
+<mark>Make sure that you add filters and sorting rules to your queries!</mark></br>
 </br>
-Following API & datasource is supported:</br>
+Following API & datasource is supported:
 </br>
 📚 Transfers and extrinsics (transactions). Both or either can be fetched, for example: </br>
 <code>query {historyElements{nodes{transfer extrinsic}}}</code>
@@ -39,7 +40,7 @@ STAKING_DESCRIPTION="</br>
 </br>"
 
 STAKING_ANALITIC="</br>
-📊 Current stake — returns bonded amount at certain block:</br>
+📊 Current stake — returns bonded amount:</br>
 <code>query {accumulatedStakes{nodes{id amount}}}</code>
 </br> </br>
 
@@ -53,11 +54,16 @@ STAKING_ANALITIC="</br>
 <code>query {stakeChanges{nodes{blockNumber extrinsicHash address amount accumulatedAmount type}}}</code>
 </br>"
 
-MULTIASSET_PROJECTS=('statemine parallel parallel-heiko westmint moonbeam moonriver astar shiden karura acala bifrost interlay kintsugi')
-HAS_STAKING=('polkadot kusama westend moonbeam moonriver')
-HAS_STAKING_ANALYTIC=('polkadot kusama westend')
+# MULTIASSET_PROJECTS=('statemine parallel parallel-heiko westmint moonbeam moonriver astar shiden karura acala bifrost interlay kintsugi')
+# HAS_STAKING=('polkadot kusama westend moonbeam moonriver')
+# HAS_STAKING_ANALYTIC=('polkadot kusama westend')
 
-folders=($(ls ${MAIN_DIRECTORY}/networks))
+MULTIASSET_PROJECTS=('test')
+HAS_STAKING=('test-project fearless-test')
+HAS_STAKING_ANALYTIC=('test-project')
+
+# folders=($(ls ${MAIN_DIRECTORY}/networks))
+folders=('test test-project fearless-test')
 
 for item in ${folders[*]}; do
   DESCRIPTION=${BASE_DESCRIPTION}
