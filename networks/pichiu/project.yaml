@@ -8,6 +8,8 @@ schema:
 network:
   genesisHash: '0x0e06260459b4f9034aba0a75108c08ed73ea51d2763562749b1d3600986c4ea5'
   endpoint: wss://kusama.kylin-node.co.uk
+  chaintypes:
+    file: './dist/chaintypes.js'
 
 dataSources:
   - name: main
