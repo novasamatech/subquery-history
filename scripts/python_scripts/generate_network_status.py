@@ -3,12 +3,15 @@
 
 import json
 import os
+import requests
+import yaml
 from jinja2 import Template
 from pytablewriter import MarkdownTableWriter
 from subquery_cli import use_subquery_cli
 
 subquery_cli_version = '0.2.5'
 token = os.environ['SUBQUERY_TOKEN']
+nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v4/chains_dev.json"
 
 readme = Template("""
 Projects' status is updated every 4 hours
@@ -20,7 +23,7 @@ Projects' status is updated every 4 hours
 
 def generate_networks_list():
     writer = MarkdownTableWriter(
-        headers=["--", "Network", "Stage status",
+        headers=["--", "Network", "Features", "Stage status",
                  "Prod status", "Stage commit", "Prod commit"],
         value_matrix=generate_value_matrix(),
         margin=1
@@ -86,27 +89,73 @@ def generate_progress_status(network):
 
 
 def generate_value_matrix():
-    network_list = get_networks_list(folder="./networks")
+    network_list = generate_network_list(nova_network_list)
     returning_array = []
     for network in network_list:
         network_data_array = []
         network_data_array.append(
             "[%s](https://explorer.subquery.network/subquery/nova-wallet/nova-wallet-%s)" % (
-                network.title(), network)
+                network.get('name').title(), network.get('name'))
         )
         prod_status, prod_commit, stage_status, stage_comit = generate_progress_status(
-            network)
+            network.get('name'))
+        network_data_array.append(network.get('features'))
         network_data_array.append(stage_status)
         network_data_array.append(prod_status)
         network_data_array.append(stage_comit)
         network_data_array.append(prod_commit)
         returning_array.append(network_data_array)
-        print('%s generated!' % network.title())
+        print('%s generated!' % network.get('name').title())
     returning_array.sort()
     increment = iter(range(1, len(returning_array)+1))
     [network.insert(0, next(increment)) for network in returning_array]
     return returning_array
 
+
+def generate_network_list(url):
+    feature_list = []
+    chains_list = send_http_request(url)
+    available_projects = get_networks_list(folder="./networks")
+    for project in available_projects:
+        with open("./networks/%s/project.yaml" % project, 'r') as stream:
+            project_data = yaml.safe_load(stream)
+        project_genesis = project_data.get('network').get('genesisHash')
+        print(project)
+        chain = [chain for chain in chains_list if chain.get('chainId') == project_genesis[2:]]
+        feature_list.append({
+                "name": project,
+                "genesis": project_genesis,
+                "features": check_features(chain)
+            })
+    return feature_list
+
+def check_features(chains):
+    '''
+    features may be:
+    [
+        '📚 Transfer History',
+        '✨ Transfers for ORML/Assets',
+        '📈 Staking analytics',
+        '🥞 Staking rewards history'
+    ]
+    '''
+    features = ['📚 Transfer History']
+    for chain in chains:
+        if (len(chain.get('assets')) > 1):
+            features.append('✨ Transfers for ORML/Assets')
+        if (chain.get('assets')[0].get('staking')):
+            if (chain.get('assets')[0].get('staking') == 'relaychain'):
+                features.append('📈 Staking analytics')
+            features.append('🥞 Staking rewards history')
+    return '<br />'.join(features)
+
+def send_http_request(url):
+    try:
+        response = requests.get(url)
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+
+    return json.loads(response.text)
 
 if __name__ == '__main__':
 
