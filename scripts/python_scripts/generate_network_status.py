@@ -134,19 +134,19 @@ def check_features(chains):
     features may be:
     [
         '📚 Transfer History',
-        '✨ Transfers for ORML/Assets',
+        '✨ ORML/Assets transfer',
         '📈 Staking analytics',
-        '🥞 Staking rewards history'
+        '🥞 Staking rewards'
     ]
     '''
     features = ['📚 Transfer History']
     for chain in chains:
         if (len(chain.get('assets')) > 1):
-            features.append('✨ Transfers for ORML/Assets')
+            features.append('✨ ORML/Assets transfer')
         if (chain.get('assets')[0].get('staking')):
             if (chain.get('assets')[0].get('staking') == 'relaychain'):
                 features.append('📈 Staking analytics')
-            features.append('🥞 Staking rewards history')
+            features.append('🥞 Staking rewards')
     return '<br />'.join(features)
 
 def send_http_request(url):
