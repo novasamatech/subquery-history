@@ -142,7 +142,7 @@ def check_features(chains):
     features = ['📚 Transfer History']
     for chain in chains:
         if (len(chain.get('assets')) > 1):
-            features.append('✨ ORML/Assets transfer')
+            features.append('✨ ORML/Assets')
         if (chain.get('assets')[0].get('staking')):
             if (chain.get('assets')[0].get('staking') == 'relaychain'):
                 features.append('📈 Staking analytics')
