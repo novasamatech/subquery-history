@@ -134,7 +134,7 @@ def check_features(chains):
     features may be:
     [
         '📚 Transfer History',
-        '✨ ORML/Assets transfer',
+        '✨ ORML/Assets',
         '📈 Staking analytics',
         '🥞 Staking rewards'
     ]
