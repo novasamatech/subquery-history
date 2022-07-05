@@ -119,9 +119,8 @@ def generate_network_list(url):
     for project in available_projects:
         with open("./networks/%s/project.yaml" % project, 'r') as stream:
             project_data = yaml.safe_load(stream)
-        project_genesis = project_data.get('network').get('genesisHash')
-        print(project)
-        chain = [chain for chain in chains_list if chain.get('chainId') == project_genesis[2:]]
+        project_genesis = remove_hex_prefix(project_data.get('network').get('genesisHash'))
+        chain = [chain for chain in chains_list if chain.get('chainId') == project_genesis]
         feature_list.append({
                 "name": project,
                 "genesis": project_genesis,
@@ -130,24 +129,38 @@ def generate_network_list(url):
     return feature_list
 
 def check_features(chains):
-    '''
-    features may be:
-    [
-        '📚 Transfer History',
-        '✨ ORML/Assets',
-        '📈 Staking analytics',
-        '🥞 Staking rewards'
-    ]
-    '''
-    features = ['📚 Transfer History']
-    for chain in chains:
-        if (len(chain.get('assets')) > 1):
-            features.append('✨ ORML/Assets')
-        if (chain.get('assets')[0].get('staking')):
-            if (chain.get('assets')[0].get('staking') == 'relaychain'):
-                features.append('📈 Staking analytics')
-            features.append('🥞 Staking rewards')
-    return '<br />'.join(features)
+	def has_transfer_history(chain):
+		return True
+
+	def has_orml_or_asset(chain):
+		if (len(chain.get('assets')) > 1):
+			return True
+		return False
+
+	def has_staking_analytics(chain):
+		if (chain.get('assets')[0].get('staking') == 'relaychain'):
+			return True
+		return False
+
+	def has_rewards_history(chain):
+		if (chain.get('assets')[0].get('staking')):
+			return True
+		return False
+
+	features = []
+
+	dict = {
+		"📚 Transfer History" : has_transfer_history,
+		"✨ ORML/Assets" : has_orml_or_asset,
+		"📈 Staking analytics" : has_staking_analytics,
+		"🥞 Staking rewards": has_rewards_history
+	}
+
+	for key, value in dict.items():
+		for chain in chains:
+			if (value(chain)):
+				features.append(key)
+	return '<br />'.join(features)
 
 def send_http_request(url):
     try:
@@ -156,6 +169,9 @@ def send_http_request(url):
         raise SystemExit(e)
 
     return json.loads(response.text)
+
+def remove_hex_prefix(hex_string):
+    return hex_string[2:]
 
 if __name__ == '__main__':
 
