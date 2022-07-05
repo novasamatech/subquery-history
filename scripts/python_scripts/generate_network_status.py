@@ -124,11 +124,11 @@ def generate_network_list(url):
         feature_list.append({
                 "name": project,
                 "genesis": project_genesis,
-                "features": check_features(chain)
+                "features": check_features(chain[0] if len(chain) == 1 else None)
             })
     return feature_list
 
-def check_features(chains):
+def check_features(chain):
 	def has_transfer_history(chain):
 		return True
 
@@ -155,9 +155,10 @@ def check_features(chains):
 		"🥞 Staking rewards": has_rewards_history
 	}
 
-	features = []
-	for chain in chains:
-		features = [feature for feature, criteria in dict.items() if criteria(chain) == True]
+	if (chain == None):
+		return next(iter(dict))
+
+	features = [feature for feature, criteria in dict.items() if criteria(chain) == True]
 
 	return '<br />'.join(features)
 
