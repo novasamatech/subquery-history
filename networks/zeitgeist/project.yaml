@@ -80,3 +80,8 @@ dataSources:
           filter:
             module: staking
             method: StakersElected
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
