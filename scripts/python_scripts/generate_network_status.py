@@ -133,8 +133,9 @@ def check_features(chains):
 		return True
 
 	def has_orml_or_asset(chain):
-		if (len(chain.get('assets')) > 1):
-			return True
+		for asset in chain.get('assets'):
+			if (asset.get('type') in ['orml', 'statemine']):
+				return True
 		return False
 
 	def has_staking_analytics(chain):
@@ -147,19 +148,17 @@ def check_features(chains):
 			return True
 		return False
 
-	features = []
-
 	dict = {
-		"📚 Transfer History" : has_transfer_history,
-		"✨ ORML/Assets" : has_orml_or_asset,
+		"📚 Operation History" : has_transfer_history,
+		"✨ Multi assets" : has_orml_or_asset,
 		"📈 Staking analytics" : has_staking_analytics,
 		"🥞 Staking rewards": has_rewards_history
 	}
 
-	for key, value in dict.items():
-		for chain in chains:
-			if (value(chain)):
-				features.append(key)
+	features = []
+	for chain in chains:
+		features = [feature for feature, criteria in dict.items() if criteria(chain) == True]
+
 	return '<br />'.join(features)
 
 def send_http_request(url):
