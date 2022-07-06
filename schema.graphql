@@ -83,3 +83,12 @@ type ErrorEvent @entity {
   id: ID!
   description: String!
 }
+
+type Multisig @entity {
+  id: ID! #callHash
+  createdBy: String!
+  signedBy: [String]!
+  cancelledBy: String
+  multisigAccount: String!
+  status: String!
+}

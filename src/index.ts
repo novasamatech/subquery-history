@@ -4,4 +4,5 @@ export * from './mappings/Rewards'
 export * from './mappings/Transfers'
 export * from './mappings/NewEra'
 export * from './mappings/StakeChanged'
+export * from './mappings/Multisig'
 import "@polkadot/api-augment"

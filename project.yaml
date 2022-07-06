@@ -12,7 +12,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 11471090
     mapping:
       file: ./dist/index.js
       handlers:
@@ -68,3 +68,23 @@ dataSources:
           filter:
             module: staking
             method: StakersElected
+        - handler: handleCreateMultisig
+          kind: substrate/EventHandler
+          filter:
+            module: multisig
+            method: NewMultisig
+        - handler: handleApproveMultisig
+          kind: substrate/EventHandler
+          filter:
+            module: multisig
+            method: MultisigApproval
+        - handler: handleExecuteMultisig
+          kind: substrate/EventHandler
+          filter:
+            module: multisig
+            method: MultisigExecuted
+        - handler: handleCancelMultisig
+          kind: substrate/EventHandler
+          filter:
+            module: multisig
+            method: MultisigCancelled
