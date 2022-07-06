@@ -18,41 +18,11 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleReward
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Reward
-        - handler: handleRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Rewarded
         - handler: handleParachainRewarded
           kind: substrate/EventHandler
-          filter:	
+          filter:
             module: parachainStaking
             method: Rewarded
-        - handler: handleSlash
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slash
-        - handler: handleSlashed
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slashed
-        - handler: handleBonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Bonded
-        - handler: handleUnbonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Unbonded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -63,16 +33,6 @@ dataSources:
           filter:
             module: balances
             method: transfer_keep_alive
-        - handler: handleNewEra
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakingElection
-        - handler: handleStakersElected
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakersElected
         - handler: handleAssetTransfer
           kind: substrate/EventHandler
           filter:
