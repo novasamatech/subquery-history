@@ -40,8 +40,8 @@ STAKING_ANALITIC="📊 Current stake — returns bonded amount:
 <code>query {stakeChanges{nodes{blockNumber extrinsicHash address amount accumulatedAmount type}}}</code>
 </br>"
 
-MULTIASSET_PROJECTS=('statemine parallel parallel-heiko westmint moonbeam moonriver astar shiden karura acala bifrost interlay kintsugi')
-HAS_STAKING=('polkadot kusama westend moonbeam moonriver')
+MULTIASSET_PROJECTS=('statemine parallel parallel-heiko westmint moonbeam moonriver astar shiden karura acala bifrost interlay kintsugi turing')
+HAS_STAKING=('polkadot kusama westend moonbeam moonriver turing zeitgeist bifrost edgeware aleph-zero polkadex')
 HAS_STAKING_ANALYTIC=('polkadot kusama westend')
 
 
@@ -62,7 +62,7 @@ for item in ${folders[*]}; do
     DESCRIPTION+=${STAKING_ANALITIC}
   fi
 
-  $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key $item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
+  $MAIN_DIRECTORY/subquery --token ${SUBQUERY_TOKEN} project update --org ${ORGANISATION} --key ${ORGANISATION}"-"$item --description "${DESCRIPTION}" --subtitle "Nova Wallet SubQuery project for ${item^} network"
 
 done
 
