@@ -32,7 +32,7 @@ dataSources:
             method: Rewarded
         - handler: handleParachainRewarded
           kind: substrate/EventHandler
-          filter:	
+          filter:
             module: parachainStaking
             method: Rewarded
         - handler: handleSlash
