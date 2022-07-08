@@ -6,8 +6,8 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x2fc8bb6ed7c0051bdcf4866c322ed32b6276572713607e3297ccf411b8f14aa9'
-  endpoint: wss://rpc.litentry-parachain.litentry.io
+  genesisHash: '0xfeb426ca713f0f46c96465b8f039890370cf6bfd687c9076ea2843f58a6ae8a7'
+  endpoint: 'wss://kabocha.jelliedowl.com'
 
 dataSources:
   - name: main
@@ -18,41 +18,11 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleReward
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Reward
-        - handler: handleRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Rewarded
         - handler: handleParachainRewarded
           kind: substrate/EventHandler
           filter:
             module: parachainStaking
             method: Rewarded
-        - handler: handleSlash
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slash
-        - handler: handleSlashed
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slashed
-        - handler: handleBonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Bonded
-        - handler: handleUnbonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Unbonded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -63,16 +33,6 @@ dataSources:
           filter:
             module: balances
             method: transfer_keep_alive
-        - handler: handleNewEra
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakingElection
-        - handler: handleStakersElected
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakersElected
         - handler: handleAssetTransfer
           kind: substrate/EventHandler
           filter:
