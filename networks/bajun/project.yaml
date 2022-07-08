@@ -6,7 +6,7 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x0e06260459b4f9034aba0a75108c08ed73ea51d2763562749b1d3600986c4ea5'
+  genesisHash: '0x35a06bfec2edf0ff4be89a6428ccd9ff5bd0167d618c5a0d4341f9600a458d14'
   endpoint: wss://rpc-parachain.bajun.network
 
 dataSources:
