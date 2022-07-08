@@ -120,11 +120,11 @@ def generate_network_list(url):
         with open("./networks/%s/project.yaml" % project, 'r') as stream:
             project_data = yaml.safe_load(stream)
         project_genesis = remove_hex_prefix(project_data.get('network').get('genesisHash'))
-        chain = [chain for chain in chains_list if chain.get('chainId') == project_genesis]
+        chain = next(iter([chain for chain in chains_list if chain.get('chainId') == project_genesis]), None)
         feature_list.append({
                 "name": project,
                 "genesis": project_genesis,
-                "features": check_features(chain[0] if len(chain) == 1 else None)
+                "features": check_features(chain)
             })
     return feature_list
 
@@ -156,7 +156,7 @@ def check_features(chain):
 	}
 
 	if (chain == None):
-		return next(iter(dict))
+		return list(dict.keys())[0]
 
 	features = [feature for feature, criteria in dict.items() if criteria(chain) == True]
 
