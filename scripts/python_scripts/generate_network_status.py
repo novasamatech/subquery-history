@@ -15,6 +15,14 @@ nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/ma
 
 readme = Template("""
 Projects' status is updated every 4 hours
+
+Features supported by projects:
+
+📚 Operation History - Include regular account history with transfered the Netwok token and all extrinsics \
+✨ Multi assets - Responsible for collecting the history for tokens using ORML and Assets pallets \
+🥞 Staking rewards - Provide rewards history and total rewards accumulation, including parachain staking \
+📈 Staking analytics - Support additional information about staking such: current stake, validators statistics, and stake change history
+
 # List of deployed projects
 
 {{dapps_table}}
@@ -78,7 +86,7 @@ def generate_progress_status(network):
                 progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
                     percent, percent, instance.get('type').capitalize())
         else:
-            progress_bar = '![0](https://progress-bar.dev/0?title=Not%20Deployed)'
+            progress_bar = '![0](https://progress-bar.dev/0?title=N/D)'
             commit = '-'
         return progress_bar, commit
 
