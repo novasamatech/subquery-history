@@ -18,9 +18,9 @@ Projects' status is updated every 4 hours
 
 Features supported by projects:
 
-📚 Operation History - Include regular account history with transfered the Netwok token and all extrinsics \
-✨ Multi assets - Responsible for collecting the history for tokens using ORML and Assets pallets \
-🥞 Staking rewards - Provide rewards history and total rewards accumulation, including parachain staking \
+📚 Operation History - Include regular account history with transfered the Netwok token and all extrinsics <br />
+✨ Multi assets - Responsible for collecting the history for tokens using ORML and Assets pallets <br />
+🥞 Staking rewards - Provide rewards history and total rewards accumulation, including parachain staking <br />
 📈 Staking analytics - Support additional information about staking such: current stake, validators statistics, and stake change history
 
 # List of deployed projects
