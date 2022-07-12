@@ -16,7 +16,7 @@ nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/ma
 readme = Template("""
 Projects' status is updated every 4 hours
 
-Features supported by projects:
+SubQuery API data sources are grouped based on the following features:
 
 📚 Operation History - Include regular account history with transfered the Netwok token and all extrinsics <br />
 ✨ Multi assets - Responsible for collecting the history for tokens using ORML and Assets pallets <br />
@@ -86,7 +86,7 @@ def generate_progress_status(network):
                 progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
                     percent, percent, instance.get('type').capitalize())
         else:
-            progress_bar = '![0](https://progress-bar.dev/0?title=N/D)'
+            progress_bar = '![0](https://progress-bar.dev/0?title=N/A)'
             commit = '-'
         return progress_bar, commit
 
