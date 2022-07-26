@@ -57,6 +57,7 @@ def get_deployments_list(network: str):
             if (production_instance): continue
             production_instance = instance
         else:
+            if (stage_instance): continue
             stage_instance = instance
 
     return production_instance, stage_instance
