@@ -9,7 +9,7 @@ from jinja2 import Template
 from pytablewriter import MarkdownTableWriter
 from subquery_cli import use_subquery_cli
 
-subquery_cli_version = '0.2.5'
+subquery_cli_version = '0.2.10'
 token = os.environ['SUBQUERY_TOKEN']
 nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v4/chains_dev.json"
 
@@ -54,8 +54,10 @@ def get_deployments_list(network: str):
 
     for instance in json.loads(deployments):
         if (instance.get('type') == 'primary'):
+            if (production_instance): continue
             production_instance = instance
         else:
+            if (stage_instance): continue
             stage_instance = instance
 
     return production_instance, stage_instance
