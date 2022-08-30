@@ -11,7 +11,7 @@ from subquery_cli import use_subquery_cli
 
 subquery_cli_version = '0.2.10'
 token = os.environ['SUBQUERY_TOKEN']
-nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v4/chains_dev.json"
+nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v5/chains_dev.json"
 
 readme = Template("""
 Projects' status is updated every 4 hours
