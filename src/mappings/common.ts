@@ -108,7 +108,7 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
 }
 
 export function getEventData(event: SubstrateEvent): GenericEventData {
-    return event.event.data
+    return event.event.data as GenericEventData
 }
 
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
@@ -123,7 +123,7 @@ function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigi
     if (eventRecord != undefined) {
         const {event: {data: [, fee]}}= eventRecord
 
-        return (fee as Balance).toBigInt()
+        return (fee as unknown as Balance).toBigInt()
     }
 
     return BigInt(0)
@@ -133,7 +133,7 @@ function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic, from:
     const eventRecord = extrinsic.events.find((event) =>
         event.event.method == "Withdraw" && event.event.section == "balances"
     )
-    
+
     if (eventRecord !== undefined) {
         const {
             event: {
@@ -143,8 +143,7 @@ function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic, from:
 
         const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
         const withdrawAccountId = accountid.toString()
-        
-        return extrinsicSigner === withdrawAccountId ? (fee as Balance).toBigInt() :  BigInt(0)
+        return extrinsicSigner === withdrawAccountId ? (fee as unknown as Balance).toBigInt() :  BigInt(0)
     }
 
     return BigInt(0)
@@ -158,7 +157,7 @@ function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigin
     if (eventRecord != undefined) {
         const {event: {data: [, fee]}}= eventRecord
 
-        return (fee as Balance).toBigInt()
+        return (fee as unknown as Balance).toBigInt()
     }
 
     return BigInt(0)
@@ -172,7 +171,7 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
     if (eventRecord != undefined) {
         const {event: {data: [fee]}}= eventRecord
 
-        return (fee as Balance).toBigInt()
+        return (fee as unknown as Balance).toBigInt()
     } else  {
         return BigInt(0)
     }

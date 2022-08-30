@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova
+name: subquery-nova-parallel-heiko
 version: 1.0.0
 runner:
   node:
@@ -13,9 +13,12 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
+  chainId: '0x64a1c658a48b2e70a7fb1ad4c39eea35022568c20fc44a6e2e3d0a57aee6053b'
   endpoint: >-
-    wss://acala-polkadot.api.onfinality.io/ws
+    wss://parallel-heiko.api.onfinality.io/public-ws
+  dictionary: https://api.subquery.network/sq/subquery/parallel-heiko-dictionary
+  chaintypes:
+    file: ./dist/parallelHeikoChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -25,6 +28,11 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -45,8 +53,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded

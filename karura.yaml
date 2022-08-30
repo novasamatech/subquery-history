@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova
+name: subquery-nova-karura
 version: 1.0.0
 runner:
   node:
@@ -13,9 +13,12 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
+  chainId: '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b'
   endpoint: >-
-    wss://acala-polkadot.api.onfinality.io/ws
+    wss://karura.polkawallet.io
+  dictionary: https://api.subquery.network/sq/AcalaNetwork/karura-dictionary
+  chaintypes:
+    file: ./dist/karuraChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -25,6 +28,11 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -35,18 +43,8 @@ dataSources:
           filter:
             module: assets
             method: Transferred
-        - handler: handleCurrencyTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: currencies
-            method: Transferred
         - handler: handleTokenTransfer
           kind: substrate/EventHandler
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded

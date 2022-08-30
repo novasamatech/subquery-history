@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova
+name: subquery-nova-moonbeam
 version: 1.0.0
 runner:
   node:
@@ -13,18 +13,26 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
+  chainId: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d'
   endpoint: >-
-    wss://acala-polkadot.api.onfinality.io/ws
+    wss://moonbeam.api.onfinality.io/public-ws
+  dictionary: https://api.subquery.network/sq/subquery/moonbeam-dictionary
+  chaintypes:
+    file: ./dist/moonbeamChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 150000
     mapping:
       file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -45,8 +53,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded

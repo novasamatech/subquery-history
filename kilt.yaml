@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova
+name: subquery-nova-kilt
 version: 1.0.0
 runner:
   node:
@@ -13,13 +13,15 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
+  chainId: '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21'
   endpoint: >-
-    wss://acala-polkadot.api.onfinality.io/ws
+    wss://spiritnet.api.onfinality.io/public-ws
+  chaintypes:
+    file: ./dist/kiltChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 200
     mapping:
       file: ./dist/index.js
       handlers:
@@ -45,8 +47,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
