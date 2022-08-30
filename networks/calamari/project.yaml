@@ -7,7 +7,7 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0x4ac80c99289841dd946ef92765bf659a307d39189b3ce374a92b5f0415ee17a1'
-  endpoint: wss://calamari.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
+  endpoint: wss://ws.calamari.systems/
   dictionary: https://api.subquery.network/sq/subquery/calamari-dictionary
 
 dataSources:
