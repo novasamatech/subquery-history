@@ -7,12 +7,12 @@ schema:
   file: ./schema.graphql
 network:
   genesisHash: '0x335369975fced3fc22e23498da306a712f4fd964c957364d53c49cea9db8bc2f'
-  endpoint: wss://rpc.efinity.io
+  endpoint: wss://efinity-rpc.dwellir.com
 
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 796254
+    startBlock: 1
     mapping:
       file: ./dist/src/index.js
       handlers:
