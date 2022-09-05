@@ -31,7 +31,8 @@
     "acalaChaintypes": "./chainTypes/acalaChaintypes.ts",
     "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
     "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts",
-    "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts"
+    "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts",
+    "encointerChaintypes": "./chainTypes/encointerChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
