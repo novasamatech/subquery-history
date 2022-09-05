@@ -15,7 +15,7 @@ schema:
 network:
   chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
   endpoint: >-
-    wss://acala-polkadot.api.onfinality.io/ws?apikey=07f15f84-2391-4ac6-9397-d840c0141bb0
+    wss://acala.polkawallet.io
   dictionary: https://api.subquery.network/sq/subquery/acala-dictionary
   chaintypes:
     file: ./dist/acalaChaintypes.js
