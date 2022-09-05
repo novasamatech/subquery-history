@@ -309,6 +309,7 @@ async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean)
         accumulatedReward = new AccumulatedReward(accountAddress);
         accumulatedReward.amount = BigInt(0)
     }
+    // @ts-ignore
     const newAmount = (amount as Balance).toBigInt()
     accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
     await accumulatedReward.save()

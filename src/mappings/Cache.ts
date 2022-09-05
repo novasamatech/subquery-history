@@ -31,6 +31,7 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
         // looks like accountAddress not related to events so just try to query payee directly
         if (allAccountsInBlock.length === 0) {
             rewardDestinationByAddress[blockId] = {}
+            // @ts-ignore
             return await api.query.staking.payee(accountAddress)
         }
 
@@ -38,6 +39,7 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
         // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
         const payees = await api.queryMulti(allAccountsInBlock.map(account => ([api.query.staking.payee, account])));
 
+        // @ts-ignore
         const rewardDestinations = payees.map(payee => { return payee as RewardDestination });
         
         let destinationByAddress: {[address: string]: RewardDestination} = {}
@@ -45,8 +47,10 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
         // something went wrong, so just query for single accountAddress
         if (rewardDestinations.length !== allAccountsInBlock.length) {
             const payee = await api.query.staking.payee(accountAddress)
+            // @ts-ignore
             destinationByAddress[accountAddress] = payee
             rewardDestinationByAddress[blockId] = destinationByAddress
+            // @ts-ignore
             return payee
         }
         allAccountsInBlock.forEach((account, index) => { 
