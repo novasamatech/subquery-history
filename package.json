@@ -24,6 +24,7 @@
     "@interlay/interbtc-types": "^1.5.10",
     "@zeroio/type-definitions": "^0.0.14",
     "@kiltprotocol/type-definitions": "^0.1.23",
+    "moonbeam-types-bundle": "^2.0.8",
     "@phala/typedefs": "^0.2.31",
     "@polkadot/api": "^7",
     "@subql/cli": "^1.6.0",
@@ -41,7 +42,8 @@
     "karuraChaintypes": "./chainTypes/karuraChaintypes.ts",
     "khalaChaintypes": "./chainTypes/khalaChaintypes.ts",
     "kiltChaintypes": "./chainTypes/kiltChaintypes.ts",
-    "kintsugiChaintypes": "./chainTypes/kintsugiChaintypes.ts"
+    "kintsugiChaintypes": "./chainTypes/kintsugiChaintypes.ts",
+    "moonbeamChaintypes": "./chainTypes/moonbeamChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
