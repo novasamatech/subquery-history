@@ -35,7 +35,8 @@
     "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts",
     "encointerChaintypes": "./chainTypes/encointerChaintypes.ts",
     "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts",
-    "interlayChaintypes": "./chainTypes/interlayChaintypes.ts"
+    "interlayChaintypes": "./chainTypes/interlayChaintypes.ts",
+    "karuraChaintypes": "./chainTypes/karuraChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
