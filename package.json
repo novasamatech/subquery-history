@@ -32,7 +32,8 @@
     "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
     "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts",
     "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts",
-    "encointerChaintypes": "./chainTypes/encointerChaintypes.ts"
+    "encointerChaintypes": "./chainTypes/encointerChaintypes.ts",
+    "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
