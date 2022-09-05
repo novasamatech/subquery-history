@@ -1,7 +1,7 @@
 version: '3'
-
 services:
   postgres:
+    container_name: "postgres-${PRJECT_PATH}"
     image: postgres:12-alpine
     ports:
       - 5432:5432
@@ -16,6 +16,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
   subquery-node:
+    container_name: "node-${PRJECT_PATH}"
     image: onfinality/subql-node:v1.9.1
     depends_on:
       postgres:
@@ -30,11 +31,12 @@ services:
     volumes:
       - ./:/app
     command:
-      - -f=/app
+      - -f=/app/${PRJECT_PATH}
       # - --local #remove
       # - --batch-size=50
 
   graphql-engine:
+    container_name: "query-${PRJECT_PATH}"
     image: onfinality/subql-query:v1.5.0
     ports:
       - 3000:3000
