@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@acala-network/type-definitions": "^4.1.5",
+    "@interlay/interbtc-types": "^1.5.10",
     "@zeroio/type-definitions": "^0.0.14",
     "@polkadot/api": "^7",
     "@subql/cli": "^1.6.0",
@@ -33,7 +34,8 @@
     "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts",
     "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts",
     "encointerChaintypes": "./chainTypes/encointerChaintypes.ts",
-    "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts"
+    "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts",
+    "interlayChaintypes": "./chainTypes/interlayChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
