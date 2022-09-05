@@ -99,11 +99,13 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
             }
 
             let accountAddress = account.toString()
+            // @ts-ignore
             let rewardDestination = await cachedRewardDestination(accountAddress, eventRecord as SubstrateEvent)
 
             if (rewardDestination.isStaked || rewardDestination.isStash) {
                 accountsMapping[accountAddress] = accountAddress
             } else if (rewardDestination.isController) {
+                // @ts-ignore
                 accountsMapping[accountAddress] = await cachedController(accountAddress, eventRecord as SubstrateEvent)
             } else if (rewardDestination.isAccount) {
                 accountsMapping[accountAddress] = rewardDestination.asAccount.toString()
