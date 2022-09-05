@@ -29,7 +29,8 @@
   },
   "exports": {
     "acalaChaintypes": "./chainTypes/acalaChaintypes.ts",
-    "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts"
+    "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
+    "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
