@@ -23,6 +23,7 @@
     "@acala-network/type-definitions": "^4.1.5",
     "@interlay/interbtc-types": "^1.5.10",
     "@zeroio/type-definitions": "^0.0.14",
+    "@kiltprotocol/type-definitions": "^0.1.23",
     "@phala/typedefs": "^0.2.31",
     "@polkadot/api": "^7",
     "@subql/cli": "^1.6.0",
@@ -38,7 +39,8 @@
     "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts",
     "interlayChaintypes": "./chainTypes/interlayChaintypes.ts",
     "karuraChaintypes": "./chainTypes/karuraChaintypes.ts",
-    "khalaChaintypes": "./chainTypes/khalaChaintypes.ts"
+    "khalaChaintypes": "./chainTypes/khalaChaintypes.ts",
+    "kiltChaintypes": "./chainTypes/kiltChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
