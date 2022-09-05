@@ -40,7 +40,8 @@
     "interlayChaintypes": "./chainTypes/interlayChaintypes.ts",
     "karuraChaintypes": "./chainTypes/karuraChaintypes.ts",
     "khalaChaintypes": "./chainTypes/khalaChaintypes.ts",
-    "kiltChaintypes": "./chainTypes/kiltChaintypes.ts"
+    "kiltChaintypes": "./chainTypes/kiltChaintypes.ts",
+    "kintsugiChaintypes": "./chainTypes/kintsugiChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
