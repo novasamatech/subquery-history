@@ -30,7 +30,8 @@
   "exports": {
     "acalaChaintypes": "./chainTypes/acalaChaintypes.ts",
     "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
-    "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts"
+    "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts",
+    "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
