@@ -1,0 +1,51 @@
+name: Manual deploy to IPFS
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+env:
+  SUBQUERY_ORG: nova-wallet
+
+jobs:
+
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      project_files: ${{ steps.project_files.outputs.files }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: project_files
+        run: |
+          echo "::set-output name=files::$(.github/get_all_project_files.sh)"
+
+      - name: 🔄 Install dependencies
+        run: yarn install
+
+      - name: 🧬 Types generation
+        run: yarn codegen
+
+      - name: 🏗 Build from sources
+        run: yarn build
+
+      - name: 📬 Deploy to IPFS
+        run:  |
+          for item in ${{steps.project_files.outputs.files}}
+          do
+              echo Start deploy for $item..
+              ./node_modules/.bin/subql publish -f $item -o ./ipfs-cids/
+          done
+
+      - name: Commit files
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -f ipfs-cids/**/
+          git commit -m "Update CIDs for IFPS"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: refs/heads/update-deploy-${{github.run_number}}
