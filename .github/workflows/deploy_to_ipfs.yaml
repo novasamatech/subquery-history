@@ -16,8 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - id: project_files
+      - name: 🧾 Get list of projects
+        id: project_files
         run: |
+          chmod +x .github/get_all_project_files.sh
           echo "::set-output name=files::$(.github/get_all_project_files.sh)"
 
       - name: 🔄 Install dependencies
@@ -37,14 +39,14 @@ jobs:
               ./node_modules/.bin/subql publish -f $item -o ./ipfs-cids/
           done
 
-      - name: Commit files
+      - name: ➡️ Commit files
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -f ipfs-cids/**/
           git commit -m "Update CIDs for IFPS"
 
-      - name: Push changes
+      - name: 🏹 Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
