@@ -23,21 +23,7 @@ jobs:
           chmod +x .github/get_all_project_files.sh
           echo "::set-output name=files::$(.github/get_all_project_files.sh)"
 
-      - name: 🧾 Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: 🪫 Setup yarn cache
-        uses: actions/cache@v1
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: 🔄 Install dependencies
-        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn install
 
       - name: 🧬 Types generation
@@ -46,12 +32,6 @@ jobs:
       - name: 🏗 Build from sources
         run: yarn build
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: build
-          path: |
-            dist
-            src
 
   deploy-to-IPFS:
     needs: setup
@@ -65,28 +45,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: 🧾 Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: 🪫 Setup yarn cache
-        uses: actions/cache@v1
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: 🔄 Install dependencies
         if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn install
 
-      - name: Download built artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: build
-          path: ./
+      - name: 🧬 Types generation
+        run: yarn codegen
 
       - name: 📬 Deploy to IPFS
         run:  |
