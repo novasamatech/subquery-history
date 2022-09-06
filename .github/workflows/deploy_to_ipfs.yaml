@@ -35,7 +35,7 @@ jobs:
       - name: Create branch
         run: |
           git checkout -B refs/heads/update-cids-${{github.run_number}}
-          git push
+          git push --set-upstream origin refs/heads/update-cids-${{github.run_number}}
 
 
   deploy-to-IPFS:
