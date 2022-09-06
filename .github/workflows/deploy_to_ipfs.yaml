@@ -32,6 +32,11 @@ jobs:
       - name: 🏗 Build from sources
         run: yarn build
 
+      - name: Create branch
+        run: |
+          git checkout -B refs/heads/update-cids-${{github.run_number}}
+          git push
+
 
   deploy-to-IPFS:
     needs: setup
