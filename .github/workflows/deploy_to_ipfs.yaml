@@ -23,6 +23,23 @@ jobs:
           chmod +x .github/get_all_project_files.sh
           echo "::set-output name=files::$(.github/get_all_project_files.sh)"
 
+      - name: 🔄 Install dependencies
+        run: yarn install
+
+      - name: 🧬 Types generation
+        run: yarn codegen
+
+      - name: 🏗 Build from sources
+        run: yarn build
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: |
+            dist
+            node_modules
+            src
+
   deploy-to-IPFS:
     needs: setup
     name: 📬 Deploy to subquery IPFS
@@ -34,14 +51,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: 🔄 Install dependencies
-        run: yarn install
 
-      - name: 🧬 Types generation
-        run: yarn codegen
-
-      - name: 🏗 Build from sources
-        run: yarn build
+      - name: Download built artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: ./
 
       - name: 📬 Deploy to IPFS
         run:  |
@@ -54,7 +69,7 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add -f ipfs-cids/**/
+          git add -f ipfs-cids
           git commit -m "Update CIDs for IFPS"
 
       - name: 🏹 Push changes
