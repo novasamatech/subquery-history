@@ -75,4 +75,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: refs/heads/update-deploy-${{github.run_number}}
+          branch: refs/heads/update-cids-${{github.run_number}}
