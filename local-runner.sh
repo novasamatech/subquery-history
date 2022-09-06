@@ -7,7 +7,7 @@ if [ -z $1 ]; then
     exit 1
 fi
 
-export PRJECT_PATH=$1
+export PROJECT_PATH=$1
 
 docker rm -f $(docker-compose ps -a -q)
 sudo rm -rf .data/
