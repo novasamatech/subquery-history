@@ -1,6 +1,7 @@
 #!/bin/bash
 
 MAIN_DIRECTORY='.'
+arrVar=()
 
 for item in "$MAIN_DIRECTORY"/*.yaml
 do
@@ -10,6 +11,8 @@ do
     fi
 
     arrIN=(${item//\// })
-    echo ${arrIN[1]}
+    arrVar+=${arrIN[1]}' '
 
 done
+
+echo $arrVar
