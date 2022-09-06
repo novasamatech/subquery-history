@@ -23,6 +23,17 @@ jobs:
           chmod +x .github/get_all_project_files.sh
           echo "::set-output name=files::$(.github/get_all_project_files.sh)"
 
+  deploy-to-IPFS:
+    needs: setup
+    name: 📬 Deploy to subquery IPFS
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{fromJson(needs.setup.outputs.project_files)}}
+
+    steps:
+      - uses: actions/checkout@v2
       - name: 🔄 Install dependencies
         run: yarn install
 
@@ -34,11 +45,7 @@ jobs:
 
       - name: 📬 Deploy to IPFS
         run:  |
-          for item in ${{steps.project_files.outputs.files}}
-          do
-              echo Start deploy for $item..
-              ./node_modules/.bin/subql publish -f $item -o
-          done
+          ./node_modules/.bin/subql publish -f ${{ matrix.project_file }}  -o
 
       - name: Move cid files to separate folder
         run: mv  -v .*cid ./ipfs-cids
