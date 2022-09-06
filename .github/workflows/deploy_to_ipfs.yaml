@@ -6,6 +6,7 @@ on:
 
 env:
   SUBQUERY_ORG: nova-wallet
+  SUBQL_ACCESS_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
 
 jobs:
 
@@ -36,8 +37,11 @@ jobs:
           for item in ${{steps.project_files.outputs.files}}
           do
               echo Start deploy for $item..
-              ./node_modules/.bin/subql publish -f $item -o ./ipfs-cids/
+              ./node_modules/.bin/subql publish -f $item -o
           done
+
+      - name: Move cid files to separate folder
+        run: mv  -v .*cid ./ipfs-cids
 
       - name: ➡️ Commit files
         run: |
