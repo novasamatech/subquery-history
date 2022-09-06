@@ -4,7 +4,6 @@ src/types
 .data
 .idea
 .DS_Store
-yarn.lock
 .venv
 .vscode
 __pycache__
