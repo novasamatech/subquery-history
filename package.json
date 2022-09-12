@@ -50,7 +50,8 @@
     "pichiuChaintypes": "./chainTypes/pichiuChaintypes.ts",
     "shidenChaintypes": "./chainTypes/shidenChaintypes.ts",
     "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
-    "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts"
+    "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
+    "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"

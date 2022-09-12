@@ -15,6 +15,8 @@ schema:
 network:
   chainId: '0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e'
   endpoint: wss://mainnet.ternoa.network
+  chaintypes:
+    file: ./dist/ternoaChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
