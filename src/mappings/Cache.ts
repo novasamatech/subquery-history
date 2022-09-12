@@ -46,10 +46,8 @@ export async function cachedRewardDestination(accountAddress: string, event: Sub
         // something went wrong, so just query for single accountAddress
         if (rewardDestinations.length !== allAccountsInBlock.length) {
             const payee = await api.query.staking.payee(accountAddress)
-
             destinationByAddress[accountAddress] = payee
             rewardDestinationByAddress[blockId] = destinationByAddress
-
             return payee
         }
         allAccountsInBlock.forEach((account, index) => {

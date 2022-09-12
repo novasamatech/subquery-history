@@ -109,7 +109,6 @@ async function createTransfer({
   element.timestamp = timestamp(event.block);
   element.blockNumber = blockNumber(event);
   if (event.extrinsic !== undefined) {
-
     if (isEvmTransaction(event.extrinsic.extrinsic.method)) {
       const executedEvent = event.extrinsic.events.find(isEvmExecutedEvent);
       element.extrinsicHash =

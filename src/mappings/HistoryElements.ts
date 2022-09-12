@@ -36,7 +36,6 @@ export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promi
         } else {
             await saveExtrinsic(extrinsic)
         }
-
     } else if (isEvmTransaction(extrinsic.extrinsic.method) && extrinsic.success) {
         await saveEvmExtrinsic(extrinsic)
     }
@@ -126,7 +125,6 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
     if (extrinsic.success) {
         return null;
     }
-
 
     let transferCallsArgs = determineTransferCallsArgs(extrinsic.extrinsic.method)
     if (transferCallsArgs.length == 0) {

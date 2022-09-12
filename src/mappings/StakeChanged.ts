@@ -8,7 +8,6 @@ export async function handleBonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
     let address = stash.toString()
-
     let amountBalance = (amount as unknown as Balance).toBigInt()
     let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
 
@@ -31,7 +30,6 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
     let address = stash.toString()
-
     let amountBalance = (amount as unknown as Balance).toBigInt()
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
@@ -54,7 +52,6 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     const {event: {data: [validatorOrNominatorAccountId, amount]}} = event;
 
     let address = validatorOrNominatorAccountId.toString()
-
     let amountBalance = (amount as unknown as Balance).toBigInt()
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
@@ -84,7 +81,6 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
 
     const payee = await cachedRewardDestination(accountAddress, event)
     if (payee.isStaked) {
-
         let amountBalance = (amount as unknown as Balance).toBigInt()
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 

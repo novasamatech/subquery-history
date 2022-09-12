@@ -90,7 +90,6 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
         const withdrawFee = exportFeeFromBalancesWithdrawEvent(extrinsic, from)
 
         if (withdrawFee !== BigInt(0)) {
-
             if (isEvmTransaction(extrinsic.extrinsic.method)){
                 const feeRefund = exportFeeRefund(extrinsic, from)
                 return feeRefund ? (withdrawFee - feeRefund).toString() : withdrawFee.toString();
@@ -109,7 +108,6 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
 }
 
 export function getEventData(event: SubstrateEvent): GenericEventData {
-
     return event.event.data as GenericEventData
 }
 
@@ -145,7 +143,6 @@ function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic, from:
 
         const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
         const withdrawAccountId = accountid.toString()
-
         return extrinsicSigner === withdrawAccountId ? (fee as unknown as Balance).toBigInt() :  BigInt(0)
     }
 
