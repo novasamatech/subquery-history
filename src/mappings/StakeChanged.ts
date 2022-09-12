@@ -1,16 +1,15 @@
 import {SubstrateEvent} from "@subql/types";
 import {AccumulatedStake, StakeChange} from "../types";
-import {blockNumber, eventId, timestamp} from "./common";
+import {eventId, timestamp} from "./common";
 import {Balance} from "@polkadot/types/interfaces";
-import {RewardDestination} from "@polkadot/types/interfaces/staking";
 import {cachedRewardDestination} from "./Cache"
 
 export async function handleBonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
     let address = stash.toString()
-    // @ts-ignore
-    let amountBalance = (amount as Balance).toBigInt()
+
+    let amountBalance = (amount as unknown as Balance).toBigInt()
     let accumulatedAmount = await handleAccumulatedStake(address, amountBalance)
 
     const element = new StakeChange(eventId(event));
@@ -32,8 +31,8 @@ export async function handleUnbonded(event: SubstrateEvent): Promise<void> {
     const {event: {data: [stash, amount]}} = event;
 
     let address = stash.toString()
-    // @ts-ignore
-    let amountBalance = (amount as Balance).toBigInt()
+
+    let amountBalance = (amount as unknown as Balance).toBigInt()
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
@@ -55,8 +54,8 @@ export async function handleSlashForAnalytics(event: SubstrateEvent): Promise<vo
     const {event: {data: [validatorOrNominatorAccountId, amount]}} = event;
 
     let address = validatorOrNominatorAccountId.toString()
-    // @ts-ignore
-    let amountBalance = (amount as Balance).toBigInt()
+
+    let amountBalance = (amount as unknown as Balance).toBigInt()
     let accumulatedAmount = await handleAccumulatedStake(address, -amountBalance)
 
     const element = new StakeChange(eventId(event));
@@ -85,8 +84,8 @@ export async function handleRewardRestakeForAnalytics(event: SubstrateEvent): Pr
 
     const payee = await cachedRewardDestination(accountAddress, event)
     if (payee.isStaked) {
-        // @ts-ignore
-        let amountBalance = (amount as Balance).toBigInt()
+
+        let amountBalance = (amount as unknown as Balance).toBigInt()
         let accumulatedAmount = await handleAccumulatedStake(accountAddress, amountBalance)
 
         const element = new StakeChange(eventId(event));

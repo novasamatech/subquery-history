@@ -90,7 +90,7 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
         const withdrawFee = exportFeeFromBalancesWithdrawEvent(extrinsic, from)
 
         if (withdrawFee !== BigInt(0)) {
-            // @ts-ignore
+
             if (isEvmTransaction(extrinsic.extrinsic.method)){
                 const feeRefund = exportFeeRefund(extrinsic, from)
                 return feeRefund ? (withdrawFee - feeRefund).toString() : withdrawFee.toString();
@@ -109,8 +109,8 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
 }
 
 export function getEventData(event: SubstrateEvent): GenericEventData {
-    // @ts-ignore
-    return event.event.data
+
+    return event.event.data as GenericEventData
 }
 
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
@@ -124,8 +124,8 @@ function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigi
 
     if (eventRecord != undefined) {
         const {event: {data: [, fee]}}= eventRecord
-        // @ts-ignore
-        return (fee as Balance).toBigInt()
+
+        return (fee as unknown as Balance).toBigInt()
     }
 
     return BigInt(0)
@@ -135,7 +135,7 @@ function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic, from:
     const eventRecord = extrinsic.events.find((event) =>
         event.event.method == "Withdraw" && event.event.section == "balances"
     )
-    
+
     if (eventRecord !== undefined) {
         const {
             event: {
@@ -145,8 +145,8 @@ function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic, from:
 
         const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
         const withdrawAccountId = accountid.toString()
-        // @ts-ignore
-        return extrinsicSigner === withdrawAccountId ? (fee as Balance).toBigInt() :  BigInt(0)
+
+        return extrinsicSigner === withdrawAccountId ? (fee as unknown as Balance).toBigInt() :  BigInt(0)
     }
 
     return BigInt(0)
@@ -159,8 +159,8 @@ function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigin
 
     if (eventRecord != undefined) {
         const {event: {data: [, fee]}}= eventRecord
-        // @ts-ignore
-        return (fee as Balance).toBigInt()
+
+        return (fee as unknown as Balance).toBigInt()
     }
 
     return BigInt(0)
@@ -173,8 +173,8 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
 
     if (eventRecord != undefined) {
         const {event: {data: [fee]}}= eventRecord
-        // @ts-ignore
-        return (fee as Balance).toBigInt()
+
+        return (fee as unknown as Balance).toBigInt()
     } else  {
         return BigInt(0)
     }
