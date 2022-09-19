@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova
+name: subquery-nova-khala
 version: 1.0.0
 runner:
   node:
@@ -13,9 +13,11 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c'
-  endpoint: >-
-    wss://acala-polkadot.api.onfinality.io/ws
+  chainId: '0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d'
+  endpoint: wss://khala.api.onfinality.io/public-ws
+  dictionary: https://api.subquery.network/sq/subquery/khala-dictionary
+  chaintypes:
+    file: ./dist/khalaChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -25,6 +27,11 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -45,8 +52,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
