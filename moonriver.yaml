@@ -43,6 +43,11 @@ dataSources:
           filter:
             module: assets
             method: Transferred
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: localassets
+            method: Transferred
         - handler: handleCurrencyTransfer
           kind: substrate/EventHandler
           filter:
