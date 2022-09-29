@@ -1,9 +1,6 @@
-import type { OverrideBundleDefinition } from '@polkadot/types/types';
+import { OverrideBundleType } from "@polkadot/types/types";
 
-// structs need to be in order
-/* eslint-disable sort-keys */
-
-const definitions: OverrideBundleDefinition = {
+const types = {
   types: [
     {
       // on all versions
@@ -26,6 +23,14 @@ const definitions: OverrideBundleDefinition = {
       }
     }
   ]
+}
+
+const typesBundle: OverrideBundleType = {
+  spec: {
+    "kylin": types,
+  },
 };
 
-export default definitions;
+export default {
+  typesBundle,
+};
