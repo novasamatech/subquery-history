@@ -32,6 +32,7 @@ services:
       - ./:/app
     command:
       - -f=/app/${PROJECT_PATH}
+      - --disable-historical=true
       # - --local #remove
       # - --batch-size=50
 
