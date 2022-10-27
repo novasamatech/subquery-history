@@ -6,6 +6,9 @@ import os
 import requests
 import yaml
 from jinja2 import Template
+
+from os import listdir
+from os.path import isfile, join
 from pytablewriter import MarkdownTableWriter
 from subquery_cli import use_subquery_cli
 
@@ -41,9 +44,9 @@ def generate_networks_list():
 
 
 def get_networks_list(folder):
-    sub_folders = [name for name in os.listdir(
-        folder) if os.path.isdir(os.path.join(folder, name))]
-    return sub_folders
+    onlyfiles = [f for f in listdir(folder) if isfile(join(folder, f))]
+    network_array = [name.split('.')[0] for name in onlyfiles if '.yaml' in name and 'project.yaml' not in name]
+    return network_array
 
 
 def get_deployments_list(network: str):
@@ -125,11 +128,11 @@ def generate_value_matrix():
 def generate_network_list(url):
     feature_list = []
     chains_list = send_http_request(url)
-    available_projects = get_networks_list(folder="./networks")
+    available_projects = get_networks_list(folder="./")
     for project in available_projects:
-        with open("./networks/%s/project.yaml" % project, 'r') as stream:
+        with open("./%s.yaml" % project, 'r') as stream:
             project_data = yaml.safe_load(stream)
-        project_genesis = remove_hex_prefix(project_data.get('network').get('genesisHash'))
+        project_genesis = remove_hex_prefix(project_data.get('network').get('chainId'))
         chain = next(iter([chain for chain in chains_list if chain.get('chainId') == project_genesis]), None)
         feature_list.append({
                 "name": project,
