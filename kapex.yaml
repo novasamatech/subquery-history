@@ -4,7 +4,7 @@ version: 1.0.0
 runner:
   node:
     name: '@subql/node'
-    version: v1.9.1
+    version: '*'
   query:
     name: '@subql/query'
     version: v1.5.0
@@ -18,7 +18,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 90000
+    startBlock: 289434
     mapping:
       file: ./dist/index.js
       handlers:
