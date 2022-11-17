@@ -53,6 +53,7 @@
     "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
+    "polkadexChaintypes": "./chainTypes/polkadexChaintypes.ts",
     "kylinChaintypes": "./chainTypes/kylinChainTypes.ts"
   },
   "resolutions": {

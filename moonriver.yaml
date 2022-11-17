@@ -4,7 +4,7 @@ version: 1.0.0
 runner:
   node:
     name: '@subql/node'
-    version: v1.9.1
+    version: "*"
   query:
     name: '@subql/query'
     version: v1.5.0
@@ -15,7 +15,7 @@ schema:
 network:
   chainId: '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b'
   endpoint: >-
-    wss://moonriver.api.onfinality.io/public-ws
+    wss://wss.api.moonriver.moonbeam.network
   dictionary: https://api.subquery.network/sq/subquery/moonriver-dictionary
   chaintypes:
     file: ./dist/moonbeamChaintypes.js
