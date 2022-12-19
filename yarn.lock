@@ -178,6 +178,11 @@
   resolved "https://registry.yarnpkg.com/@cosmjs/utils/-/utils-0.28.13.tgz#2fd2844ec832d7833811e2ae1691305d09791a08"
   integrity sha512-dVeMBiyg+46x7XBZEfJK8yTihphbCFpjVYmLJVqmTsHfJwymQ65cpyW/C+V/LgWARGK8hWQ/aX9HM5Ao8QmMSg==
 
+"@edgeware/node-types@^3.6.2-wako":
+  version "3.6.2-wako"
+  resolved "https://registry.yarnpkg.com/@edgeware/node-types/-/node-types-3.6.2-wako.tgz#21463fe18f68d5f3f0675244683d416d45ab0a3d"
+  integrity sha512-kBGCoWoRSUOj864BiTwHGfsfuhGr2ycWEsjw9FB2VdJ5esJDVq3K6WZs/J2rtrtybKJWADqIp5K0ptDBlg1XqA==
+
 "@ethersproject/abstract-provider@^5.6.1":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/abstract-provider/-/abstract-provider-5.7.0.tgz#b0a8550f88b6bf9d51f90e4795d48294630cb9ef"
