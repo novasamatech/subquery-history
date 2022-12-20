@@ -1,4 +1,4 @@
-import { spec as spec_types } from "@edgeware/node-types";
+import { spec } from "@edgeware/node-types";
 
 const RewardDestinationTo257 = {
   _enum: {
@@ -8,17 +8,13 @@ const RewardDestinationTo257 = {
   },
 };
 
-spec_types.typesBundle.spec.edgeware.types?.push(
-  {
-    minmax: [0, undefined],
-    types: {
-      ValidatorPrefs: {
-        commission: "Compact<Perbill>",
-      },
-      RewardDestinationTo257,
-      Signature: "[u8; 60]",
-      Event: ""
+export default {
+  types: {
+    ValidatorPrefs: {
+      commission: "Compact<Perbill>",
     },
-  })
-
-export default {...spec_types};
+    RewardDestinationTo257,
+    Signature: "[u8; 60]"
+  },
+  ...spec,
+};
