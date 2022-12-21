@@ -15,13 +15,13 @@ const Event = {
   }
 }
 export default {
-  types: {
-    ValidatorPrefs: {
-      commission: "Compact<Perbill>",
-    },
-    RewardDestinationTo257,
-    Signature: "[u8; 60]",
-    Event: Event
-  },
+  // types: {
+  //   ValidatorPrefs: {
+  //     commission: "Compact<Perbill>",
+  //   },
+  //   RewardDestinationTo257,
+  //   Signature: "[u8; 60]",
+  //   Event: Event
+  // },
   ...spec,
 };
