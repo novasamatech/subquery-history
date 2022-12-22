@@ -1,0 +1,72 @@
+specVersion: 1.0.0
+name: subquery-nova-xx-network
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: '*'
+  query:
+    name: '@subql/query'
+    version: v1.5.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
+network:
+  chainId: '0x50dd5d206917bf10502c68fb4d18a59fc8aa31586f4e8856b493e43544aa82aa'
+  endpoint: >-
+    wss://xxnetwork-rpc.dwellir.com
+dataSources:
+  - name: main
+    kind: substrate/Runtime
+    startBlock: 1
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleHistoryElement
+          kind: substrate/CallHandler
+        - handler: handleReward
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Reward
+        - handler: handleRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Rewarded
+        - handler: handleSlash
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slash
+        - handler: handleSlashed
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slashed
+        - handler: handleBonded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Bonded
+        - handler: handleUnbonded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Unbonded
+        - handler: handleTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: Transfer
+        - handler: handleNewEra
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakingElection
+        - handler: handleStakersElected
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakersElected
