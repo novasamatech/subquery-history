@@ -21,10 +21,10 @@ Projects' status is updated every 4 hours
 
 SubQuery API data sources are grouped based on the following features:
 
-📚 Operation History - Include regular account history with transfered the Netwok token and all extrinsics <br />
-✨ Multi assets - Responsible for collecting the history for tokens using ORML and Assets pallets <br />
-🥞 Staking rewards - Provide rewards history and total rewards accumulation, including parachain staking <br />
-📈 Staking analytics - Support additional information about staking such: current stake, validators statistics, and stake change history
+📚 Operation History -  Transfers and Extrinsics for Utility (main) token of the network <br />
+✨ Multi-asset transfers - Support for transfer history for tokens from ORML and Assets pallets <br />
+🥞 Staking rewards - Rewards history and accumulated total rewards, supports both Staking and ParachainStaking pallets <br />
+📈 Staking analytics - Queries for current stake, validators statistics, and stake change history
 
 # List of deployed projects
 
