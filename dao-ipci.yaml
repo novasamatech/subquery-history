@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-karura
+name: subquery-nova-dao-ipci
 version: 1.0.0
 runner:
   node:

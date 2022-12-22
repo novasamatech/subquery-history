@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-karura
+name: subquery-nova-amplitude
 version: 1.0.0
 runner:
   node:
