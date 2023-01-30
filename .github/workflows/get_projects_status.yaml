@@ -26,8 +26,11 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          branch: gh-pages
+          ref: gh-pages
           path: gh-pages
+
+      - name: Copy table to gh-pages
+        run: mv ./gh-pages-temp/README.md ./gh-pages/README.md
 
       - name: Deploy report to Github Pages
         uses: peaceiris/actions-gh-pages@v2
