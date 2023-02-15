@@ -188,14 +188,14 @@ def remove_hex_prefix(hex_string):
 
 if __name__ == '__main__':
 
-    dir_name = 'gh-pages'
+    dir_name = 'gh-pages-temp'
     try:
         os.makedirs(dir_name)
         print("Directory ", dir_name,  " Created ")
     except FileExistsError:
         print("Directory ", dir_name,  " already exists")
 
-    with open("./gh-pages/README.md", "w") as f:
+    with open("./gh-pages-temp/README.md", "w") as f:
         f.write(readme.render(
             dapps_table=generate_networks_list()
         ))

@@ -22,6 +22,14 @@ jobs:
       - name: Generate table
         run: python ./scripts/python_scripts/generate_network_status.py
 
+      - uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Copy table to gh-pages
+        run: mv ./gh-pages-temp/README.md ./gh-pages/README.md
+
       - name: Deploy report to Github Pages
         uses: peaceiris/actions-gh-pages@v2
         env:
