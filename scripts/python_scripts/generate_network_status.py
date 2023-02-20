@@ -15,7 +15,7 @@ from subquery_cli import use_subquery_cli
 
 subquery_cli_version = '0.2.10'
 token = os.getenv("SUBQUERY_TOKEN")
-nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v7/chains_dev.json"
+nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v8/chains_dev.json"
 skip_projects_list = [] # use to skip projects from telegram notifications
 
 readme = Template("""
