@@ -4,7 +4,7 @@ version: 1.0.0
 runner:
   node:
     name: '@subql/node'
-    version: v1.9.1
+    version: '*'
   query:
     name: '@subql/query'
     version: v1.5.0
@@ -16,6 +16,8 @@ network:
   chainId: '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c'
   endpoint: >-
     wss://polkadex.api.onfinality.io/public-ws
+  chaintypes:
+    file: ./dist/polkadexChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
