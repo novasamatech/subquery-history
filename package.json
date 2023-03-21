@@ -54,8 +54,7 @@
     "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
-    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
-    "polymeshChaintypes": "./chainTypes/polymeshChaintypes.ts"
+    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
