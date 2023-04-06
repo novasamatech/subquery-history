@@ -1,11 +1,7 @@
+import eqDefs from '@equilab/definitions';
 import type { OverrideBundleType } from '@polkadot/types/types';
 
-import eqDefs from '@equilab/definitions';
-
-
-
 const { equilibrium, equilibriumNext } = eqDefs;
-
 
 const typesBundle: OverrideBundleType = {
   spec: {
