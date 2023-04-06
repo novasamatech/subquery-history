@@ -32,6 +32,10 @@ export function isAssetTransfer(call: CallBase<AnyTuple>) : boolean {
     return call.section == "assets" && transferCalls.includes(call.method)
 }
 
+export function isEquilibriumTransfer(call: CallBase<AnyTuple>) : boolean {
+    return call.section == "eqBalances" && transferCalls.includes(call.method)
+}
+
 export function isEvmTransaction(call: CallBase<AnyTuple>): boolean {
     return call.section === "ethereum" && call.method === "transact"
 }
@@ -97,6 +101,12 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
             return withdrawFee.toString()
         }
 
+        const transactionPaymentFee = exportFeeFromTransactionFeePaidEvent(extrinsic)
+
+        if (transactionPaymentFee != undefined) {
+            return transactionPaymentFee.toString()
+        }
+
         let balancesFee = exportFeeFromBalancesDepositEvent(extrinsic)
         let treasureFee = exportFeeFromTreasureDepositEvent(extrinsic)
 
@@ -147,6 +157,28 @@ function exportFeeFromBalancesWithdrawEvent(extrinsic: SubstrateExtrinsic, from:
     }
 
     return BigInt(0)
+}
+
+function exportFeeFromTransactionFeePaidEvent(extrinsic: SubstrateExtrinsic, from: string = ''): bigint | undefined {
+    const eventRecord = extrinsic.events.find((event) =>
+        event.event.method == "TransactionFeePaid" && event.event.section == "transactionPayment"
+    )
+
+    if (eventRecord !== undefined) {
+        const {
+            event: {
+                data: [ accountid, fee, tip ]
+            }
+        } = eventRecord
+
+        const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt()
+
+        const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
+        const withdrawAccountId = accountid.toString()
+        return extrinsicSigner === withdrawAccountId ? fullFee :  undefined
+    }
+
+    return undefined
 }
 
 function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigint {

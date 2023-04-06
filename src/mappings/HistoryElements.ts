@@ -14,7 +14,7 @@ import {
     isNativeTransferAll,
     isOrmlTransferAll,
     isEvmTransaction,
-    isEvmExecutedEvent,
+    isEvmExecutedEvent, isEquilibriumTransfer,
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -160,6 +160,8 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [boolean, s
         return [[false, ...extractArgsFromAssetTransfer(causeCall)]]
     } else if (isOrmlTransfer(causeCall)) {
         return [[false, ...extractArgsFromOrmlTransfer(causeCall)]]
+    } else if (isEquilibriumTransfer(causeCall)) {
+        return [[false, ...extractArgsFromEquilibriumTransfer(causeCall)]]
     } else if (isNativeTransferAll(causeCall)) {
         return [[true, ...extractArgsFromTransferAll(causeCall)]]
     } else if (isOrmlTransferAll(causeCall)) {
@@ -204,6 +206,16 @@ function extractArgsFromOrmlTransfer(call: CallBase<AnyTuple>): [string, bigint,
         destinationAddress.toString(),
         (amount as u64).toBigInt(),
         currencyId.toHex().toString()
+    ]
+}
+
+function extractArgsFromEquilibriumTransfer(call: CallBase<AnyTuple>): [string, bigint, string] {
+    const [assetId, destinationAddress, amount] = call.args
+
+    return [
+        destinationAddress.toString(),
+        (amount as u64).toBigInt(),
+        assetId.toString()
     ]
 }
 

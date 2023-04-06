@@ -27,23 +27,9 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleTransfer
+
+        - handler: handleEquilibriumTransfer
           kind: substrate/EventHandler
           filter:
-            module: balances
+            module: eqBalances
             method: Transfer
-        - handler: handleAssetTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: assets
-            method: Transferred
-        - handler: handleTokenTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: tokens
-            method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
