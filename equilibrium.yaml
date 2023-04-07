@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-acala
+name: subquery-nova-equilibrium
 version: 1.0.0
 runner:
   node:
@@ -17,7 +17,7 @@ network:
   endpoint: >-
     wss://equilibrium-rpc.dwellir.com
   chaintypes:
-    file: ./dist/equilibriumChaintypes.js
+    file: ./chainTypes/equilibriumTypes.json
 dataSources:
   - name: main
     kind: substrate/Runtime
