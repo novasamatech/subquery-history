@@ -56,7 +56,7 @@ def get_percentage(instance, network):
     target_block = instance['syncStatus'].get('targetBlock')
 
     if processing_block != -1 and processing_block is not None:
-        status = round((processing_block / target_block) * 100, 2)
+        status = int((processing_block / target_block) * 100)
         
         return str(status)
     else:
