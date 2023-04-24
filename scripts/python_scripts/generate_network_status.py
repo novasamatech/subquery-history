@@ -58,7 +58,7 @@ def get_percentage(instance, network):
     if processing_block != -1 and processing_block is not None:
         status = round((processing_block / target_block) * 100, 2)
         
-        return str(status) + "%"
+        return str(status)
     else:
         telegram_message += f"\n\n*{network['network'].title()}* Indexer is unhealthy\!\nProject URL: [Link to project](https://managedservice.subquery.network/orgs/nova-wallet/projects/{instance['projectKey'].split('/')[1]}/deployments?slot={instance['type']})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance['projectKey']})\nEnvironment: {instance['type'].capitalize()}"
 
