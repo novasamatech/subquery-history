@@ -1,4 +1,5 @@
 import requests
+import json
 
 
 class SubQuery():
@@ -27,11 +28,26 @@ class SubQuery():
         try:
             response = requests.request(
                 method, self.base_url + path, headers=self.headers, data=payload)
+            if response.status_code == 401:
+                raise Exception(f"Unautorised:\n{response}")
 
             return response
         except Exception as e:
             raise Exception(
                 f"Can't request to: {path} by method: {method} and payload: {payload} \nException: {e}")
+
+    def collect_all_data(self) -> None:
+        self.get_all_projects_for_organisation()
+        self.get_deployments()
+        self.get_sync_status_for_all_projects()
+
+    def read_data_from_file(self, file_path):
+        with open(file_path, encoding='UTF-8') as fin:
+            self.org_projects = json.load(fin)
+
+    def write_all_data_in_file(self, name):
+        with open(name, "w") as file:
+            file.write(json.dumps(self.org_projects))
 
     def get_all_projects_for_organisation(self):
         projects = self._send_request(
@@ -42,44 +58,32 @@ class SubQuery():
 
         return self.org_projects
 
-    def get_sync_status_for_all_projects(self):
+    def get_sync_status_for_all_projects(self) -> None:
         if len(self.org_projects) == 0:
             print("org_projects is empty, use get_all_projects_for_organisation first")
 
-        print(f"Process of getting sync status for {len(self.org_projects)} have been started.")
+        print(f"Process of getting sync status have been started.")
         for project in self.org_projects:
-            project['status'] = {}
             for deployment in project['deployments']:
-                if deployment['type'] == 'primary':
-                    prim_sync_status = self._send_request(
-                        method="GET",
-                        path=f"/subqueries/{project['key']}/deployments/{deployment['id']}/sync-status"
-                    ).json()
-                    project['status']['primary'] = prim_sync_status
-                    print(f"Prod deployment for {project['network']} status: {prim_sync_status}")
+                sync_status = self._send_request(
+                    method="GET",
+                    path=f"/subqueries/{project['key']}/deployments/{deployment['id']}/sync-status"
+                ).json()
+                deployment['syncStatus'] = sync_status
+                print(
+                    f"Deployment for {project['network']} status: {sync_status}, env: {deployment['type']}")
 
-                elif deployment['type'] == 'stage':
-                    stage_sync_status = self._send_request(
-                        method="GET",
-                        path=f"/subqueries/{project['key']}/deployments/{deployment['id']}/sync-status"
-                    ).json()
-                    project['status']['stage'] = stage_sync_status
-                    print(f"Stage deployment for {project['network']} status: {prim_sync_status}")
-
-                else:
-                    raise Exception(
-                        f"Unknown deployment type: {deployment['type']} in project:\n{project}")
-
-    def get_deployments(self):
+    def get_deployments(self) -> None:
         if len(self.org_projects) == 0:
             print("org_projects is empty, use get_all_projects_for_organisation first")
 
-        print(f"Process of getting deployments for {len(self.org_projects)} have been started.")
+        print(f"Process of getting deployments have been started.")
 
         for project in self.org_projects:
             deployments = self._send_request(
                 method="GET",
                 path=f"/subqueries/{project['key']}/deployments"
             ).json()
-            print(f"Project: {project['network']} received: {len(deployments)} deployments.")
+            print(
+                f"Project: {project['network']} received: {len(deployments)} deployments.")
             project['deployments'] = deployments
