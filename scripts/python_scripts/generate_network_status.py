@@ -7,16 +7,17 @@ import requests
 import yaml
 from jinja2 import Template
 
-from os import listdir
-from os.path import isfile, join
 from pytablewriter import MarkdownTableWriter
+from subquery_api import SubQuery
 from telegram_notifications import send_telegram_message
-from subquery_cli import use_subquery_cli
 
-subquery_cli_version = '0.2.10'
+global telegram_message
+
+telegram_message = "⚠️ SubQuery project error ⚠️"
+
 token = os.getenv("SUBQUERY_TOKEN")
-nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v8/chains_dev.json"
-skip_projects_list = [] # use to skip projects from telegram notifications
+organisation = "nova-wallet"
+nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v11/chains_dev.json"
 
 readme = Template("""
 Projects' status is updated every 4 hours
@@ -35,65 +36,55 @@ SubQuery API data sources are grouped based on the following features:
 
 
 def generate_networks_list():
+    sub_query = SubQuery(auth_token=token, org=organisation)
+    sub_query.collect_all_data()
+
     writer = MarkdownTableWriter(
         headers=["--", "Network", "Features", "Stage status",
                  "Prod status", "Stage commit", "Prod commit"],
-        value_matrix=generate_value_matrix(),
+        value_matrix=generate_value_matrix(sub_query),
         margin=1
     )
     writer.write_table()
+    asyncio.run(send_telegram_message(telegram_message))
     return writer
 
 
-def get_networks_list(folder):
-    onlyfiles = [f for f in listdir(folder) if isfile(join(folder, f))]
-    network_array = [name.split('.')[0] for name in onlyfiles if '.yaml' in name and 'project.yaml' not in name]
-    return network_array
+def get_percentage(instance, network):
+    global telegram_message
+    processing_block = instance['syncStatus'].get('processingBlock')
+    target_block = instance['syncStatus'].get('targetBlock')
 
+    if processing_block != -1 and processing_block is not None:
+        status = round((processing_block / target_block) * 100, 2)
+        
+        return str(status) + "%"
+    else:
+        telegram_message += f"\n\n*{network['network'].title()}* Indexer is unhealthy\!\nProject URL: [Link to project](https://managedservice.subquery.network/orgs/nova-wallet/projects/{instance['projectKey'].split('/')[1]}/deployments?slot={instance['type']})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance['projectKey']})\nEnvironment: {instance['type'].capitalize()}"
 
-def get_deployments_list(network: str):
-    deployments = use_subquery_cli(subquery_cli_version, '--token', token, 'deployment',
-                                   'list', '--key', 'nova-wallet-'+network, '--org', 'nova-wallet', '-o', 'json')
-    production_instance = None
-    stage_instance = None
-
-    for instance in json.loads(deployments):
-        if (instance.get('type') == 'primary'):
-            if (production_instance): continue
-            production_instance = instance
-        else:
-            if (stage_instance): continue
-            stage_instance = instance
-
-    return production_instance, stage_instance
-
-
-def get_percentage(network, project_id):
-    try:
-        percentage = use_subquery_cli(subquery_cli_version, '--token', token, 'deployment',
-                                  'sync-status', '--id', str(project_id), '--key', 'nova-wallet-'+network, '--org', 'nova-wallet')
-        status = percentage.split("percent: ")[1:]
-        return status[0].split('%')[0:][0].split('.')[0]
-    except:
         return '0'
 
 
-def generate_progress_status(network):
-    prod, stage = get_deployments_list(network)
+def generate_progress_status(project):
+    prod, stage = None, None
+    for deployment in project['deployments']:
+        if deployment['type'] == 'primary':
+            prod = deployment
+        elif deployment['type'] == 'stage':
+            stage = deployment
+        else:
+            raise Exception(
+                f"Unknown deployment type: {deployment['type']} in project: {project}")
 
     def fill_status_bar(instance):
         if (instance):
             commit = instance.get('version')[0:8]
             if (instance.get('status') == 'processing'):
                 progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
-            elif (instance.get('status') == 'error' and get_percentage(network, instance.get('id')) == '0'):
+            elif (instance.get('status') == 'error' and get_percentage(instance, project) == '0'):
                 progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
-                if network not in skip_projects_list:
-                    asyncio.run(send_telegram_message(
-                            f"⚠️ SubQuery project error ⚠️\n{network.title()} indexer is unhealthy\!\nProject URL: [Link to project](https://project.subquery.network/orgs/nova-wallet/projects/{instance['projectKey'].split('/')[1]}/deployments?slot={instance['type']})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance['projectKey']})\nEnvironment: {instance['type'].capitalize()}\n"
-                        ))
             else:
-                percent = get_percentage(network, instance.get('id'))
+                percent = get_percentage(instance, project)
                 progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
                     percent, percent, instance.get('type').capitalize())
         else:
@@ -107,8 +98,8 @@ def generate_progress_status(network):
     return prod_status, prod_commit, stage_status, stage_commit
 
 
-def generate_value_matrix():
-    network_list = generate_network_list(nova_network_list)
+def generate_value_matrix(subquery: SubQuery):
+    network_list = generate_network_list(nova_network_list, subquery)
     returning_array = []
     for network in network_list:
         network_data_array = []
@@ -117,7 +108,9 @@ def generate_value_matrix():
                 network.get('name').title(), network.get('name'))
         )
         prod_status, prod_commit, stage_status, stage_comit = generate_progress_status(
-            network.get('name'))
+            next(filter(
+                lambda project: project['name'] == network['name'], subquery.org_projects))
+        )
         network_data_array.append(network.get('features'))
         network_data_array.append(stage_status)
         network_data_array.append(prod_status)
@@ -131,55 +124,65 @@ def generate_value_matrix():
     return returning_array
 
 
-def generate_network_list(url):
+def generate_network_list(chains_url, subquery: SubQuery):
     feature_list = []
-    chains_list = send_http_request(url)
-    available_projects = get_networks_list(folder="./")
+    chains_list = send_http_request(chains_url)
+    available_projects = subquery.org_projects
     for project in available_projects:
-        with open("./%s.yaml" % project, 'r') as stream:
-            project_data = yaml.safe_load(stream)
-        project_genesis = remove_hex_prefix(project_data.get('network').get('chainId'))
-        chain = next(iter([chain for chain in chains_list if chain.get('chainId') == project_genesis]), None)
+        try:
+            prod_genesis = [deploy['configuration']['chainId'] for deploy in project[
+                'deployments'] if deploy['type'] == 'primary']
+        except:
+            print(
+                f"Network: {project['network']} has old deployment, need to redeploy")
+        if len(prod_genesis) == 0:  # Skip undeployed projects
+            continue
+        project_genesis = remove_hex_prefix(prod_genesis[0])
+        chain = next(iter([chain for chain in chains_list if chain.get(
+            'chainId') == project_genesis]), None)
         feature_list.append({
-                "name": project,
-                "genesis": project_genesis,
-                "features": check_features(chain)
-            })
+            "name": project['name'],
+            "genesis": project_genesis,
+            "features": check_features(chain)
+        })
     return feature_list
 
+
 def check_features(chain):
-	def has_transfer_history(chain):
-		return True
+    def has_transfer_history(chain):
+        return True
 
-	def has_orml_or_asset(chain):
-		for asset in chain.get('assets'):
-			if (asset.get('type') in ['orml', 'statemine']):
-				return True
-		return False
+    def has_orml_or_asset(chain):
+        for asset in chain.get('assets'):
+            if (asset.get('type') in ['orml', 'statemine']):
+                return True
+        return False
 
-	def has_staking_analytics(chain):
-		if (chain.get('assets')[0].get('staking') == 'relaychain'):
-			return True
-		return False
+    def has_staking_analytics(chain):
+        if (chain.get('assets')[0].get('staking') == 'relaychain'):
+            return True
+        return False
 
-	def has_rewards_history(chain):
-		if (chain.get('assets')[0].get('staking')):
-			return True
-		return False
+    def has_rewards_history(chain):
+        if (chain.get('assets')[0].get('staking')):
+            return True
+        return False
 
-	dict = {
-		"📚 Operation History" : has_transfer_history,
-		"✨ Multi assets" : has_orml_or_asset,
-		"📈 Staking analytics" : has_staking_analytics,
-		"🥞 Staking rewards": has_rewards_history
-	}
+    dict = {
+        "📚 Operation History": has_transfer_history,
+        "✨ Multi assets": has_orml_or_asset,
+        "📈 Staking analytics": has_staking_analytics,
+        "🥞 Staking rewards": has_rewards_history
+    }
 
-	if (chain == None):
-		return list(dict.keys())[0]
+    if (chain == None):
+        return list(dict.keys())[0]
 
-	features = [feature for feature, criteria in dict.items() if criteria(chain) == True]
+    features = [feature for feature,
+                criteria in dict.items() if criteria(chain) == True]
 
-	return '<br />'.join(features)
+    return '<br />'.join(features)
+
 
 def send_http_request(url):
     try:
@@ -189,8 +192,10 @@ def send_http_request(url):
 
     return json.loads(response.text)
 
+
 def remove_hex_prefix(hex_string):
     return hex_string[2:]
+
 
 if __name__ == '__main__':
 
