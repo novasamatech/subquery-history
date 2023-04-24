@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@acala-network/type-definitions": "^4.1.5",
+    "@edgeware/node-types": "^3.6.2-wako",
     "@interlay/interbtc-types": "^1.5.10",
     "@kiltprotocol/type-definitions": "^0.1.23",
     "@parallel-finance/type-definitions": "^1.7.14",
@@ -55,7 +56,8 @@
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
     "polkadexChaintypes": "./chainTypes/polkadexChaintypes.ts",
-    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts"
+    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
+    "edgewareChaintypes": "./chainTypes/edgewareChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
