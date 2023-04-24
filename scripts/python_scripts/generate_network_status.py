@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-
+import asyncio
 import json
 import os
 import requests
@@ -10,11 +10,13 @@ from jinja2 import Template
 from os import listdir
 from os.path import isfile, join
 from pytablewriter import MarkdownTableWriter
+from telegram_notifications import send_telegram_message
 from subquery_cli import use_subquery_cli
 
 subquery_cli_version = '0.2.10'
-token = os.environ['SUBQUERY_TOKEN']
-nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v5/chains_dev.json"
+token = os.getenv("SUBQUERY_TOKEN")
+nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v8/chains_dev.json"
+skip_projects_list = [] # use to skip projects from telegram notifications
 
 readme = Template("""
 Projects' status is updated every 4 hours
@@ -86,6 +88,10 @@ def generate_progress_status(network):
                 progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
             elif (instance.get('status') == 'error' and get_percentage(network, instance.get('id')) == '0'):
                 progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
+                if network not in skip_projects_list:
+                    asyncio.run(send_telegram_message(
+                            f"⚠️ SubQuery project error ⚠️\n{network.title()} indexer is unhealthy\!\nProject URL: [Link to project](https://project.subquery.network/orgs/nova-wallet/projects/{instance['projectKey'].split('/')[1]}/deployments?slot={instance['type']})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance['projectKey']})\nEnvironment: {instance['type'].capitalize()}\n"
+                        ))
             else:
                 percent = get_percentage(network, instance.get('id'))
                 progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (

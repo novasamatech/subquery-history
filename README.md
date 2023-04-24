@@ -3,17 +3,13 @@
 This repo contains implementation of [SubQuery](https://github.com/subquery/subql) project for many substrate networks which Nova-wallet supports.
 
 # Get Started
-### 1. Run script for prepare project to run
+
+### For local run you can use special script in each network directory
 ```shell
-sh ./scripts/prepare_folders.sh
+sh local-runner.sh ${paroject_file}.yaml
 ```
 
-### 2. For local run you can use special script in each network directory
+### In order to deploy new project
 ```shell
-sh ./networks/${network}/local-runner.sh
-```
-
-### For clear project
-```shell
-sh ./scripts/clear_folders.sh
+./node_modules/.bin/subql publish -f ${paroject_file}.yaml
 ```

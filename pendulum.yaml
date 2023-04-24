@@ -1,20 +1,27 @@
-specVersion: 0.2.0
-name: nova
+specVersion: 1.0.0
+name: subquery-nova-parallel
 version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: '*'
+  query:
+    name: '@subql/query'
+    version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  genesisHash: '0x19a3733beb9cb8a970a308d835599e9005e02dc007a35440e461a451466776f8'
-  endpoint: wss://ws.gm.bldnodes.org
-
+  chainId: '0x5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86'
+  endpoint: >-
+    wss://rpc-pendulum.prd.pendulumchain.tech
 dataSources:
   - name: main
     kind: substrate/Runtime
     startBlock: 1
     mapping:
-      file: ./dist/src/index.js
+      file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
@@ -38,8 +45,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
