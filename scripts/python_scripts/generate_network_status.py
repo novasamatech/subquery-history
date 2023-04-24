@@ -13,7 +13,7 @@ from telegram_notifications import send_telegram_message
 
 global telegram_message
 
-telegram_message = "⚠️ SubQuery project error ⚠️"
+telegram_message = "⚠️ SubQuery projects error ⚠️"
 
 token = os.getenv("SUBQUERY_TOKEN")
 organisation = "nova-wallet"
