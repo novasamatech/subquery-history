@@ -1481,10 +1481,10 @@
     "@types/websocket" "^1.0.5"
     websocket "^1.0.34"
 
-"@polymathnetwork/polymesh-types@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@polymathnetwork/polymesh-types/-/polymesh-types-0.0.2.tgz#a9f07bc9e1e659e59afa7a5409b2d91301b5fef9"
-  integrity sha512-wGexzpZ4IdrwReQGSH7ViCN+kyoKMQcQC5exATgeG+1cZxOtcbxp+1LWP9xTrnw7R5+PYWPzIl+f71gMkSDD5A==
+"@polymeshassociation/polymesh-types@^5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@polymeshassociation/polymesh-types/-/polymesh-types-5.4.0.tgz#fb5b3dcac1e3a40afa69c7707c41ccd0dd6fd7d6"
+  integrity sha512-oR3Qqbb/ZVxB1uk0y9WtWh9QYLNU9v4UJVgvKLp0nMoJuqv7dS/tG/cAVTe/hsxpzf0tkcrBwNp/TSJasZjCNQ==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"

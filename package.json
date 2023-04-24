@@ -27,6 +27,7 @@
     "@phala/typedefs": "^0.2.31",
     "@polkadot/api": "^8",
     "@polkadot/types-augment": "^8",
+    "@polymeshassociation/polymesh-types": "^5.4.0",
     "@subql/cli": "^1.8.0",
     "@subql/types": "^1.6.0",
     "@subsocial/types": "^0.6.8",
@@ -55,7 +56,8 @@
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
     "polkadexChaintypes": "./chainTypes/polkadexChaintypes.ts",
-    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts"
+    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
+    "polymeshChaintypes": "./chainTypes/polymeshTypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
