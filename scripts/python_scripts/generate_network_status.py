@@ -8,7 +8,7 @@ import yaml
 from jinja2 import Template
 
 from pytablewriter import MarkdownTableWriter
-from subquery_api import SubQuery
+from subquery_api import SubQueryDeploymentAPI
 from telegram_notifications import send_telegram_message
 
 global telegram_message
@@ -36,7 +36,7 @@ SubQuery API data sources are grouped based on the following features:
 
 
 def generate_networks_list():
-    sub_query = SubQuery(auth_token=token, org=organisation)
+    sub_query = SubQueryDeploymentAPI(auth_token=token, org=organisation)
     sub_query.collect_all_data()
 
     writer = MarkdownTableWriter(
@@ -98,7 +98,7 @@ def generate_progress_status(project):
     return prod_status, prod_commit, stage_status, stage_commit
 
 
-def generate_value_matrix(subquery: SubQuery):
+def generate_value_matrix(subquery: SubQueryDeploymentAPI):
     network_list = generate_network_list(nova_network_list, subquery)
     returning_array = []
     for network in network_list:
@@ -124,7 +124,7 @@ def generate_value_matrix(subquery: SubQuery):
     return returning_array
 
 
-def generate_network_list(chains_url, subquery: SubQuery):
+def generate_network_list(chains_url, subquery: SubQueryDeploymentAPI):
     feature_list = []
     chains_list = send_http_request(chains_url)
     available_projects = subquery.org_projects

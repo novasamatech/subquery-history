@@ -2,7 +2,7 @@ import requests
 import json
 
 
-class SubQuery():
+class SubQueryDeploymentAPI():
 
     org_projects = []
     base_url = "https://api.subquery.network"
