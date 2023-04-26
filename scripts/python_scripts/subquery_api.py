@@ -3,7 +3,7 @@ import requests
 import json
 
 
-class DeploymentInstances():
+class DeploymentInstance():
 
     def __init__(self, **kwargs) -> None:
 
@@ -13,7 +13,7 @@ class DeploymentInstances():
 
 class SubQueryProject():
 
-    deployments = List[DeploymentInstances]
+    deployments = List[DeploymentInstance]
 
     def __init__(self, **kwargs) -> None:
 
@@ -22,7 +22,7 @@ class SubQueryProject():
             if key == 'deployments':
                 deployments = []
                 for deployment in value:
-                    deployments.append(DeploymentInstances(**deployment))
+                    deployments.append(DeploymentInstance(**deployment))
                 setattr(self, key, deployments)
 
             setattr(self, key, value)
@@ -34,7 +34,7 @@ class SubQueryProject():
 
 class SubQueryDeploymentAPI():
 
-    org_projects = []
+    org_projects = [SubQueryProject]
     base_url = "https://api.subquery.network"
 
     def __init__(self, auth_token, org) -> None:
@@ -90,7 +90,7 @@ class SubQueryDeploymentAPI():
 
         return self.org_projects
 
-    def get_sync_status_for_deployment(self, deployment: DeploymentInstances) -> DeploymentInstances:
+    def get_sync_status_for_deployment(self, deployment: DeploymentInstance) -> DeploymentInstance:
         if len(self.org_projects) == 0:
             print("org_projects is empty, use get_all_projects_for_organisation first")
 
@@ -102,7 +102,7 @@ class SubQueryDeploymentAPI():
 
         return deployment
 
-    def get_deployments_for_project(self, project: SubQueryProject) -> List[DeploymentInstances]:
+    def get_deployments_for_project(self, project: SubQueryProject) -> List[DeploymentInstance]:
         if len(self.org_projects) == 0:
             print("org_projects is empty, use get_all_projects_for_organisation first")
 
@@ -112,6 +112,6 @@ class SubQueryDeploymentAPI():
         ).json()
 
         for deployment in deployments:
-            project.add_deployment(DeploymentInstances(**deployment))
+            project.add_deployment(DeploymentInstance(**deployment))
 
         return project.deployments

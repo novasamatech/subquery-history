@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
 import os
 
 from jinja2 import Template

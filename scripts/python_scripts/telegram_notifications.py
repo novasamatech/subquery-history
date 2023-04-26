@@ -2,7 +2,7 @@ import os
 import asyncio
 import telegram
 
-from subquery_api import SubQueryProject, DeploymentInstances
+from subquery_api import SubQueryProject, DeploymentInstance
 
 
 class TelegramNotifications():
@@ -31,6 +31,6 @@ class TelegramNotifications():
         else:
             pass
 
-    def add_row_in_telegram_notification(self, project: SubQueryProject, instance: DeploymentInstances):
+    def add_row_in_telegram_notification(self, project: SubQueryProject, instance: DeploymentInstance):
         self.need_to_send_notification = True
         self.telegram_message += f"\n\n*{project.network.title()}* Indexer is unhealthy\!\nProject URL: [Link to project](https://managedservice.subquery.network/orgs/nova-wallet/projects/{instance.projectKey.split('/')[1]}/deployments?slot={instance.type})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance.projectKey})\nEnvironment: {instance.type.capitalize()}"

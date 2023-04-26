@@ -3,7 +3,7 @@ import requests
 
 from pytablewriter import MarkdownTableWriter
 from telegram_notifications import TelegramNotifications
-from subquery_api import SubQueryDeploymentAPI, SubQueryProject, DeploymentInstances
+from subquery_api import SubQueryDeploymentAPI, SubQueryProject, DeploymentInstance
 
 
 class ProjectTableGenerator():
@@ -82,7 +82,7 @@ class ProjectTableGenerator():
                 raise Exception(
                     f"Unknown deployment type: {deployment.type} in project: {project}")
 
-        def fill_status_bar(instance: DeploymentInstances):
+        def fill_status_bar(instance: DeploymentInstance):
             if (instance):
                 commit = instance.version[0:8]
                 if (instance.status == 'processing'):
@@ -103,7 +103,7 @@ class ProjectTableGenerator():
 
         return prod_status, prod_commit, stage_status, stage_commit
 
-    def get_sync_percentage(self, instance: DeploymentInstances, project: SubQueryProject) -> str:
+    def get_sync_percentage(self, instance: DeploymentInstance, project: SubQueryProject) -> str:
         # Adding global variable in order to simplify access to messaage for notifications
 
         processing_block = instance.sync_status.get('processingBlock')
