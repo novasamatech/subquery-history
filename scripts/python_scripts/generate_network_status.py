@@ -9,9 +9,6 @@ from table_representation import ProjectTableGenerator
 from subquery_api import SubQueryDeploymentAPI
 from telegram_notifications import send_telegram_message
 
-global telegram_message
-
-telegram_message = "⚠️ SubQuery projects error ⚠️"
 token = os.getenv("SUBQUERY_TOKEN")
 organisation = "nova-wallet"
 nova_network_list = "https://raw.githubusercontent.com/nova-wallet/nova-utils/master/chains/v11/chains_dev.json"

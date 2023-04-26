@@ -2,6 +2,7 @@ import json
 import requests
 
 from pytablewriter import MarkdownTableWriter
+from telegram_notifications import add_row_in_telegram_notification
 from subquery_api import SubQueryDeploymentAPI, SubQueryProject, DeploymentInstances
 
 
@@ -86,10 +87,10 @@ class ProjectTableGenerator():
                 commit = instance.version[0:8]
                 if (instance.status == 'processing'):
                     progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
-                elif (instance.status == 'error' and self.get_percentage(instance, project) == '0'):
+                elif (instance.status == 'error' and self.get_sync_percentage(instance, project) == '0'):
                     progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
                 else:
-                    percent = self.get_percentage(instance, project)
+                    percent = self.get_sync_percentage(instance, project)
                     progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
                         percent, percent, instance.type.capitalize())
             else:
@@ -102,9 +103,8 @@ class ProjectTableGenerator():
 
         return prod_status, prod_commit, stage_status, stage_commit
 
-    def get_percentage(self, instance: DeploymentInstances, project: SubQueryProject) -> str:
+    def get_sync_percentage(self, instance: DeploymentInstances, project: SubQueryProject) -> str:
         # Adding global variable in order to simplify access to messaage for notifications
-        global telegram_message
 
         processing_block = instance.sync_status.get('processingBlock')
         target_block = instance.sync_status.get('targetBlock')
@@ -113,9 +113,11 @@ class ProjectTableGenerator():
             status = int((processing_block / target_block) * 100)
 
             return str(status)
+        elif target_block is not None and target_block == 0:
+            add_row_in_telegram_notification(project=project, instance=instance)
+            return '0'
         else:
-            telegram_message += f"\n\n*{project.network.title()}* Indexer is unhealthy\!\nProject URL: [Link to project](https://managedservice.subquery.network/orgs/nova-wallet/projects/{instance.projectKey.split('/')[1]}/deployments?slot={instance['type']})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance.projectKey})\nEnvironment: {instance.type.capitalize()}"
-
+            add_row_in_telegram_notification(project=project, instance=instance)
             return '0'
 
     def check_features(self, chain: json):
