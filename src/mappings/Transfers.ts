@@ -83,6 +83,31 @@ export async function handleOrmlTransfer(event: SubstrateEvent): Promise<void> {
   });
 }
 
+export async function handleEquilibriumTransfer(
+    event: SubstrateEvent
+): Promise<void> {
+  const [from, to, assetId, amount] = getEventData(event);
+
+  await createTransfer({
+    event,
+    address: from,
+    from,
+    to,
+    suffix: "-from",
+    amount,
+    assetId: assetId.toString(),
+  });
+  await createTransfer({
+    event,
+    address: to,
+    from,
+    to,
+    suffix: "-to",
+    amount,
+    assetId: assetId.toString(),
+  });
+}
+
 export async function handleTokenTransfer(
   event: SubstrateEvent
 ): Promise<void> {
