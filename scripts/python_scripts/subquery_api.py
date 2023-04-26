@@ -1,5 +1,35 @@
+from typing import List
 import requests
 import json
+
+
+class DeploymentInstances():
+
+    def __init__(self, **kwargs) -> None:
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+class SubQueryProject():
+
+    deployments = List[DeploymentInstances]
+
+    def __init__(self, **kwargs) -> None:
+
+        self.deployments = []
+        for key, value in kwargs.items():
+            if key == 'deployments':
+                deployments = []
+                for deployment in value:
+                    deployments.append(DeploymentInstances(**deployment))
+                setattr(self, key, deployments)
+
+            setattr(self, key, value)
+
+    def add_deployment(self, item):
+        # Append the item to the deployments list
+        self.deployments.append(item)
 
 
 class SubQueryDeploymentAPI():
@@ -36,54 +66,52 @@ class SubQueryDeploymentAPI():
             raise Exception(
                 f"Can't request to: {path} by method: {method} and payload: {payload} \nException: {e}")
 
-    def collect_all_data(self) -> None:
+    def collect_all_project_data(self) -> List[SubQueryProject]:
         self.get_all_projects_for_organisation()
-        self.get_deployments()
-        self.get_sync_status_for_all_projects()
-
-    def read_data_from_file(self, file_path):
-        with open(file_path, encoding='UTF-8') as fin:
-            self.org_projects = json.load(fin)
-
-    def write_all_data_in_file(self, name):
-        with open(name, "w") as file:
-            file.write(json.dumps(self.org_projects))
-
-    def get_all_projects_for_organisation(self):
-        projects = self._send_request(
-            method="GET", path=f"/user/projects?account={self.org}")
-        self.org_projects = projects.json()
         print(
             f"Organisation: {self.org}\nHas {len(self.org_projects)} projects")
+        print(f"Process of getting deployments have been started.")
+        for project in self.org_projects:
+            self.get_deployments_for_project(project)
+            print(
+                f"Project: {project.network} received: {len(project.deployments)} deployments.")
+            for deployment in project.deployments:
+                self.get_sync_status_for_deployment(deployment)
+                print(
+                    f"Deployment for {project.network} status: {deployment.sync_status}, env: {deployment.type}")
 
         return self.org_projects
 
-    def get_sync_status_for_all_projects(self) -> None:
+    def get_all_projects_for_organisation(self) -> List[SubQueryProject]:
+        projects = self._send_request(
+            method="GET", path=f"/user/projects?account={self.org}").json()
+
+        self.org_projects = [SubQueryProject(**project) for project in projects]
+
+        return self.org_projects
+
+    def get_sync_status_for_deployment(self, deployment: DeploymentInstances) -> DeploymentInstances:
         if len(self.org_projects) == 0:
             print("org_projects is empty, use get_all_projects_for_organisation first")
 
-        print(f"Process of getting sync status have been started.")
-        for project in self.org_projects:
-            for deployment in project['deployments']:
-                sync_status = self._send_request(
-                    method="GET",
-                    path=f"/subqueries/{project['key']}/deployments/{deployment['id']}/sync-status"
-                ).json()
-                deployment['syncStatus'] = sync_status
-                print(
-                    f"Deployment for {project['network']} status: {sync_status}, env: {deployment['type']}")
+        sync_status = self._send_request(
+            method="GET",
+            path=f"/subqueries/{deployment.projectKey}/deployments/{deployment.id}/sync-status"
+        ).json()
+        deployment.__setattr__('sync_status', sync_status)
 
-    def get_deployments(self) -> None:
+        return deployment
+
+    def get_deployments_for_project(self, project: SubQueryProject) -> List[DeploymentInstances]:
         if len(self.org_projects) == 0:
             print("org_projects is empty, use get_all_projects_for_organisation first")
 
-        print(f"Process of getting deployments have been started.")
+        deployments = self._send_request(
+            method="GET",
+            path=f"/subqueries/{project.key}/deployments"
+        ).json()
 
-        for project in self.org_projects:
-            deployments = self._send_request(
-                method="GET",
-                path=f"/subqueries/{project['key']}/deployments"
-            ).json()
-            print(
-                f"Project: {project['network']} received: {len(deployments)} deployments.")
-            project['deployments'] = deployments
+        for deployment in deployments:
+            project.add_deployment(DeploymentInstances(**deployment))
+
+        return project.deployments
