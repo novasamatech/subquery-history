@@ -27,9 +27,10 @@ class ProjectTableGenerator():
         returning_array = []
         for network in network_list:
             network_data_array = []
+            subquery_project_data = subquery.find_project_by_parameter('name', network.get('name'))
             network_data_array.append(
-                "[%s](https://explorer.subquery.network/subquery/nova-wallet/nova-wallet-%s)" % (
-                    network.get('name').title(), network.get('name'))
+                "[%s](https://explorer.subquery.network/subquery/%s)" % (
+                    network.get('name').title(), subquery_project_data.key)
             )
             prod_status, prod_commit, stage_status, stage_comit = self.generate_progress_status(
                 next(filter(

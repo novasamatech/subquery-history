@@ -115,3 +115,13 @@ class SubQueryDeploymentAPI():
             project.add_deployment(DeploymentInstance(**deployment))
 
         return project.deployments
+
+    def find_project_by_parameter(self, parameter_name, parameter_value):
+        found_project = [project for project in self.org_projects if project.__getattribute__(
+            parameter_name) == parameter_value]
+        if found_project:
+            print("Project found")
+            for obj in found_project:
+                return obj
+        else:
+            print("Project not found.")
