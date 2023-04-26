@@ -2,7 +2,7 @@ import json
 import requests
 
 from pytablewriter import MarkdownTableWriter
-from telegram_notifications import add_row_in_telegram_notification
+from telegram_notifications import TelegramNotifications
 from subquery_api import SubQueryDeploymentAPI, SubQueryProject, DeploymentInstances
 
 
@@ -108,16 +108,17 @@ class ProjectTableGenerator():
 
         processing_block = instance.sync_status.get('processingBlock')
         target_block = instance.sync_status.get('targetBlock')
+        telegram = TelegramNotifications()
 
         if processing_block != -1 and processing_block is not None:
             status = int((processing_block / target_block) * 100)
 
             return str(status)
         elif target_block is not None and target_block == 0:
-            add_row_in_telegram_notification(project=project, instance=instance)
+            telegram.add_row_in_telegram_notification(project=project, instance=instance)
             return '0'
         else:
-            add_row_in_telegram_notification(project=project, instance=instance)
+            telegram.add_row_in_telegram_notification(project=project, instance=instance)
             return '0'
 
     def check_features(self, chain: json):

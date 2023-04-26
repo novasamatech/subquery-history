@@ -7,7 +7,7 @@ from jinja2 import Template
 
 from table_representation import ProjectTableGenerator
 from subquery_api import SubQueryDeploymentAPI
-from telegram_notifications import send_telegram_message
+from telegram_notifications import TelegramNotifications
 
 token = os.getenv("SUBQUERY_TOKEN")
 organisation = "nova-wallet"
@@ -42,6 +42,8 @@ def generate_project_table():
 if __name__ == '__main__':
 
     dir_name = 'gh-pages-temp'
+    
+    telegram = TelegramNotifications()
     try:
         os.makedirs(dir_name)
         print("Directory ", dir_name,  " Created ")
@@ -53,6 +55,4 @@ if __name__ == '__main__':
             dapps_table=generate_project_table()
         ))
 
-    # Send telegram notification if script found any problem
-    if telegram_message != "⚠️ SubQuery projects error ⚠️":
-        asyncio.run(send_telegram_message(telegram_message))
+    telegram.send_notification()
