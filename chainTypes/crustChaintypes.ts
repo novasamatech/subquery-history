@@ -1,3 +1,3 @@
 import { typesBundleForPolkadot } from '@crustio/type-definitions';
 
-export default typesBundleForPolkadot;
+export default { typesBundle: { spec: { "crust": typesBundleForPolkadot.spec.crust } } };
