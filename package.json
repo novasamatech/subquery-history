@@ -56,7 +56,8 @@
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
     "polkadexChaintypes": "./chainTypes/polkadexChaintypes.ts",
-    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts"
+    "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
+    "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
