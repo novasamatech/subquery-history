@@ -1,4 +1,4 @@
-import {AccumulatedReward, ErrorEvent, HistoryElement, Reward} from '../types';
+import {AccountReward, AccumulatedReward, AccumulatedStake, ErrorEvent, HistoryElement, Reward, RewardType} from '../types';
 import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
@@ -6,8 +6,10 @@ import {
     isBatch,
     timestamp,
     eventId,
+    eventIdWithAddress,
     isProxy,
-    callFromProxy
+    callFromProxy,
+    blockNumber
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -44,6 +46,7 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     await handleRewardRestakeForAnalytics(rewardEvent)
     await handleRewardForTxHistory(rewardEvent)
     await updateAccumulatedReward(rewardEvent, true)
+    await updateAccountRewards(rewardEvent, RewardType.reward)
     // let rewardEventId = eventId(rewardEvent)
     // try {
     //     let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
@@ -181,6 +184,7 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
     await handleSlashForAnalytics(slashEvent)
     await handleSlashForTxHistory(slashEvent)
     await updateAccumulatedReward(slashEvent, false)
+    await updateAccountRewards(slashEvent, RewardType.slash)
     // let slashEventId = eventId(slashEvent)
     // try {
     //     let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
@@ -312,6 +316,26 @@ async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean)
     await accumulatedReward.save()
 }
 
+async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType): Promise<void> {
+    let {event: {data: [accountId, amount]}} = event
+    let accountAddress = accountId.toString()
+
+    let accumulatedReward = BigInt(0)
+    let lastAccumulatedsStake = await AccumulatedStake.get(accountAddress);
+    if (!lastAccumulatedsStake) {
+        accumulatedReward = lastAccumulatedsStake.amount
+    }
+
+    let id = eventIdWithAddress(event, accountAddress)
+    let accountReward = new AccountReward(id);
+    accountReward.accumulatedAmount = accumulatedReward
+    accountReward.address = accountAddress
+    accountReward.amount = (amount as unknown as Balance).toBigInt()
+    accountReward.type = rewardType
+    accountReward.timestamp = timestamp(event.block)
+    accountReward.blockNumber = blockNumber(event)
+    await accountReward.save()
+}
 
 async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
     const extrinsic = rewardEvent.extrinsic;

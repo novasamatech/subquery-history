@@ -64,6 +64,10 @@ export function callFromProxy(proxyCall: CallBase<AnyTuple>) : CallBase<AnyTuple
     return proxyCall.args[2] as CallBase<AnyTuple>
 }
 
+export function eventIdWithAddress(event: SubstrateEvent, address: String): string {
+    return `${eventId(event)}-${address}`
+}
+
 export function eventId(event: SubstrateEvent): string {
     return `${blockNumber(event)}-${event.idx}`
 }
