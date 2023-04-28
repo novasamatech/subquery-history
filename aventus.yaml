@@ -24,11 +24,6 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
