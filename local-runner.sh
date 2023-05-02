@@ -16,3 +16,4 @@ yarn
 yarn codegen
 yarn build
 yarn start:docker
+read -p "Press enter to exit"
