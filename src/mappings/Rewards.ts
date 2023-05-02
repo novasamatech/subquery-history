@@ -1,4 +1,4 @@
-import {AccountReward, AccumulatedReward, AccumulatedStake, ErrorEvent, HistoryElement, Reward, RewardType} from '../types';
+import {AccountReward, AccumulatedReward, ErrorEvent, HistoryElement, Reward, RewardType} from '../types';
 import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
