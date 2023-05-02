@@ -45,8 +45,8 @@ export async function handleRewarded(rewardEvent: SubstrateEvent): Promise<void>
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     await handleRewardRestakeForAnalytics(rewardEvent)
     await handleRewardForTxHistory(rewardEvent)
-    await updateAccumulatedReward(rewardEvent, true)
-    await updateAccountRewards(rewardEvent, RewardType.reward)
+    let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
+    await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
     // let rewardEventId = eventId(rewardEvent)
     // try {
     //     let errorOccursOnEvent = await ErrorEvent.get(rewardEventId)
@@ -183,8 +183,8 @@ export async function handleSlashed(slashEvent: SubstrateEvent): Promise<void> {
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
     await handleSlashForAnalytics(slashEvent)
     await handleSlashForTxHistory(slashEvent)
-    await updateAccumulatedReward(slashEvent, false)
-    await updateAccountRewards(slashEvent, RewardType.slash)
+    let accumulatedReward = await updateAccumulatedReward(slashEvent, false)
+    await updateAccountRewards(slashEvent, RewardType.slash, accumulatedReward.amount)
     // let slashEventId = eventId(slashEvent)
     // try {
     //     let errorOccursOnEvent = await ErrorEvent.get(slashEventId)
@@ -302,7 +302,7 @@ async function buildRewardEvents<A>(
     await Promise.allSettled(savingPromises);
 }
 
-async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean): Promise<void> {
+async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean): Promise<AccumulatedReward> {
     let {event: {data: [accountId, amount]}} = event
     let accountAddress = accountId.toString()
 
@@ -314,21 +314,16 @@ async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean)
     const newAmount = (amount as unknown as Balance).toBigInt()
     accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
     await accumulatedReward.save()
+    return accumulatedReward
 }
 
-async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType): Promise<void> {
-    let {event: {data: [accountId, amount]}} = event
+async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
+    let { event: { data: [accountId, amount] } } = event
     let accountAddress = accountId.toString()
-
-    let accumulatedReward = BigInt(0)
-    let lastAccumulatedsStake = await AccumulatedStake.get(accountAddress);
-    if (!lastAccumulatedsStake) {
-        accumulatedReward = lastAccumulatedsStake.amount
-    }
 
     let id = eventIdWithAddress(event, accountAddress)
     let accountReward = new AccountReward(id);
-    accountReward.accumulatedAmount = accumulatedReward
+    accountReward.accumulatedAmount = accumulatedAmount
     accountReward.address = accountAddress
     accountReward.amount = (amount as unknown as Balance).toBigInt()
     accountReward.type = rewardType
