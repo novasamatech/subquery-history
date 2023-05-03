@@ -24,7 +24,7 @@ describe('handleReward', () => {
 		(global as any).api = mockAPI;
 		accountId = mockAddress("JHXFqYWQFFr5RkHVzviRiKhY7tutyGcYQb6kUyoScSir862")
 		rewardAmount = mockNumber(1000)
-		
+
 		rewardEvent = new SubstrateTestEventBuilder().buildEventForRewards(accountId, rewardAmount)
 	});
 
@@ -37,7 +37,7 @@ describe('handleReward', () => {
 			return Promise.resolve()
 		})
 		jest.spyOn(AccountReward.prototype, "save").mockImplementation(function (this: AccountReward) {
-			expect(this.amount).toBe(AccountReward.getByAddress(accountId.toString()))
+			expect(this.amount).toBe(rewardAmount)
 			return Promise.resolve()
 		})
 
