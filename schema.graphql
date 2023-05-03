@@ -26,6 +26,21 @@ type Reward @jsonField {
   validator: String
 }
 
+enum RewardType {
+  reward
+  slash  
+}
+
+type AccountReward @entity {
+  id: ID!
+  address: String! @index
+  blockNumber: Int! @index
+  timestamp: BigInt!
+  amount: BigInt!
+  accumulatedAmount: BigInt!
+  type: RewardType!
+}
+
 type AccumulatedReward @entity {
   id: ID! #address
   amount: BigInt!
