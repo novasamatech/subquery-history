@@ -372,5 +372,6 @@ async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): P
 
 export async function handleParachainRewarded (rewardEvent: SubstrateEvent): Promise<void> {
     await handleParachainRewardForTxHistory(rewardEvent)
-    await updateAccumulatedReward(rewardEvent, true)
+    let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
+    await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
 }
