@@ -29,6 +29,7 @@
     "@phala/typedefs": "^0.2.31",
     "@polkadot/api": "^8",
     "@polkadot/types-augment": "^8",
+    "@polymeshassociation/polymesh-types": "^5.4.0",
     "@subql/cli": "^1.13.1",
     "@subql/types": "^1.7.2",
     "@subsocial/types": "^0.6.8",
@@ -58,6 +59,7 @@
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
     "polkadexChaintypes": "./chainTypes/polkadexChaintypes.ts",
     "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
+    "polymeshChaintypes": "./chainTypes/polymeshTypes.ts",
     "crustChaintypes": "./chainTypes/crustChaintypes.ts",
     "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts"
   },
