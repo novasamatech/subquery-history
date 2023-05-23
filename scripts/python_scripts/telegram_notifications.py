@@ -25,15 +25,13 @@ class TelegramNotifications(metaclass=Singleton):
             for project_message in self.notify_projects_message:
                 notification_message += project_message
             
-            asyncio.run(self.send_telegram_message(notification_message))
+            shielded_message = notification_message.replace('-', '\-')
+            asyncio.run(self.send_telegram_message(shielded_message)) 
         else:
             pass
 
     def add_row_in_telegram_notification(self, project: SubQueryProject, instance: DeploymentInstance):
-        notify_project_name = project.network.title()
-
-        if notify_project_name == '' or notify_project_name is None:
-            notify_project_name = project.name.title()
+        notify_project_name = project.name.title()
 
         self.notify_projects_message.append(
             f"\n\n*{notify_project_name}* Indexer is unhealthy\!\nProject URL: [Link to project](https://managedservice.subquery.network/orgs/nova-wallet/projects/{instance.project_key.split('/')[1]}/deployments?slot={instance.type})\nExplorer URL: [Link to explorer](https://explorer.subquery.network/subquery/{instance.project_key})\nEnvironment: {instance.type.capitalize()}"
