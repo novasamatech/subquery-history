@@ -25,7 +25,8 @@ class TelegramNotifications(metaclass=Singleton):
             for project_message in self.notify_projects_message:
                 notification_message += project_message
             
-            asyncio.run(self.send_telegram_message(notification_message))
+            shielded_message = notification_message.replace('-', '\-')
+            asyncio.run(self.send_telegram_message(shielded_message)) 
         else:
             pass
 
