@@ -1,40 +1,37 @@
 from typing import List
 import requests
-import json
 
 
 class DeploymentInstance():
 
     def __init__(self, **kwargs) -> None:
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.id = kwargs['id']
+        self.project_key = kwargs['projectKey']
+        self.version = kwargs['version']
+        self.status = kwargs['status']
+        self.type = kwargs['type']
+        self.configuration = kwargs['configuration']
 
 
 class SubQueryProject():
 
-    deployments = List[DeploymentInstance]
-
     def __init__(self, **kwargs) -> None:
+        self.id = kwargs['id']
+        self.key = kwargs['key']
+        self.name = kwargs['name']
+        self.network = kwargs['network']
+        self.metadata = kwargs['metadata']
+        self.query_url = kwargs['queryUrl']
+        self.deployments: List[DeploymentInstance] = []
 
-        self.deployments = []
-        for key, value in kwargs.items():
-            if key == 'deployments':
-                deployments = []
-                for deployment in value:
-                    deployments.append(DeploymentInstance(**deployment))
-                setattr(self, key, deployments)
-
-            setattr(self, key, value)
-
-    def add_deployment(self, item):
-        # Append the item to the deployments list
-        self.deployments.append(item)
+        deployments = kwargs.get('deployments')
+        if deployments:
+            for deployment in deployments:
+                self.deployments.append(DeploymentInstance(**deployment))
 
 
 class SubQueryDeploymentAPI():
 
-    org_projects = [SubQueryProject]
     base_url = "https://api.subquery.network"
 
     def __init__(self, auth_token, org) -> None:
@@ -96,7 +93,7 @@ class SubQueryDeploymentAPI():
 
         sync_status = self._send_request(
             method="GET",
-            path=f"/subqueries/{deployment.projectKey}/deployments/{deployment.id}/sync-status"
+            path=f"/subqueries/{deployment.project_key}/deployments/{deployment.id}/sync-status"
         ).json()
         deployment.__setattr__('sync_status', sync_status)
 
@@ -111,8 +108,7 @@ class SubQueryDeploymentAPI():
             path=f"/subqueries/{project.key}/deployments"
         ).json()
 
-        for deployment in deployments:
-            project.add_deployment(DeploymentInstance(**deployment))
+        project.deployments = [DeploymentInstance(**deployment) for deployment in deployments]
 
         return project.deployments
 
