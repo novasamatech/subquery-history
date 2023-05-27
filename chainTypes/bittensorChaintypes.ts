@@ -33,4 +33,4 @@ const definitions = {
   ]
 };
 
-export default definitions;
+export default {typesBundle: {spec: {bittensor: definitions}}};
