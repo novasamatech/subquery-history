@@ -52,7 +52,6 @@
     "kintsugiChaintypes": "./chainTypes/kintsugiChaintypes.ts",
     "moonbeamChaintypes": "./chainTypes/moonbeamChaintypes.ts",
     "parallelHeikoChaintypes": "./chainTypes/parallelHeikoChaintypes.ts",
-    "pichiuChaintypes": "./chainTypes/pichiuChaintypes.ts",
     "shidenChaintypes": "./chainTypes/shidenChaintypes.ts",
     "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
