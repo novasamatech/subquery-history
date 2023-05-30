@@ -14,7 +14,7 @@ schema:
   file: ./schema.graphql
 network:
   chainId: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d'
-  endpoint: wss://turing-rpc.dwellir.com
+  endpoint: wss://rpc.turing.oak.tech
 dataSources:
   - name: main
     kind: substrate/Runtime
