@@ -1,13 +1,19 @@
-import type { OverrideBundleType, OverrideBundleDefinition } from '@polkadot/types/types';
+// Copyright 2017-2023 @polkadot/types-known authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
-import { typeBundleForPolkadot } from '@zeroio/type-definitions';
+/* eslint-disable sort-keys */
 
-const typesBundle: OverrideBundleType = {
-    spec: {
-        "subzero": typeBundleForPolkadot.types as unknown as OverrideBundleDefinition,
-    },
+import {OverrideBundleDefinition} from "@polkadot/types/types";
+
+const definitions: OverrideBundleDefinition = {
+    types: [
+        {
+            minmax: [0, 4],
+            types: {
+                DispatchError: 'DispatchErrorPre6First',
+            }
+        },
+    ]
 };
 
-export default {
-    typesBundle,
-};
+export default { typesBundle: { spec: { "aleph-node" : definitions }}};
