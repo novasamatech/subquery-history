@@ -18,7 +18,8 @@ const definitions: OverrideBundleDefinition = {
           periodCount: 'u32',
           perPeriod: 'Compact<Balance>'
         },
-        VestingScheduleOf: 'OrmlVestingSchedule'
+        VestingScheduleOf: 'OrmlVestingSchedule',
+        DispatchError: 'DispatchErrorPre6First',
       }
     }
   ]
@@ -26,7 +27,7 @@ const definitions: OverrideBundleDefinition = {
 
 const typesBundle = {
     spec: {
-        'node-polkadex': definitions
+        'node': definitions
     }
 }
 
