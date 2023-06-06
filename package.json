@@ -61,7 +61,8 @@
     "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
     "polymeshChaintypes": "./chainTypes/polymeshTypes.ts",
     "crustChaintypes": "./chainTypes/crustChaintypes.ts",
-    "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts"
+    "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts",
+    "calamariChainTypes": "./chainTypes/calamariChainTypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
