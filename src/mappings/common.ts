@@ -5,7 +5,7 @@ import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
 
-const batchCalls = ["batch", "batchAll"]
+const batchCalls = ["batch", "batchAll", "forceBatch"]
 const transferCalls = ["transfer", "transferKeepAlive"]
 const ormlSections = ["currencies", "tokens"]
 
