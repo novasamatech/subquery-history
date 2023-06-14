@@ -8,7 +8,7 @@ import {OverrideBundleDefinition} from "@polkadot/types/types";
 const definitions: OverrideBundleDefinition = {
     types: [
         {
-            minmax: [0, 4],
+            minmax: [0, 3100],
             types: {
                 DispatchError: 'DispatchErrorPre6First',
             }
@@ -16,4 +16,4 @@ const definitions: OverrideBundleDefinition = {
     ]
 };
 
-export default { typesBundle: { spec: { "aleph-node" : definitions }}};
+export default { typesBundle: { spec: { "calamari" : definitions }}};

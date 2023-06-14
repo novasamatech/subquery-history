@@ -15,6 +15,8 @@ schema:
 network:
   chainId: '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e'
   endpoint: wss://ws.azero.dev
+  chaintypes:
+    file: ./dist/alephZeroChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -44,16 +46,6 @@ dataSources:
           filter:
             module: staking
             method: Slashed
-        - handler: handleBonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Bonded
-        - handler: handleUnbonded
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Unbonded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:

@@ -27,7 +27,7 @@
     "@kiltprotocol/type-definitions": "^0.1.23",
     "@parallel-finance/type-definitions": "^1.7.14",
     "@phala/typedefs": "^0.2.31",
-    "@polkadot/api": "^8",
+    "@polkadot/api": "latest",
     "@polkadot/types-augment": "^8",
     "@polymeshassociation/polymesh-types": "^5.4.1",
     "@subql/cli": "^2",
@@ -60,7 +60,8 @@
     "kylinChaintypes": "./chainTypes/kylinChainTypes.ts",
     "polymeshChaintypes": "./chainTypes/polymeshTypes.ts",
     "crustChaintypes": "./chainTypes/crustChaintypes.ts",
-    "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts"
+    "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts",
+    "calamariChainTypes": "./chainTypes/calamariChainTypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
