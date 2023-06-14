@@ -81,30 +81,6 @@ type IndividualExposure @jsonField {
   value: String!
 }
 
-#enum StakeChangeType {
-#  bonded
-#  unbonded
-#  slashed
-#  rewarded
-#}
-
-type StakeChange @entity {
-  id: ID!
-  blockNumber: Int!
-  extrinsicHash: String
-  eventIdx: Int!
-  timestamp: BigInt! @index
-  address: String! @index
-  amount: BigInt!
-  accumulatedAmount: BigInt!
-  type: String!
-}
-
-type AccumulatedStake @entity {
-  id: ID!
-  amount: BigInt!
-}
-
 type ErrorEvent @entity {
   id: ID!
   description: String!

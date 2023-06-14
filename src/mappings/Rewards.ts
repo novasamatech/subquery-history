@@ -13,9 +13,8 @@ import {
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
-import {EraIndex, RewardDestination} from "@polkadot/types/interfaces/staking"
+import {EraIndex} from "@polkadot/types/interfaces/staking"
 import {Balance} from "@polkadot/types/interfaces";
-import {handleRewardRestakeForAnalytics, handleSlashForAnalytics} from "./StakeChanged"
 import {cachedRewardDestination, cachedController} from "./Cache"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
@@ -43,7 +42,6 @@ export async function handleRewarded(rewardEvent: SubstrateEvent): Promise<void>
 }
 
 export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
-    await handleRewardRestakeForAnalytics(rewardEvent)
     await handleRewardForTxHistory(rewardEvent)
     let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
     await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
@@ -55,7 +53,6 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     //         return;
     //     }
 
-    //     await handleRewardRestakeForAnalytics(rewardEvent)
     //     await handleRewardForTxHistory(rewardEvent)
     //     await updateAccumulatedReward(rewardEvent, true)
     // } catch (error) {
@@ -181,7 +178,6 @@ export async function handleSlashed(slashEvent: SubstrateEvent): Promise<void> {
 }
 
 export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
-    await handleSlashForAnalytics(slashEvent)
     await handleSlashForTxHistory(slashEvent)
     let accumulatedReward = await updateAccumulatedReward(slashEvent, false)
     await updateAccountRewards(slashEvent, RewardType.slash, accumulatedReward.amount)
@@ -193,7 +189,6 @@ export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
     //         return;
     //     }
 
-    //     await handleSlashForAnalytics(slashEvent)
     //     await handleSlashForTxHistory(slashEvent)
     //     await updateAccumulatedReward(slashEvent, false)
     // } catch (error) {
