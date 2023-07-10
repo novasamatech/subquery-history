@@ -15,7 +15,7 @@ import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
 import {Balance} from "@polkadot/types/interfaces";
-import {cachedRewardDestination, cachedController, cachedEraIndex} from "./Cache"
+import {cachedRewardDestination, cachedController, cachedStakingRewardEraIndex} from "./Cache"
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -334,7 +334,7 @@ async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): P
     const blockTimestamp = timestamp(block)
     const {event: {data: [account, amount]}} = rewardEvent
     const eventId = eventIdFromBlockAndIdx(blockNumber, rewardEvent.idx.toString())
-    const eraIndex = await cachedEraIndex(rewardEvent)
+    const eraIndex = await cachedStakingRewardEraIndex(rewardEvent)
 
     const validatorEvent = rewardEvent.block.events.find(event =>
         event.event.section == rewardEvent.event.section && 

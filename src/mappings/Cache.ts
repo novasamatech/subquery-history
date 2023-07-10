@@ -8,7 +8,7 @@ import {PalletStakingRewardDestination} from "@polkadot/types/lookup"
 let rewardDestinationByAddress: {[blockId: string]: {[address: string]: PalletStakingRewardDestination}} = {}
 let controllersByStash: {[blockId: string]: {[address: string]: string}} = {}
 
-let parachainEra: {[blockId: string]: number} = {}
+let parachainStakingRewardEra: {[blockId: string]: number} = {}
 
 export async function cachedRewardDestination(accountAddress: string, event: SubstrateEvent): Promise<PalletStakingRewardDestination> {
     const blockId = blockNumber(event)
@@ -124,9 +124,9 @@ export async function cachedController(accountAddress: string, event: SubstrateE
     }
 }
 
-export async function cachedEraIndex(event: SubstrateEvent): Promise<number> {
+export async function cachedStakingRewardEraIndex(event: SubstrateEvent): Promise<number> {
     const blockId = blockNumber(event)
-    let cachedEra = parachainEra[blockId]
+    let cachedEra = parachainStakingRewardEra[blockId]
 
     if (cachedEra !== undefined) {
         return cachedEra
@@ -137,8 +137,8 @@ export async function cachedEraIndex(event: SubstrateEvent): Promise<number> {
         // HACK: used to get data from object
         const eraIndex = (era.toJSON() as {current: any}).current - Number(paymentDelay)
 
-        parachainEra = {}
-        parachainEra[blockId] = eraIndex
+        parachainStakingRewardEra = {}
+        parachainStakingRewardEra[blockId] = eraIndex
         return eraIndex
     }
 }
