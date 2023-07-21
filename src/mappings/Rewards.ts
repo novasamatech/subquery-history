@@ -1,4 +1,13 @@
-import {AccountReward, AccumulatedReward, ErrorEvent, HistoryElement, Reward, RewardType} from '../types';
+import {
+    AccountReward, 
+    AccountPoolReward, 
+    AccumulatedReward, 
+    AccumulatedPoolReward,
+    ErrorEvent, 
+    HistoryElement, 
+    Reward, 
+    RewardType,
+} from '../types';
 import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
@@ -16,6 +25,8 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
 import {Balance} from "@polkadot/types/interfaces";
 import {cachedRewardDestination, cachedController, cachedStakingRewardEraIndex} from "./Cache"
+import {Codec} from "@polkadot/types/types";
+import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -61,6 +72,71 @@ export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
     //     saveError.description = error.toString()
     //     await saveError.save()
     // }
+}
+
+export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
+    await handlePoolRewardForTxHistory(rewardEvent)
+    let accumulatedReward = await updateAccumulatedPoolReward(rewardEvent, true)
+    await updateAccountPoolRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
+}
+
+
+// TODO: Unite with parachain tx history
+async function handlePoolRewardForTxHistory(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
+    const extrinsic = rewardEvent.extrinsic;
+    const block = rewardEvent.block;
+    const blockNumber = block.block.header.number.toString()
+    const blockTimestamp = timestamp(block)
+    const {event: {data: [account, poolId, amount]}} = rewardEvent
+    const eventId = eventIdFromBlockAndIdx(blockNumber, rewardEvent.idx.toString())
+
+    const element = new HistoryElement(eventId);
+    element.timestamp = blockTimestamp
+    element.address = account.toString()
+    element.blockNumber = block.block.header.number.toNumber()
+    if (extrinsic !== undefined) {
+        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        element.extrinsicIdx = extrinsic.idx
+    }
+    element.poolReward = {
+        eventIdx: rewardEvent.idx,
+        amount: amount.toString(),
+        isReward: true,
+        poolId: poolId.toNumber()
+    }
+
+    element.save()
+}
+
+async function updateAccumulatedPoolReward(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
+    let {event: {data: [accountId, poolId, amount]}} = event
+    let accountAddress = accountId.toString()
+
+    let accumulatedReward = await AccumulatedPoolReward.get(accountAddress);
+    if (!accumulatedReward) {
+        accumulatedReward = new AccumulatedPoolReward(accountAddress);
+        accumulatedReward.amount = BigInt(0)
+    }
+    const newAmount = (amount as unknown as Balance).toBigInt()
+    accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
+    await accumulatedReward.save()
+    return accumulatedReward
+}
+
+async function updateAccountPoolRewards(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
+    let { event: { data: [accountId, poolId, amount] } } = event
+    let accountAddress = accountId.toString()
+
+    let id = eventIdWithAddress(event, accountAddress)
+    let accountReward = new AccountPoolReward(id);
+    accountReward.accumulatedAmount = accumulatedAmount
+    accountReward.address = accountAddress
+    accountReward.amount = (amount as unknown as Balance).toBigInt()
+    accountReward.type = rewardType
+    accountReward.timestamp = timestamp(event.block)
+    accountReward.blockNumber = blockNumber(event)
+    accountReward.poolId = poolId.toNumber()
+    await accountReward.save()
 }
 
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
