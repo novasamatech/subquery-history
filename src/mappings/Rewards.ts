@@ -395,7 +395,7 @@ async function buildRewardEvents<A>(
 
 async function updateAccumulatedReward(event: SubstrateEvent<[accountId: Codec, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
     let {event: {data: [accountId, amount]}} = event
-    return await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, amount, isReward)
+    return await updateAccumulatedGenericReward(AccumulatedReward, accountId, amount, isReward)
 }
 
 async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {

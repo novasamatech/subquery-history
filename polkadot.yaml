@@ -36,6 +36,11 @@ dataSources:
           filter:
             module: staking
             method: Rewarded
+        - handler: handlePoolReward
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PaidOut
         - handler: handleSlash
           kind: substrate/EventHandler
           filter:
