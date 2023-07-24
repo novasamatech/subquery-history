@@ -26,6 +26,13 @@ type Reward @jsonField {
   validator: String
 }
 
+type PoolReward @jsonField {
+  eventIdx: Int!
+  amount: String!
+  isReward: Boolean!,
+  poolId: Int!
+}
+
 enum RewardType {
   reward
   slash  
@@ -41,7 +48,23 @@ type AccountReward @entity {
   type: RewardType!
 }
 
+type AccountPoolReward @entity {
+  id: ID!
+  address: String! @index
+  blockNumber: Int! @index
+  timestamp: BigInt!
+  amount: BigInt!
+  accumulatedAmount: BigInt!
+  type: RewardType!
+  poolId: Int!
+}
+
 type AccumulatedReward @entity {
+  id: ID! #address
+  amount: BigInt!
+}
+
+type AccumulatedPoolReward @entity {
   id: ID! #address
   amount: BigInt!
 }
@@ -62,6 +85,7 @@ type HistoryElement @entity {
   timestamp: BigInt! @index
   address: String! @index
   reward: Reward
+  poolReward: PoolReward
   extrinsic: Extrinsic
   transfer: Transfer
   assetTransfer: AssetTransfer
