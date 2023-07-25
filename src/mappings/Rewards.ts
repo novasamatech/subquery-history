@@ -1,11 +1,8 @@
 import {
-    AccountReward, 
-    AccountPoolReward, 
-    AccumulatedReward, 
-    AccumulatedPoolReward,
-    ErrorEvent, 
-    HistoryElement, 
-    Reward, 
+    AccountReward,
+    AccumulatedReward,
+    HistoryElement,
+    Reward,
     RewardType,
 } from '../types';
 import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
@@ -72,91 +69,6 @@ export async function handleReward(rewardEvent: SubstrateEvent<[accountId: Codec
     //     saveError.description = error.toString()
     //     await saveError.save()
     // }
-}
-
-export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
-    await handlePoolRewardForTxHistory(rewardEvent)
-    let accumulatedReward = await updateAccumulatedPoolReward(rewardEvent, true)
-    await updateAccountPoolRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
-}
-
-
-// TODO: Unite with parachain tx history
-async function handlePoolRewardForTxHistory(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
-    handleGenericForTxHistory(rewardEvent, async (element: HistoryElement) => {
-        const {event: {data: [account, poolId, amount]}} = rewardEvent
-        element.address = account.toString()
-        element.poolReward = {
-            eventIdx: rewardEvent.idx,
-            amount: amount.toString(),
-            isReward: true,
-            poolId: poolId.toNumber()
-        } 
-        return element       
-    })
-}
-
-async function handleGenericForTxHistory(event: SubstrateEvent, fieldCallback: (element: HistoryElement) => Promise<HistoryElement>): Promise<void> {
-    const extrinsic = event.extrinsic;
-    const block = event.block;
-    const blockNumber = block.block.header.number.toString()
-    const blockTimestamp = timestamp(block)
-    const eventId = eventIdFromBlockAndIdx(blockNumber, event.idx.toString())
-
-    const element = new HistoryElement(eventId);
-    element.timestamp = blockTimestamp
-    element.blockNumber = block.block.header.number.toNumber()
-    if (extrinsic !== undefined) {
-        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
-        element.extrinsicIdx = extrinsic.idx
-    }
-    
-    (await fieldCallback(element)).save()
-}
-
-async function updateAccumulatedPoolReward(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
-    let {event: {data: [accountId, _, amount]}} = event
-    return await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, amount, isReward)
-}
-
-interface AccumulatedInterface {
-    amount : bigint
-    save() : Promise<void>
-}
-
-interface AccumulatedInterfaceStatic<BaseType extends AccumulatedInterface> {
-    new(id: string):BaseType;
-    get(accountAddress: string) : Promise<BaseType | undefined>
-}
-
-async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: Codec, amount: INumber, isReward: boolean): Promise<AccumulatedRewardType> {
-    let accountAddress = accountId.toString()
-
-    let accumulatedReward = await AccumulatedRewardTypeObject.get(accountAddress);
-    if (!accumulatedReward) {
-        accumulatedReward = new AccumulatedRewardTypeObject(accountAddress);
-        accumulatedReward.amount = BigInt(0)
-    }
-    const newAmount = (amount as unknown as Balance).toBigInt()
-    accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
-    await accumulatedReward.save()
-    return accumulatedReward
-}
-
-async function updateAccountPoolRewards(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
-    let { event: { data: [accountId, poolId, amount] } } = event
-    let accountAddress = accountId.toString()
-
-    let id = eventIdWithAddress(event, accountAddress)
-    let accountReward = new AccountPoolReward(id);
-    accountReward.accumulatedAmount = accumulatedAmount
-    accountReward.address = accountAddress
-    accountReward.amount = (amount as unknown as Balance).toBigInt()
-    accountReward.type = rewardType
-    accountReward.timestamp = timestamp(event.block)
-    accountReward.blockNumber = blockNumber(event)
-    accountReward.poolId = poolId.toNumber()
-    await accountReward.save()
 }
 
 async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
@@ -400,17 +312,18 @@ async function updateAccumulatedReward(event: SubstrateEvent<[accountId: Codec, 
 
 async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
     let { event: { data: [accountId, amount] } } = event
-    let accountAddress = accountId.toString()
 
-    let id = eventIdWithAddress(event, accountAddress)
-    let accountReward = new AccountReward(id);
-    accountReward.accumulatedAmount = accumulatedAmount
-    accountReward.address = accountAddress
-    accountReward.amount = (amount as unknown as Balance).toBigInt()
-    accountReward.type = rewardType
-    accountReward.timestamp = timestamp(event.block)
-    accountReward.blockNumber = blockNumber(event)
-    await accountReward.save()
+    updateGenericAccountRewards(
+        AccountReward,
+        event,
+        accountId.toString(),
+        (amount as unknown as Balance).toBigInt(),
+        rewardType,
+        accumulatedAmount,
+        (element: AccountReward) => {
+            return element
+        }
+    )
 }
 
 async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
@@ -440,4 +353,89 @@ export async function handleParachainRewarded (rewardEvent: SubstrateEvent<[acco
     await handleParachainRewardForTxHistory(rewardEvent)
     let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
     await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
+}
+
+// ============= GENERICS ================
+
+interface AccumulatedInterface {
+    amount : bigint
+    save() : Promise<void>
+}
+
+interface AccumulatedInterfaceStatic<BaseType extends AccumulatedInterface> {
+    new(id: string):BaseType;
+    get(accountAddress: string) : Promise<BaseType | undefined>
+}
+
+export async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: Codec, amount: INumber, isReward: boolean): Promise<AccumulatedRewardType> {
+    let accountAddress = accountId.toString()
+
+    let accumulatedReward = await AccumulatedRewardTypeObject.get(accountAddress);
+    if (!accumulatedReward) {
+        accumulatedReward = new AccumulatedRewardTypeObject(accountAddress);
+        accumulatedReward.amount = BigInt(0)
+    }
+    const newAmount = (amount as unknown as Balance).toBigInt()
+    accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
+    await accumulatedReward.save()
+    return accumulatedReward
+}
+
+export async function handleGenericForTxHistory(event: SubstrateEvent, fieldCallback: (element: HistoryElement) => Promise<HistoryElement>): Promise<void> {
+    const extrinsic = event.extrinsic;
+    const block = event.block;
+    const blockNumber = block.block.header.number.toString()
+    const blockTimestamp = timestamp(block)
+    const eventId = eventIdFromBlockAndIdx(blockNumber, event.idx.toString())
+
+    const element = new HistoryElement(eventId);
+    element.timestamp = blockTimestamp
+    element.blockNumber = block.block.header.number.toNumber()
+    if (extrinsic !== undefined) {
+        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        element.extrinsicIdx = extrinsic.idx
+    }
+    
+    (await fieldCallback(element)).save()
+}
+
+interface AccountRewardsInterface {
+    id: string;
+
+    address: string;
+
+    blockNumber: number;
+
+    timestamp: bigint;
+
+    amount: bigint;
+
+    accumulatedAmount: bigint;
+
+    type: RewardType;
+    save() : Promise<void>
+}
+interface AccountRewardsInterfaceStatic<BaseType extends AccountRewardsInterface> {
+    new(id: string):BaseType;
+    get(accountAddress: string) : Promise<BaseType | undefined>
+}
+
+export async function updateGenericAccountRewards<AccountRewardsType extends AccountRewardsInterface, AccumulatedRewardClassType extends AccountRewardsInterfaceStatic<AccountRewardsType>>(
+    AccountRewardsTypeObject: AccumulatedRewardClassType, 
+    event: SubstrateEvent, 
+    accountAddress: string,
+    amount: bigint,
+    rewardType: RewardType, 
+    accumulatedAmount: bigint,
+    fillEventData: (element: AccountRewardsType) => AccountRewardsType
+): Promise<void> {
+    let id = eventIdWithAddress(event, accountAddress)
+    let accountReward = new AccountRewardsTypeObject(id);
+    accountReward.accumulatedAmount = accumulatedAmount
+    accountReward.address = accountAddress
+    accountReward.amount = amount
+    accountReward.type = rewardType
+    accountReward.timestamp = timestamp(event.block)
+    accountReward.blockNumber = blockNumber(event)
+    await fillEventData(accountReward).save()
 }
