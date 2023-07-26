@@ -1,4 +1,10 @@
-import {AccountReward, AccumulatedReward, ErrorEvent, HistoryElement, Reward, RewardType} from '../types';
+import {
+    AccountReward,
+    AccumulatedReward,
+    HistoryElement,
+    Reward,
+    RewardType,
+} from '../types';
 import {SubstrateBlock, SubstrateEvent, SubstrateExtrinsic} from "@subql/types";
 import {
     callsFromBatch,
@@ -16,6 +22,8 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import {EraIndex} from "@polkadot/types/interfaces/staking"
 import {Balance} from "@polkadot/types/interfaces";
 import {cachedRewardDestination, cachedController, cachedStakingRewardEraIndex} from "./Cache"
+import {Codec} from "@polkadot/types/types";
+import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
     return call.method == "payoutStakers"
@@ -37,11 +45,11 @@ function extractArgsFromPayoutValidator(call: CallBase<AnyTuple>, sender: string
     return [sender, (eraRaw as EraIndex).toNumber()]
 }
 
-export async function handleRewarded(rewardEvent: SubstrateEvent): Promise<void> {
+export async function handleRewarded(rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>): Promise<void> {
     await handleReward(rewardEvent)
 }
 
-export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
+export async function handleReward(rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>): Promise<void> {
     await handleRewardForTxHistory(rewardEvent)
     let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
     await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
@@ -173,11 +181,11 @@ function determinePayoutCallsArgs(causeCall: CallBase<AnyTuple>, sender: string)
     }
 }
 
-export async function handleSlashed(slashEvent: SubstrateEvent): Promise<void> {
+export async function handleSlashed(slashEvent: SubstrateEvent<[accountId: Codec, slash: INumber]>): Promise<void> {
     await handleSlash(slashEvent)
 }
 
-export async function handleSlash(slashEvent: SubstrateEvent): Promise<void> {
+export async function handleSlash(slashEvent: SubstrateEvent<[accountId: Codec, slash: INumber]>): Promise<void> {
     await handleSlashForTxHistory(slashEvent)
     let accumulatedReward = await updateAccumulatedReward(slashEvent, false)
     await updateAccountRewards(slashEvent, RewardType.slash, accumulatedReward.amount)
@@ -297,13 +305,74 @@ async function buildRewardEvents<A>(
     await Promise.allSettled(savingPromises);
 }
 
-async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean): Promise<AccumulatedReward> {
+async function updateAccumulatedReward(event: SubstrateEvent<[accountId: Codec, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
     let {event: {data: [accountId, amount]}} = event
+    return await updateAccumulatedGenericReward(AccumulatedReward, accountId, amount, isReward)
+}
+
+async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
+    let { event: { data: [accountId, amount] } } = event
+
+    updateGenericAccountRewards(
+        AccountReward,
+        event,
+        accountId.toString(),
+        (amount as unknown as Balance).toBigInt(),
+        rewardType,
+        accumulatedAmount,
+        (element: AccountReward) => {
+            return element
+        }
+    )
+}
+
+async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
+    handleGenericForTxHistory(rewardEvent, async (element: HistoryElement) => {
+        const {event: {data: [account, amount]}} = rewardEvent
+        const eraIndex = await cachedStakingRewardEraIndex(rewardEvent)
+
+        const validatorEvent = rewardEvent.block.events.find(event =>
+            event.event.section == rewardEvent.event.section && 
+            event.event.method == rewardEvent.event.method
+        )
+        const validatorId = validatorEvent?.event.data[0].toString()
+        element.address = account.toString()
+        element.reward = {eventIdx: rewardEvent.idx,
+            amount: amount.toString(),
+            isReward: true,
+            stash: account.toString(),
+            validator: validatorId,
+            era: eraIndex
+        }
+    
+        return element       
+    })
+}
+
+export async function handleParachainRewarded (rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>): Promise<void> {
+    await handleParachainRewardForTxHistory(rewardEvent)
+    let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
+    await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
+}
+
+// ============= GENERICS ================
+
+interface AccumulatedInterface {
+    amount : bigint
+    save() : Promise<void>
+}
+
+interface AccumulatedInterfaceStatic<BaseType extends AccumulatedInterface> {
+    new(id: string):BaseType;
+    get(accountAddress: string) : Promise<BaseType | undefined>
+}
+
+export async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: Codec, amount: INumber, isReward: boolean): Promise<AccumulatedRewardType> {
     let accountAddress = accountId.toString()
 
-    let accumulatedReward = await AccumulatedReward.get(accountAddress);
+    let accumulatedReward = await AccumulatedRewardTypeObject.get(accountAddress);
     if (!accumulatedReward) {
-        accumulatedReward = new AccumulatedReward(accountAddress);
+        accumulatedReward = new AccumulatedRewardTypeObject(accountAddress);
         accumulatedReward.amount = BigInt(0)
     }
     const newAmount = (amount as unknown as Balance).toBigInt()
@@ -312,57 +381,61 @@ async function updateAccumulatedReward(event: SubstrateEvent, isReward: boolean)
     return accumulatedReward
 }
 
-async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
-    let { event: { data: [accountId, amount] } } = event
-    let accountAddress = accountId.toString()
-
-    let id = eventIdWithAddress(event, accountAddress)
-    let accountReward = new AccountReward(id);
-    accountReward.accumulatedAmount = accumulatedAmount
-    accountReward.address = accountAddress
-    accountReward.amount = (amount as unknown as Balance).toBigInt()
-    accountReward.type = rewardType
-    accountReward.timestamp = timestamp(event.block)
-    accountReward.blockNumber = blockNumber(event)
-    await accountReward.save()
-}
-
-async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
-    const extrinsic = rewardEvent.extrinsic;
-    const block = rewardEvent.block;
+export async function handleGenericForTxHistory(event: SubstrateEvent, fieldCallback: (element: HistoryElement) => Promise<HistoryElement>): Promise<void> {
+    const extrinsic = event.extrinsic;
+    const block = event.block;
     const blockNumber = block.block.header.number.toString()
     const blockTimestamp = timestamp(block)
-    const {event: {data: [account, amount]}} = rewardEvent
-    const eventId = eventIdFromBlockAndIdx(blockNumber, rewardEvent.idx.toString())
-    const eraIndex = await cachedStakingRewardEraIndex(rewardEvent)
-
-    const validatorEvent = rewardEvent.block.events.find(event =>
-        event.event.section == rewardEvent.event.section && 
-        event.event.method == rewardEvent.event.method
-    )
-    const validatorId = validatorEvent?.event.data[0].toString()
+    const eventId = eventIdFromBlockAndIdx(blockNumber, event.idx.toString())
 
     const element = new HistoryElement(eventId);
     element.timestamp = blockTimestamp
-    element.address = account.toString()
     element.blockNumber = block.block.header.number.toNumber()
     if (extrinsic !== undefined) {
         element.extrinsicHash = extrinsic.extrinsic.hash.toString()
         element.extrinsicIdx = extrinsic.idx
     }
-    element.reward = {eventIdx: rewardEvent.idx,
-        amount: amount.toString(),
-        isReward: true,
-        stash: account.toString(),
-        validator: validatorId,
-        era: eraIndex
-    }
-
-    element.save()
+    
+    (await fieldCallback(element)).save()
 }
 
-export async function handleParachainRewarded (rewardEvent: SubstrateEvent): Promise<void> {
-    await handleParachainRewardForTxHistory(rewardEvent)
-    let accumulatedReward = await updateAccumulatedReward(rewardEvent, true)
-    await updateAccountRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
+interface AccountRewardsInterface {
+    id: string;
+
+    address: string;
+
+    blockNumber: number;
+
+    timestamp: bigint;
+
+    amount: bigint;
+
+    accumulatedAmount: bigint;
+
+    type: RewardType;
+    save() : Promise<void>
+}
+interface AccountRewardsInterfaceStatic<BaseType extends AccountRewardsInterface> {
+    new(id: string):BaseType;
+    get(accountAddress: string) : Promise<BaseType | undefined>
+}
+
+export async function updateGenericAccountRewards<AccountRewardsType extends AccountRewardsInterface, AccumulatedRewardClassType extends AccountRewardsInterfaceStatic<AccountRewardsType>>(
+    AccountRewardsTypeObject: AccumulatedRewardClassType, 
+    event: SubstrateEvent, 
+    accountAddress: string,
+    amount: bigint,
+    rewardType: RewardType, 
+    accumulatedAmount: bigint,
+    fillEventData: (element: AccountRewardsType) => AccountRewardsType
+): Promise<void> {
+    let id = eventIdWithAddress(event, accountAddress)
+    let accountReward = new AccountRewardsTypeObject(id);
+    accountReward.accumulatedAmount = accumulatedAmount
+    accountReward.address = accountAddress
+    accountReward.amount = amount
+    accountReward.type = rewardType
+    accountReward.timestamp = timestamp(event.block)
+    accountReward.blockNumber = blockNumber(event)
+    await fillEventData(accountReward).save()
 }
