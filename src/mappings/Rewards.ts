@@ -307,7 +307,7 @@ async function buildRewardEvents<A>(
 
 async function updateAccumulatedReward(event: SubstrateEvent<[accountId: Codec, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
     let {event: {data: [accountId, amount]}} = event
-    return await updateAccumulatedGenericReward(AccumulatedReward, accountId, amount, isReward)
+    return await updateAccumulatedGenericReward(AccumulatedReward, accountId, amount.toBigInt(), isReward)
 }
 
 async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
@@ -367,7 +367,7 @@ interface AccumulatedInterfaceStatic<BaseType extends AccumulatedInterface> {
     get(accountAddress: string) : Promise<BaseType | undefined>
 }
 
-export async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: Codec, amount: INumber, isReward: boolean): Promise<AccumulatedRewardType> {
+export async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: Codec, amount: bigint, isReward: boolean): Promise<AccumulatedRewardType> {
     let accountAddress = accountId.toString()
 
     let accumulatedReward = await AccumulatedRewardTypeObject.get(accountAddress);
