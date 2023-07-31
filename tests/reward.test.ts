@@ -1,5 +1,6 @@
-import { AccumulatedPoolReward, AccountPoolReward } from '../src/types';
+import { AccumulatedPoolReward, AccountPoolReward, HistoryElement } from '../src/types';
 import { 
+	handlePoolReward,
 	handlePoolBondedSlash,
 	handlePoolUnbondingSlash, 
 } from "../src/mappings/PoolRewards"
@@ -134,7 +135,8 @@ describe('handlePoolSlash', () => {
 	let poolId
 	let slashAmount
 
-	let answers
+	let accumulatedPoolRewardAnswers
+	let acountPoolRewardAnswers
 
 	let accumulatedPoolRewardResults: AccumulatedPoolReward[] = []
 	let acountPoolRewardResults: AccountPoolReward[] = []
@@ -156,32 +158,63 @@ describe('handlePoolSlash', () => {
 	});
 
 	afterEach(() => {
-		expect(acountPoolRewardResults.length).toBe(answers.length)
+		expect(acountPoolRewardResults.length).toBe(acountPoolRewardAnswers.length)
 		acountPoolRewardResults.forEach((element, index) => {
-			expect(element.address).toBe(answers[index][0])
-			expect(element.amount).toBe(answers[index][1])
+			expect(element.address).toBe(acountPoolRewardAnswers[index][0])
+			expect(element.amount).toBe(acountPoolRewardAnswers[index][1])
 			expect(element.type).toBe(RewardType.slash)
 			expect(element.poolId).toBe(poolId.toNumber())
+		});
+
+		expect(accumulatedPoolRewardResults.length).toBe(acountPoolRewardAnswers.length)
+		accumulatedPoolRewardResults.forEach((element, index) => {
+			expect(element.amount).toBe(-acountPoolRewardAnswers[index][1])
 		});
 	})
 
 	beforeEach(() => {
+		accumulatedPoolRewardResults = []
 		acountPoolRewardResults = []
 	})
 
 	it('Bonded slash', async () => {
-		answers = [
+		acountPoolRewardAnswers = [
 			["16XzkhKCZqFA4yYd2nfrNk8GZBhq8xkdAQZe3T8tUWxanWWj", BigInt(1000)],
 			["128uKFo94ewG8BrRXyqVQFDj8753XNfgsDUp9DSGdh8erKwS", BigInt(500)],
 			["13au37C1nZtMjvv2uPHRvamYdgAVxffTWJoCZXo2sw1NeysP", BigInt(250)],
 		]
 
 		bondedSlashEvent = new SubstrateTestEventBuilder().buildEventForBondedPoolSlash(poolId, slashAmount)
-		await handlePoolBondedSlash(bondedSlashEvent,);
+		await handlePoolBondedSlash(bondedSlashEvent);
+	});
+
+	it('Unbonding slash with no era', async () => {
+		acountPoolRewardAnswers = [
+			["13au37C1nZtMjvv2uPHRvamYdgAVxffTWJoCZXo2sw1NeysP", BigInt(12340)],
+		]
+
+		unbondingSlashEvent = new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(mockNumber(1), poolId, slashAmount)
+		await handlePoolUnbondingSlash(unbondingSlashEvent);
+	});
+
+	it('Unbonding slash in era with points', async () => {
+		acountPoolRewardAnswers = [
+			["16XzkhKCZqFA4yYd2nfrNk8GZBhq8xkdAQZe3T8tUWxanWWj", BigInt(50)],
+		]
+
+		unbondingSlashEvent = new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(mockNumber(4904), poolId, slashAmount)
+		await handlePoolUnbondingSlash(unbondingSlashEvent);
+	});
+
+	it('Unbonding slash in era without points', async () => {
+		acountPoolRewardAnswers = []
+
+		unbondingSlashEvent = new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(mockNumber(5426), poolId, slashAmount)
+		await handlePoolUnbondingSlash(unbondingSlashEvent);
 	});
 
 	it('Caching for members working', async () => {
-		answers = []
+		acountPoolRewardAnswers = []
 		jest.spyOn(mockAPI.query.nominationPools.poolMembers, "entries")
 
 		const result_1 = await getPoolMembers(0) 
@@ -189,5 +222,51 @@ describe('handlePoolSlash', () => {
 
 		expect(mockAPI.query.nominationPools.poolMembers.entries).toBeCalledTimes(1)
 		expect(result_1).toBe(result_2)
+	});
+});
+
+describe('handlePoolReward', () => {
+	let rewardEvent
+	let accountId
+	let rewardAmount
+	let poolId
+
+	beforeAll(() => {
+		jest.clearAllMocks();
+
+		(global as any).api = mockAPI;
+		accountId = mockAddress("JHXFqYWQFFr5RkHVzviRiKhY7tutyGcYQb6kUyoScSir862")
+		rewardAmount = mockNumber(1000)
+		poolId = mockNumber(42)
+
+		rewardEvent = new SubstrateTestEventBuilder().buildEventForPoolReward(accountId, poolId, rewardAmount)
+	});
+
+	it('Pool reward processed properly', async () => {
+		jest.spyOn(AccumulatedPoolReward, "get").mockResolvedValue(undefined)
+		const accumulatedRewardSpy = jest.spyOn(AccumulatedPoolReward.prototype, "save").mockImplementation(function (this: AccumulatedPoolReward) {
+			expect(this.amount).toBe(rewardAmount.toBigInt())
+			return Promise.resolve()
+		})
+		const accountPoolRewardSpy = jest.spyOn(AccountPoolReward.prototype, "save").mockImplementation(function (this: AccountPoolReward) {
+			expect(this.amount).toBe(rewardAmount.toBigInt())
+			expect(this.address).toBe(accountId.toString())
+			expect(this.type).toBe(RewardType.reward)
+			expect(this.poolId).toBe(poolId.toNumber())
+			return Promise.resolve()
+		})
+		const historyElementSpy = jest.spyOn(HistoryElement.prototype, "save").mockImplementation(function (this: HistoryElement) {
+			expect(this.address).toBe(accountId.toString())
+			expect(this.poolReward?.amount).toBe(rewardAmount.toString())
+			expect(this.poolReward?.isReward).toBe(true)
+			expect(this.poolReward?.poolId).toBe(poolId.toNumber())
+			return Promise.resolve()
+		})
+
+		await handlePoolReward(rewardEvent);
+		
+		expect(accumulatedRewardSpy).toBeCalledTimes(1)		
+		expect(accountPoolRewardSpy).toBeCalledTimes(1)		
+		expect(historyElementSpy).toBeCalledTimes(1)		
 	});
 });

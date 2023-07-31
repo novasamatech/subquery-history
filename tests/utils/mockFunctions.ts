@@ -23,7 +23,8 @@ export class SubstrateTestEventBuilder<T extends AnyTuple = AnyTuple> {
         return this;
     }
 
-    withEvent(eventData): SubstrateTestEventBuilder<T> {
+    withEvent(eventData, idx): SubstrateTestEventBuilder<T> {
+        this._event.idx = idx
         this._event.event = {data: eventData, method: 'method', section: 'section'} as unknown as IEvent<AnyTuple, unknown>
         this._event.block.events = []
         const event = {event: {data: eventData, method: 'method', section: 'section'}} as EventRecord
@@ -35,21 +36,21 @@ export class SubstrateTestEventBuilder<T extends AnyTuple = AnyTuple> {
         return this._event as SubstrateEvent<T>;
     }
 
-    buildEventForRewards(rewardAccountId, amount): SubstrateEvent<T> {
-        return this.withBlock().withEvent([rewardAccountId, amount]).build()
+    buildEventForRewards(rewardAccountId, amount, idx=0): SubstrateEvent<T> {
+        return this.withBlock().withEvent([rewardAccountId, amount], idx).build()
     }
 
-    buildEventForPoolReward(rewardAccountId, poolId, amount): SubstrateEvent<T> {
-        return this.withBlock().withEvent([rewardAccountId, poolId, amount]).build()
+    buildEventForPoolReward(rewardAccountId, poolId, amount, idx=0): SubstrateEvent<T> {
+        return this.withBlock().withEvent([rewardAccountId, poolId, amount], idx).build()
     }
 
 
-    buildEventForBondedPoolSlash(poolId, amount): SubstrateEvent<T> {
-        return this.withBlock().withEvent([poolId, amount]).build()
+    buildEventForBondedPoolSlash(poolId, amount, idx=0): SubstrateEvent<T> {
+        return this.withBlock().withEvent([poolId, amount], idx).build()
     }
 
-    buildEventForUnbondingPoolSlash(era, poolId, amount): SubstrateEvent<T> {
-        return this.withBlock().withEvent([era, poolId, amount]).build()
+    buildEventForUnbondingPoolSlash(era, poolId, amount, idx=0): SubstrateEvent<T> {
+        return this.withBlock().withEvent([era, poolId, amount], idx).build()
     }
 }
 
