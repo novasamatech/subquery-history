@@ -2,13 +2,15 @@ import "@polkadot/types-augment/lookup";
 import {SubstrateEvent} from "@subql/types";
 import {blockNumber} from "./common";
 import {AccountId} from "@polkadot/types/interfaces";
-import {PalletStakingRewardDestination} from "@polkadot/types/lookup"
+import {PalletStakingRewardDestination, PalletNominationPoolsPoolMember} from "@polkadot/types/lookup"
 
 // Due to memory consumption optimization `rewardDestinationByAddress` contains only one key
 let rewardDestinationByAddress: {[blockId: string]: {[address: string]: PalletStakingRewardDestination}} = {}
 let controllersByStash: {[blockId: string]: {[address: string]: string}} = {}
 
 let parachainStakingRewardEra: {[blockId: string]: number} = {}
+
+let poolMembers: {[blockId: number]: [string, PalletNominationPoolsPoolMember][]} = {}
 
 export async function cachedRewardDestination(accountAddress: string, event: SubstrateEvent): Promise<PalletStakingRewardDestination> {
     const blockId = blockNumber(event)
@@ -141,4 +143,20 @@ export async function cachedStakingRewardEraIndex(event: SubstrateEvent): Promis
         parachainStakingRewardEra[blockId] = eraIndex
         return eraIndex
     }
+}
+
+export async function getPoolMembers(blockId: number) : Promise<[string, PalletNominationPoolsPoolMember][]> {
+    const cachedMembers = poolMembers[blockId]
+    if (cachedMembers != undefined) {
+        return cachedMembers
+    }
+
+    const members: [string, PalletNominationPoolsPoolMember][] = (await api.query.nominationPools.poolMembers.entries()).filter(
+        ([_, member]) => member.isSome
+    ).map(
+        ([accountId, member]) => [accountId.toString(), member.unwrap()]
+    )
+    poolMembers = {}
+    poolMembers[blockId] = members
+    return members
 }

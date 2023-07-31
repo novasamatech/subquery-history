@@ -8,8 +8,10 @@ import {
 import {SubstrateEvent} from "@subql/types";
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
-import {handleGenericForTxHistory, updateAccumulatedGenericReward, updateGenericAccountRewards} from "./Rewards";
 import {PalletNominationPoolsPoolMember} from "@polkadot/types/lookup";
+import {handleGenericForTxHistory, updateAccumulatedGenericReward, updateGenericAccountRewards} from "./Rewards";
+import {getPoolMembers} from "./Cache";
+import {blockNumber} from "./common";
 
 
 export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
@@ -35,7 +37,7 @@ async function handlePoolRewardForTxHistory(rewardEvent: SubstrateEvent<[account
 
 async function updateAccumulatedPoolReward(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
     let {event: {data: [accountId, _, amount]}} = event
-    return await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, amount.toBigInt(), isReward)
+    return await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId.toString(), amount.toBigInt(), isReward)
 }
 
 async function updateAccountPoolRewards(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
@@ -105,12 +107,12 @@ async function handleRelaychainPooledStakingSlash(
         return
     }
 
-    const members = await api.query.nominationPools.poolMembers.entries()
+    const members = await getPoolMembers(blockNumber(event))
 
     await Promise.all(members.map(async ([accountId, member]) => {
         let memberPoints: bigint
-        if (member.isSome && member.unwrap().poolId.toNumber() === poolId) {
-            memberPoints = memberPointsCounter(member.unwrap())
+        if (member.poolId.toNumber() === poolId) {
+            memberPoints = memberPointsCounter(member)
             if (memberPoints != BigInt(0)) {
                 const personalSlash = (slash / poolPoints) * memberPoints
 
@@ -119,7 +121,7 @@ async function handleRelaychainPooledStakingSlash(
                 await updateGenericAccountRewards(
                     AccountPoolReward,
                     event,
-                    accountId.toString(),
+                    accountId,
                     personalSlash,
                     RewardType.slash,
                     accumulatedReward.amount,

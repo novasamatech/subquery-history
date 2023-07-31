@@ -307,7 +307,7 @@ async function buildRewardEvents<A>(
 
 async function updateAccumulatedReward(event: SubstrateEvent<[accountId: Codec, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
     let {event: {data: [accountId, amount]}} = event
-    return await updateAccumulatedGenericReward(AccumulatedReward, accountId, amount.toBigInt(), isReward)
+    return await updateAccumulatedGenericReward(AccumulatedReward, accountId.toString(), (amount as unknown as Balance).toBigInt(), isReward)
 }
 
 async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
@@ -367,16 +367,15 @@ interface AccumulatedInterfaceStatic<BaseType extends AccumulatedInterface> {
     get(accountAddress: string) : Promise<BaseType | undefined>
 }
 
-export async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: Codec, amount: bigint, isReward: boolean): Promise<AccumulatedRewardType> {
-    let accountAddress = accountId.toString()
+export async function updateAccumulatedGenericReward<AccumulatedRewardType extends AccumulatedInterface, AccumulatedRewardClassType extends AccumulatedInterfaceStatic<AccumulatedRewardType>>(AccumulatedRewardTypeObject: AccumulatedRewardClassType, accountId: string, amount: bigint, isReward: boolean): Promise<AccumulatedRewardType> {
+    let accountAddress = accountId
 
     let accumulatedReward = await AccumulatedRewardTypeObject.get(accountAddress);
     if (!accumulatedReward) {
         accumulatedReward = new AccumulatedRewardTypeObject(accountAddress);
         accumulatedReward.amount = BigInt(0)
     }
-    const newAmount = (amount as unknown as Balance).toBigInt()
-    accumulatedReward.amount = accumulatedReward.amount + (isReward ? newAmount : -newAmount)
+    accumulatedReward.amount = accumulatedReward.amount + (isReward ? amount : -amount)
     await accumulatedReward.save()
     return accumulatedReward
 }
