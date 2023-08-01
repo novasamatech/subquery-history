@@ -135,9 +135,9 @@ describe('handlePoolSlash', () => {
 	let poolId
 	let slashAmount
 
-	let accumulatedPoolRewardAnswers
-	let acountPoolRewardAnswers
+	let answers
 
+	let historyElementResults: HistoryElement[] = []
 	let accumulatedPoolRewardResults: AccumulatedPoolReward[] = []
 	let acountPoolRewardResults: AccountPoolReward[] = []
 
@@ -146,6 +146,10 @@ describe('handlePoolSlash', () => {
 		poolId = mockNumber(42)
 		slashAmount = mockNumber(10000)
 
+		jest.spyOn(HistoryElement.prototype, "save").mockImplementation(function (this: HistoryElement) {
+			historyElementResults.push(this)
+			return Promise.resolve()
+		})
 		jest.spyOn(AccumulatedPoolReward, "get").mockResolvedValue(undefined)
 		jest.spyOn(AccumulatedPoolReward.prototype, "save").mockImplementation(function (this: AccumulatedPoolReward) {
 			accumulatedPoolRewardResults.push(this)
@@ -158,27 +162,36 @@ describe('handlePoolSlash', () => {
 	});
 
 	afterEach(() => {
-		expect(acountPoolRewardResults.length).toBe(acountPoolRewardAnswers.length)
-		acountPoolRewardResults.forEach((element, index) => {
-			expect(element.address).toBe(acountPoolRewardAnswers[index][0])
-			expect(element.amount).toBe(acountPoolRewardAnswers[index][1])
-			expect(element.type).toBe(RewardType.slash)
-			expect(element.poolId).toBe(poolId.toNumber())
+		expect(historyElementResults.length).toBe(answers.length)
+		historyElementResults.forEach((element, index) => {
+			expect(element.address).toBe(answers[index][0].toString())
+			expect(element.poolReward?.amount).toBe(answers[index][1].toString())
+			expect(element.poolReward?.isReward).toBe(false)
+			expect(element.poolReward?.poolId).toBe(poolId.toNumber())
 		});
 
-		expect(accumulatedPoolRewardResults.length).toBe(acountPoolRewardAnswers.length)
+		expect(accumulatedPoolRewardResults.length).toBe(answers.length)
 		accumulatedPoolRewardResults.forEach((element, index) => {
-			expect(element.amount).toBe(-acountPoolRewardAnswers[index][1])
+			expect(element.amount).toBe(-answers[index][1])
+		});
+
+		expect(acountPoolRewardResults.length).toBe(answers.length)
+		acountPoolRewardResults.forEach((element, index) => {
+			expect(element.address).toBe(answers[index][0])
+			expect(element.amount).toBe(answers[index][1])
+			expect(element.type).toBe(RewardType.slash)
+			expect(element.poolId).toBe(poolId.toNumber())
 		});
 	})
 
 	beforeEach(() => {
+		historyElementResults = []
 		accumulatedPoolRewardResults = []
 		acountPoolRewardResults = []
 	})
 
 	it('Bonded slash', async () => {
-		acountPoolRewardAnswers = [
+		answers = [
 			["16XzkhKCZqFA4yYd2nfrNk8GZBhq8xkdAQZe3T8tUWxanWWj", BigInt(1000)],
 			["128uKFo94ewG8BrRXyqVQFDj8753XNfgsDUp9DSGdh8erKwS", BigInt(500)],
 			["13au37C1nZtMjvv2uPHRvamYdgAVxffTWJoCZXo2sw1NeysP", BigInt(250)],
@@ -189,7 +202,7 @@ describe('handlePoolSlash', () => {
 	});
 
 	it('Unbonding slash with no era', async () => {
-		acountPoolRewardAnswers = [
+		answers = [
 			["13au37C1nZtMjvv2uPHRvamYdgAVxffTWJoCZXo2sw1NeysP", BigInt(12340)],
 		]
 
@@ -198,7 +211,7 @@ describe('handlePoolSlash', () => {
 	});
 
 	it('Unbonding slash in era with points', async () => {
-		acountPoolRewardAnswers = [
+		answers = [
 			["16XzkhKCZqFA4yYd2nfrNk8GZBhq8xkdAQZe3T8tUWxanWWj", BigInt(50)],
 		]
 
@@ -207,14 +220,14 @@ describe('handlePoolSlash', () => {
 	});
 
 	it('Unbonding slash in era without points', async () => {
-		acountPoolRewardAnswers = []
+		answers = []
 
 		unbondingSlashEvent = new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(mockNumber(5426), poolId, slashAmount)
 		await handlePoolUnbondingSlash(unbondingSlashEvent);
 	});
 
 	it('Caching for members working', async () => {
-		acountPoolRewardAnswers = []
+		answers = []
 		jest.spyOn(mockAPI.query.nominationPools.poolMembers, "entries")
 
 		const result_1 = await getPoolMembers(0) 

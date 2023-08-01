@@ -11,7 +11,7 @@ import {INumber} from "@polkadot/types-codec/types/interfaces";
 import {PalletNominationPoolsPoolMember} from "@polkadot/types/lookup";
 import {handleGenericForTxHistory, updateAccumulatedGenericReward, updateGenericAccountRewards} from "./Rewards";
 import {getPoolMembers} from "./Cache";
-import {blockNumber} from "./common";
+import {eventIdFromBlockAndIdxAndAddress, timestamp, blockNumber} from "./common";
 
 
 export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
@@ -116,7 +116,7 @@ async function handleRelaychainPooledStakingSlash(
             if (memberPoints != BigInt(0)) {
                 const personalSlash = (slash / poolPoints) * memberPoints
 
-                // await handlePoolRewardForTxHistory(rewardEvent)
+                await handlePoolSlashForTxHistory(event, poolId, accountId, personalSlash)
                 let accumulatedReward = await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, personalSlash, false)
                 await updateGenericAccountRewards(
                     AccountPoolReward,
@@ -133,4 +133,28 @@ async function handleRelaychainPooledStakingSlash(
             }
         }
     }))
+}
+
+async function handlePoolSlashForTxHistory(slashEvent: SubstrateEvent, poolId: number, accountId: string, personalSlash: bigint): Promise<void> {
+    const extrinsic = slashEvent.extrinsic;
+    const block = slashEvent.block;
+    const blockNumber = block.block.header.number.toString()
+    const blockTimestamp = timestamp(block)
+    const eventId = eventIdFromBlockAndIdxAndAddress(blockNumber, slashEvent.idx.toString(), accountId)
+
+    const element = new HistoryElement(eventId);
+    element.timestamp = blockTimestamp
+    element.blockNumber = block.block.header.number.toNumber()
+    if (extrinsic !== undefined) {
+        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
+        element.extrinsicIdx = extrinsic.idx
+    }
+    element.address = accountId
+    element.poolReward = {
+        eventIdx: slashEvent.idx,
+        amount: personalSlash.toString(),
+        isReward: false,
+        poolId: poolId
+    }
+    await element.save()
 }
