@@ -76,6 +76,10 @@ export function eventIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
     return `${blockNumber}-${eventIdx}`
 }
 
+export function eventIdFromBlockAndIdxAndAddress(blockNumber: string, eventIdx: string, address: string) {
+    return `${blockNumber}-${eventIdx}-${address}`
+}
+
 export function extrinsicIdx(event: SubstrateEvent): string {
     let idx: string = event.extrinsic ? event.extrinsic.idx.toString() : event.idx.toString()
     return idx
