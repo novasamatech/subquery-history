@@ -30,7 +30,7 @@
     "@polkadot/api": "latest",
     "@polkadot/types-augment": "^8",
     "@polymeshassociation/polymesh-types": "^5.4.1",
-    "@subql/cli": "^2",
+    "@subql/cli": "^3.3",
     "@subql/types": "^1.7.2",
     "@subsocial/types": "^0.6.8",
     "@zeitgeistpm/type-defs": "^0.8.0",

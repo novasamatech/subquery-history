@@ -6,9 +6,10 @@ import {
     RewardType,
 } from '../types';
 import {SubstrateEvent} from "@subql/types";
+import {timestamp, eventIdWithAddress, blockNumber} from "./common";
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
-import {handleGenericForTxHistory, updateAccumulatedGenericReward, updateGenericAccountRewards} from "./Rewards";
+import {handleGenericForTxHistory, updateAccumulatedGenericReward} from "./Rewards";
 
 
 export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
@@ -20,9 +21,8 @@ export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: C
 
 // TODO: Unite with parachain tx history
 async function handlePoolRewardForTxHistory(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
-    handleGenericForTxHistory(rewardEvent, async (element: HistoryElement) => {
-        const {event: {data: [account, poolId, amount]}} = rewardEvent
-        element.address = account.toString()
+    const {event: {data: [account, poolId, amount]}} = rewardEvent
+    handleGenericForTxHistory(rewardEvent, account.toString(), async (element: HistoryElement) => {
         element.poolReward = {
             eventIdx: rewardEvent.idx,
             amount: amount.toString(),
@@ -41,16 +41,17 @@ async function updateAccumulatedPoolReward(event: SubstrateEvent<[accountId: Cod
 async function updateAccountPoolRewards(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
     let { event: { data: [accountId, poolId, amount] } } = event
 
-    updateGenericAccountRewards(
-        AccountPoolReward,
-        event,
-        accountId.toString(),
+    const accountAddress = accountId.toString()
+    let id = eventIdWithAddress(event, accountAddress)
+    let accountPoolReward = new AccountPoolReward(
+        id,
+        accountAddress,
+        blockNumber(event),
+        timestamp(event.block),
         amount.toBigInt(),
-        rewardType,
         accumulatedAmount,
-        (element: AccountPoolReward) => {
-            element.poolId = poolId.toNumber()
-            return element
-        }
-    )
+        rewardType,
+        poolId.toNumber()
+    );
+    await accountPoolReward.save()
 }
