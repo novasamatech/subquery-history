@@ -129,10 +129,12 @@ async function createTransfer({
   amount,
   assetId = null,
 }: TransferPayload) {
-  const element = new HistoryElement(`${eventId(event)}${suffix}`);
-  element.address = address.toString();
-  element.timestamp = timestamp(event.block);
-  element.blockNumber = blockNumber(event);
+  const element = new HistoryElement(
+    `${eventId(event)}${suffix}`,
+    blockNumber(event),
+    timestamp(event.block),
+    address.toString(),
+  );
   if (event.extrinsic !== undefined) {
     if (isEvmTransaction(event.extrinsic.extrinsic.method)) {
       const executedEvent = event.extrinsic.events.find(isEvmExecutedEvent);

@@ -48,9 +48,12 @@ function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, s
     let extrinsicId = extrinsicIdFromBlockAndIdx(blockNumber, extrinsicIdx)
     let blockTimestamp = timestamp(extrinsic.block);
 
-    const historyElement = new HistoryElement(`${extrinsicId}${suffix}`);
-    historyElement.address = address
-    historyElement.blockNumber = blockNumber
+    const historyElement = new HistoryElement(
+        `${extrinsicId}${suffix}`,
+        blockNumber,
+        blockTimestamp,
+        address
+    );
     historyElement.extrinsicHash = extrinsicHash
     historyElement.extrinsicIdx = extrinsicIdx
     historyElement.timestamp = blockTimestamp
