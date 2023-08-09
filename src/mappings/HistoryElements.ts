@@ -88,7 +88,7 @@ async function saveFailedTransfers(transfers: Array<TransferData>, extrinsic: Su
 }
 
 async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
-    const element = createHistoryElement(extrinsic, extrinsic.extrinsic.signer.toString())
+    const element = createHistoryElement(extrinsic, extrinsic.extrinsic.signer.toString(), "--extrinsic")
 
     element.extrinsic = {
         hash: extrinsic.extrinsic.hash.toString(),
@@ -110,7 +110,7 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     const hash = executedEvent.event.data?.[2]?.toString();
     const success = !!(executedEvent.event.data?.[3].toJSON() as any).succeed;
 
-    const element = createHistoryElement(extrinsic, addressFrom, '', hash)
+    const element = createHistoryElement(extrinsic, addressFrom, '--extrinsic', hash)
 
     element.extrinsic = {
         hash,
