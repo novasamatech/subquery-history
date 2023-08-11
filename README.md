@@ -15,3 +15,4 @@ sh local-runner.sh ${paroject_file}.yaml
 ```
 ## License
 SubQuery Nova is available under the Apache 2.0 license. See the LICENSE file for more info.
+© Novasama Technologies GmbH 2023
