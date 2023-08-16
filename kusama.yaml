@@ -25,6 +25,8 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+          filter:
+            isSigned: true
         - handler: handleReward
           kind: substrate/EventHandler
           filter:
