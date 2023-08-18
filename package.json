@@ -36,6 +36,8 @@
     "@types/jest": "^29.5.1",
     "@zeitgeistpm/type-defs": "^0.8.0",
     "@zeroio/type-definitions": "^0.0.14",
+    "@types/big.js": "^6.1.6",
+    "big.js": "^6.2.1",
     "jest": "^29.5.0",
     "moonbeam-types-bundle": "^2.0.8",
     "ts-jest": "^29.1.0",
