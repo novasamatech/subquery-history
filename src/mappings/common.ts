@@ -4,6 +4,7 @@ import {Balance} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
+import Big from "big.js";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -127,6 +128,14 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
 
 export function getEventData(event: SubstrateEvent): GenericEventData {
     return event.event.data as GenericEventData
+}
+
+export function bigFromToStringCompatible(bignum: object) : Big {
+    return Big(bignum.toString())
+}
+
+export function bigintFromBig(bignum: Big) : bigint {
+    return BigInt(bignum.round().toString())
 }
 
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
