@@ -6,7 +6,6 @@ import {
     RewardType,
 } from '../types';
 import {SubstrateEvent} from "@subql/types";
-import Big from "big.js";
 import {eventIdFromBlockAndIdxAndAddress, timestamp, eventIdWithAddress, blockNumber} from "./common";
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
@@ -65,10 +64,10 @@ export async function handlePoolBondedSlash(bondedSlashEvent: SubstrateEvent<[po
     await handleRelaychainPooledStakingSlash(
         bondedSlashEvent,
         poolId,
-        Big(pool.points.toString()),
-        Big(slash.toString()),
-        (member: PalletNominationPoolsPoolMember) : Big => {
-            return Big(member.points.toString())
+        pool.points.toBigInt(),
+        slash.toBigInt(),
+        (member: PalletNominationPoolsPoolMember) : bigint => {
+            return member.points.toBigInt()
         }
     )
 }
@@ -85,10 +84,10 @@ export async function handlePoolUnbondingSlash(unbondingSlashEvent: SubstrateEve
     await handleRelaychainPooledStakingSlash(
         unbondingSlashEvent,
         poolIdNumber,
-        Big(pool.points.toString()),
-        Big(slash.toString()),
-        (member: PalletNominationPoolsPoolMember) : Big => {
-            return Big(member.unbondingEras[eraIdNumber]?.toString() ?? 0)
+        pool.points.toBigInt(),
+        slash.toBigInt(),
+        (member: PalletNominationPoolsPoolMember) : bigint => {
+            return member.unbondingEras[eraIdNumber]?.toBigInt() ?? BigInt(0)
         }
     )
 }
@@ -96,22 +95,22 @@ export async function handlePoolUnbondingSlash(unbondingSlashEvent: SubstrateEve
 async function handleRelaychainPooledStakingSlash(
     event: SubstrateEvent,
     poolId: number,
-    poolPoints: Big,
-    slash: Big,
-    memberPointsCounter: (member: PalletNominationPoolsPoolMember) => Big
+    poolPoints: bigint,
+    slash: bigint,
+    memberPointsCounter: (member: PalletNominationPoolsPoolMember) => bigint
 ): Promise<void> {
-    if(poolPoints.eq(0)) {
+    if(poolPoints == BigInt(0)) {
         return
     }
 
     const members = await getPoolMembers(blockNumber(event))
 
     await Promise.all(members.map(async ([accountId, member]) => {
-        let memberPoints: Big
+        let memberPoints: bigint
         if (member.poolId.toNumber() === poolId) {
             memberPoints = memberPointsCounter(member)
-            if (!memberPoints.eq(0)) {
-                const personalSlash = BigInt(slash.mul(memberPoints).div(poolPoints).round().toString())
+            if (memberPoints != BigInt(0)) {
+                const personalSlash = (slash * memberPoints) / poolPoints
 
                 await handlePoolSlashForTxHistory(event, poolId, accountId, personalSlash)
                 let accumulatedReward = await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, personalSlash, false)
