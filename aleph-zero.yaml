@@ -53,6 +53,16 @@ dataSources:
           filter:
             module: staking
             method: Slashed
+        - handler: handlePoolBondedSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PoolSlashed
+        - handler: handlePoolUnbondingSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: UnbondingPoolSlashed
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:

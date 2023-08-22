@@ -61,8 +61,6 @@ export async function handlePoolBondedSlash(bondedSlashEvent: SubstrateEvent<[po
 
     const pool = (await api.query.nominationPools.bondedPools(poolId)).unwrap()
 
-    const members = await api.query.nominationPools.poolMembers.entries()
-
     await handleRelaychainPooledStakingSlash(
         bondedSlashEvent,
         poolId,
@@ -112,7 +110,7 @@ async function handleRelaychainPooledStakingSlash(
         if (member.poolId.toNumber() === poolId) {
             memberPoints = memberPointsCounter(member)
             if (memberPoints != BigInt(0)) {
-                const personalSlash = (slash / poolPoints) * memberPoints
+                const personalSlash = (slash * memberPoints) / poolPoints
 
                 await handlePoolSlashForTxHistory(event, poolId, accountId, personalSlash)
                 let accumulatedReward = await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, personalSlash, false)
