@@ -27,11 +27,7 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
+        # TODO: implement parachain staking handler for krest
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:

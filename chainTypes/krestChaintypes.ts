@@ -4,4 +4,6 @@ import type { OverrideBundleDefinition } from '@polkadot/types/types';
 
 import { typesBundleForPolkadot } from '@peaqnetwork/type-definitions';
 
-export default (typesBundleForPolkadot as { spec: { peaq: OverrideBundleDefinition } }).spec.peaq;
+export default {
+    typesBundle: (typesBundleForPolkadot as { spec: { peaq: OverrideBundleDefinition } }).spec.peaq
+}
