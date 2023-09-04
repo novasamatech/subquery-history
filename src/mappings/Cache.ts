@@ -154,7 +154,7 @@ export async function getPoolMembers(blockId: number) : Promise<[string, PalletN
     const members: [string, PalletNominationPoolsPoolMember][] = (await api.query.nominationPools.poolMembers.entries()).filter(
         ([_, member]) => member.isSome
     ).map(
-        ([accountId, member]) => [accountId.toString(), member.unwrap()]
+        ([accountId, member]) => [accountId.args.toString(), member.unwrap()]
     )
     poolMembers = {}
     poolMembers[blockId] = members
