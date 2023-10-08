@@ -9,6 +9,7 @@ import {
   getEventData,
   isEvmTransaction,
   isEvmExecutedEvent,
+  getAssetIdFromSwapPathElement,
 } from "./common";
 
 type TransferPayload = {
@@ -20,6 +21,34 @@ type TransferPayload = {
   suffix: string;
   assetId?: string;
 };
+
+export async function handleSwap(event: SubstrateEvent): Promise<void> {
+  const [from, to, path, amountIn, amountOut] = getEventData(event);
+
+  const element = new HistoryElement(
+    `${eventId(event)}`,
+    blockNumber(event),
+    timestamp(event.block),
+    to.toString(),
+  );
+  element.extrinsicHash = event.extrinsic.extrinsic.hash.toString();
+  element.extrinsicIdx = event.extrinsic.idx;
+
+  const swap = {
+    assetIdIn: getAssetIdFromSwapPathElement(path[0]),
+    amountIn: amountIn.toString(),
+    assetIdOut: getAssetIdFromSwapPathElement(path[(path as any).length -1]),
+    amountOut: amountOut.toString(),
+    sender: from.toString(),
+    receiver: to.toString(),
+    fee: calculateFeeAsString(event.extrinsic, from.toString()),
+    eventIdx: event.idx
+  }
+
+  element.swap = swap
+
+  await element.save();
+}
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
   const [from, to, amount] = getEventData(event);
