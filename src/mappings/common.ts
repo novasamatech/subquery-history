@@ -217,11 +217,16 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
     }
 }
 
-export function getAssetIdFromSwapPathElement(multilocation): string {
+export function getAssetIdFromSwapPathElement(multilocation): string | undefined {
     let junctions = multilocation.interior;
+
+    
+    if (multilocation.parents != "0") {
+        return multilocation.toHex();
+    }
     if (junctions.isHere) {
-        return "0"; // TODO: add correct AssetId for native token
-    }else {
+        return undefined;
+    } else {
         return multilocation.interior.asX2[1].asGeneralIndex.toString();
     }
 }

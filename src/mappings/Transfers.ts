@@ -25,19 +25,10 @@ type TransferPayload = {
 export async function handleSwap(event: SubstrateEvent): Promise<void> {
   const [from, to, path, amountIn, amountOut] = getEventData(event);
 
-  const element = new HistoryElement(
-    `${eventId(event)}`,
-    blockNumber(event),
-    timestamp(event.block),
-    to.toString(),
-  );
-  element.extrinsicHash = event.extrinsic.extrinsic.hash.toString();
-  element.extrinsicIdx = event.extrinsic.idx;
-
   const swap = {
     assetIdIn: getAssetIdFromSwapPathElement(path[0]),
     amountIn: amountIn.toString(),
-    assetIdOut: getAssetIdFromSwapPathElement(path[(path as any).length -1]),
+    assetIdOut: getAssetIdFromSwapPathElement(path[path["length"] -1]),
     amountOut: amountOut.toString(),
     sender: from.toString(),
     receiver: to.toString(),
@@ -45,9 +36,10 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
     eventIdx: event.idx
   }
 
-  element.swap = swap
-
-  await element.save();
+  await createAssetTransmission(event, from.toString(), "", {"swap": swap});
+  if (from != to) {
+    await createAssetTransmission(event, to.toString(), "", {"swap": swap});
+  }
 }
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
@@ -158,6 +150,38 @@ async function createTransfer({
   amount,
   assetId = null,
 }: TransferPayload) {
+  const transfer = {
+    amount: amount.toString(),
+    from: from.toString(),
+    to: to.toString(),
+    fee: calculateFeeAsString(event.extrinsic, from.toString()),
+    eventIdx: event.idx,
+    success: true,
+  }
+
+  let data;
+  if (assetId) {
+    data = {
+      "assetTransfer": {
+        ...transfer,
+        assetId: assetId,
+      }
+    }
+  } else {
+    data = {
+      "transfer": transfer
+    }
+  }
+
+  await createAssetTransmission(event, address, suffix, data);
+}
+
+async function createAssetTransmission(
+  event,
+  address,
+  suffix,
+  data
+) {
   const element = new HistoryElement(
     `${eventId(event)}${suffix}`,
     blockNumber(event),
@@ -177,22 +201,8 @@ async function createTransfer({
     element.extrinsicIdx = event.extrinsic.idx;
   }
 
-  const transfer = {
-    amount: amount.toString(),
-    from: from.toString(),
-    to: to.toString(),
-    fee: calculateFeeAsString(event.extrinsic, from.toString()),
-    eventIdx: event.idx,
-    success: true,
-  }
-
-  if (assetId) {
-    element.assetTransfer = {
-      ...transfer,
-      assetId: assetId,
-    };
-  } else {
-    element.transfer = transfer
+  for(var key in data) {
+    element[key] = data[key]
   }
 
   await element.save();
