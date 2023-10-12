@@ -34,9 +34,9 @@ type PoolReward @jsonField {
 }
 
 type Swap @jsonField {
-  assetIdIn: String!
+  assetIdIn: String
   amountIn: String!
-  assetIdOut: String!
+  assetIdOut: String
   amountOut: String!
   sender: String!
   receiver: String!
