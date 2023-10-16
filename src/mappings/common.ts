@@ -220,13 +220,11 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
 export function getAssetIdFromSwapPathElement(multilocation): string | undefined {
     let junctions = multilocation.interior;
 
-    
-    if (multilocation.parents != "0") {
-        return multilocation.toHex();
-    }
     if (junctions.isHere) {
         return undefined;
+    } else if (multilocation.parents != "0") {
+        return multilocation.toHex();
     } else {
-        return multilocation.interior.asX2[1].asGeneralIndex.toString();
+        return junctions.asX2[1].asGeneralIndex.toString();
     }
 }

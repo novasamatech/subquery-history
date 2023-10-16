@@ -28,7 +28,7 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
   const swap = {
     assetIdIn: getAssetIdFromSwapPathElement(path[0]),
     amountIn: amountIn.toString(),
-    assetIdOut: getAssetIdFromSwapPathElement(path[path["length"] -1]),
+    assetIdOut: getAssetIdFromSwapPathElement(path[path["length"] - 1]),
     amountOut: amountOut.toString(),
     sender: from.toString(),
     receiver: to.toString(),
