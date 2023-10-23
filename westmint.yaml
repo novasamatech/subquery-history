@@ -40,6 +40,16 @@ dataSources:
           filter:
             module: assets
             method: Transferred
+        - handler: handleForeignAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: foreignAssets
+            method: Transferred
+        - handler: handlePoolAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: poolAssets
+            method: Transferred
         - handler: handleCurrencyTransfer
           kind: substrate/EventHandler
           filter:

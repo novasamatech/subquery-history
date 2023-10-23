@@ -15,6 +15,7 @@ type AssetTransfer @jsonField {
   fee: String!
   eventIdx: Int!
   success: Boolean!
+  pallet: String
 }
 
 type Reward @jsonField {

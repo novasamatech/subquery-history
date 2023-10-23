@@ -10,6 +10,7 @@ import {
   isEvmTransaction,
   isEvmExecutedEvent,
   getAssetIdFromSwapPathElement,
+  getAssetIdFromAssetTransfer
 } from "./common";
 
 type TransferPayload = {
@@ -20,6 +21,7 @@ type TransferPayload = {
   amount: Codec;
   suffix: string;
   assetId?: string;
+  pallet?: string;
 };
 
 export async function handleSwap(event: SubstrateEvent): Promise<void> {
@@ -56,10 +58,40 @@ export async function handleTransfer(event: SubstrateEvent): Promise<void> {
   await createTransfer({ event, address: to, from, to, suffix: "-to", amount });
 }
 
-export async function handleAssetTransfer(
+export async function handleLocalAssetTransfer(
   event: SubstrateEvent
+) {
+  await handleAssetTransfer(
+    event,
+    "localAsset"
+  );
+}
+
+export async function handleForeignAssetTransfer(
+  event: SubstrateEvent
+) {
+  await handleAssetTransfer(
+    event,
+    "foreignAsset"
+  );
+}
+
+export async function handlePoolAssetTransfer(
+  event: SubstrateEvent
+) {
+  await handleAssetTransfer(
+    event,
+    "poolAsset"
+  );
+}
+
+export async function handleAssetTransfer(
+  event: SubstrateEvent,
+  pallet?: string
 ): Promise<void> {
   const [assetId, from, to, amount] = getEventData(event);
+
+  var assetIdString = getAssetIdFromAssetTransfer(assetId, pallet)
 
   await createTransfer({
     event,
@@ -68,7 +100,8 @@ export async function handleAssetTransfer(
     to,
     suffix: "-from",
     amount,
-    assetId: assetId.toString(),
+    assetId: assetIdString,
+    pallet: pallet,
   });
   await createTransfer({
     event,
@@ -77,7 +110,8 @@ export async function handleAssetTransfer(
     to,
     suffix: "-to",
     amount,
-    assetId: assetId.toString(),
+    assetId: assetIdString,
+    pallet: pallet,
   });
 }
 
@@ -149,6 +183,7 @@ async function createTransfer({
   to,
   amount,
   assetId = null,
+  pallet = null,
 }: TransferPayload) {
   const transfer = {
     amount: amount.toString(),
@@ -165,6 +200,7 @@ async function createTransfer({
       "assetTransfer": {
         ...transfer,
         assetId: assetId,
+        pallet: pallet
       }
     }
   } else {

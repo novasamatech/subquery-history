@@ -228,3 +228,19 @@ export function getAssetIdFromSwapPathElement(multilocation): string | undefined
         return junctions.asX2[1].asGeneralIndex.toString();
     }
 }
+
+export function getAssetIdFromAssetTransfer(assetId, pallet?): string | undefined {
+    if (pallet === undefined || pallet == "poolAsset") {
+        return assetId.toString();
+    }
+
+    let junctions = assetId.interior;
+
+    if (junctions.isHere) {
+        return undefined;
+    } else if (assetId.parents != "0") {
+        return assetId.toHex();
+    } else {
+        return junctions.asX1[0].asParachain.toString();
+    }
+}
