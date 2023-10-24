@@ -50,6 +50,7 @@
     "encointerChaintypes": "./chainTypes/encointerChaintypes.ts",
     "integriteeChaintypes": "./chainTypes/integriteeChaintypes.ts",
     "interlayChaintypes": "./chainTypes/interlayChaintypes.ts",
+    "jurChaintypes": "./chainTypes/jurChaintypes.ts",
     "karuraChaintypes": "./chainTypes/karuraChaintypes.ts",
     "khalaChaintypes": "./chainTypes/khalaChaintypes.ts",
     "kiltChaintypes": "./chainTypes/kiltChaintypes.ts",
