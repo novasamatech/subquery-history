@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-westmint
+name: subquery-nova-rococo-assethub
 version: 1.0.0
 runner:
   node:
@@ -13,9 +13,9 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x67f9723393ef76214df0118c34bbbd3dbebc8ed46a10973a8c969d48fe7598c9'
+  chainId: '0x7c34d42fc815d392057c78b49f2755c753440ccd38bcb0405b3bcfb601d08734'
   endpoint: >-
-    wss://westmint-rpc.dwellir.com
+    wss://rococo-asset-hub-rpc.polkadot.io
 dataSources:
   - name: main
     kind: substrate/Runtime
