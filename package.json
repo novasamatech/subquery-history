@@ -57,6 +57,7 @@
     "moonbeamChaintypes": "./chainTypes/moonbeamChaintypes.ts",
     "parallelHeikoChaintypes": "./chainTypes/parallelHeikoChaintypes.ts",
     "shidenChaintypes": "./chainTypes/shidenChaintypes.ts",
+    "statemineChaintypes": "./chainTypes/statemineChaintypes.ts",
     "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
