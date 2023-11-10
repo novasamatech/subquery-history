@@ -15,14 +15,14 @@ schema:
 network:
   chainId: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
   endpoint: >-
-    wss://statemine-rpc.dwellir.com
+    wss://rpc-asset-hub-kusama.luckyfriday.io
   dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
   chaintypes:
     file: ./dist/statemineChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 5753828
     mapping:
       file: ./dist/index.js
       handlers:
