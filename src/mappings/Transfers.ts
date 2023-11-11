@@ -9,7 +9,10 @@ import {
   getEventData,
   isEvmTransaction,
   isEvmExecutedEvent,
-  getAssetIdFromSwapPathElement,
+  isAssetTxFeePaidEvent,
+  isSwapExecutedEvent,
+  eventRecordToSubstrateEvent,
+  getAssetIdFromMultilocation,
 } from "./common";
 
 type TransferPayload = {
@@ -25,20 +28,55 @@ type TransferPayload = {
 export async function handleSwap(event: SubstrateEvent): Promise<void> {
   const [from, to, path, amountIn, amountOut] = getEventData(event);
 
+  let element = await HistoryElement.get(eventId(event))
+
+  if (element !== undefined) {
+      // already processed swap previously
+      return;
+  }
+
+  let assetIdFee: string
+  let fee: string
+  let foundAssetTxFeePaid = event.block.events.find((e) => isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)));
+  let swaps = event.block.events.filter((e) => isSwapExecutedEvent(eventRecordToSubstrateEvent(e)));
+  if (foundAssetTxFeePaid === undefined) {
+    assetIdFee = "native"
+    fee = calculateFeeAsString(event.extrinsic, from.toString())
+  } else {
+    const [who, actual_fee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
+    assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
+    fee = actual_fee.toString();
+    swaps = swaps.slice(1)
+  }
+  await Promise.all(swaps.map((e) => processSwap(eventRecordToSubstrateEvent(e), assetIdFee, fee)))
+}
+
+async function processSwap(event: SubstrateEvent, assetIdFee: string, fee: string): Promise<void> {
+  const {event: {data: [from, to, path, amountIn, amountOut]}} = event
+
+  let element = await HistoryElement.get(eventId(event))
+
+  if (element !== undefined) {
+      // already processed swap previously
+      return;
+  }
+
   const swap = {
-    assetIdIn: getAssetIdFromSwapPathElement(path[0]),
+    assetIdIn: getAssetIdFromMultilocation(path[0]),
     amountIn: amountIn.toString(),
-    assetIdOut: getAssetIdFromSwapPathElement(path[path["length"] - 1]),
+    assetIdOut: getAssetIdFromMultilocation(path[path["length"] - 1]),
     amountOut: amountOut.toString(),
     sender: from.toString(),
     receiver: to.toString(),
-    fee: calculateFeeAsString(event.extrinsic, from.toString()),
-    eventIdx: event.idx
+    assetIdFee: assetIdFee,
+    fee: fee,
+    eventIdx: event.idx,
+    success: true
   }
 
-  await createAssetTransmission(event, from.toString(), "", {"swap": swap});
+  await createAssetTransmission(event, from.toString(), "-from", {"swap": swap});
   if (from != to) {
-    await createAssetTransmission(event, to.toString(), "", {"swap": swap});
+    await createAssetTransmission(event, to.toString(), "-to", {"swap": swap});
   }
 }
 

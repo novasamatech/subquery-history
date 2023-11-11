@@ -1,6 +1,6 @@
 import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {SubstrateExtrinsic} from "@subql/types";
-import {Balance} from "@polkadot/types/interfaces";
+import {Balance, EventRecord} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
@@ -42,6 +42,22 @@ export function isEvmTransaction(call: CallBase<AnyTuple>): boolean {
 
 export function isEvmExecutedEvent(event: SubstrateEvent): boolean {
     return event.event.section === 'ethereum' && event.event.method === "Executed"
+}
+
+export function isAssetTxFeePaidEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'assetTxPayment' && event.event.method === "AssetTxFeePaid"
+}
+
+export function isSwapExecutedEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'assetConversion' && event.event.method === "SwapExecuted"
+}
+
+export function isSwapExactTokensForTokens(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "assetConversion" && call.method === "swapExactTokensForTokens"
+}
+
+export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "assetConversion" && call.method === "swapTokensForExactTokens"
 }
 
 export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
@@ -127,6 +143,10 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
 
 export function getEventData(event: SubstrateEvent): GenericEventData {
     return event.event.data as GenericEventData
+}
+
+export function eventRecordToSubstrateEvent(eventRecord: EventRecord): SubstrateEvent {
+    return eventRecord as unknown as SubstrateEvent
 }
 
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
@@ -217,11 +237,11 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
     }
 }
 
-export function getAssetIdFromSwapPathElement(multilocation): string | undefined {
+export function getAssetIdFromMultilocation(multilocation): string {
     let junctions = multilocation.interior;
 
     if (junctions.isHere) {
-        return undefined;
+        return "native";
     } else if (multilocation.parents != "0") {
         return multilocation.toHex();
     } else {

@@ -15,8 +15,10 @@ schema:
 network:
   chainId: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
   endpoint: >-
-    wss://statemine.api.onfinality.io/public-ws
+    wss://rpc-asset-hub-kusama.luckyfriday.io
   dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
+  chaintypes:
+    file: ./dist/statemineChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -51,3 +53,8 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
+        - handler: handleSwap
+          kind: substrate/EventHandler
+          filter:
+            module: assetConversion
+            method: SwapExecuted

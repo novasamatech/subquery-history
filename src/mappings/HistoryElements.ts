@@ -1,20 +1,27 @@
 import {SubstrateExtrinsic} from '@subql/types';
-import {AssetTransfer, HistoryElement, Transfer} from "../types";
+import {AssetTransfer, HistoryElement, Transfer, Swap} from "../types";
 import {
+    getAssetIdFromMultilocation,
+    getEventData,
     callFromProxy,
     callsFromBatch,
     calculateFeeAsString,
     extrinsicIdFromBlockAndIdx,
+    eventRecordToSubstrateEvent,
     isBatch,
     isProxy,
     timestamp,
     isNativeTransfer,
     isAssetTransfer,
     isOrmlTransfer,
+    isSwapExactTokensForTokens,
+    isSwapTokensForExactTokens,
     isNativeTransferAll,
     isOrmlTransferAll,
     isEvmTransaction,
-    isEvmExecutedEvent, isEquilibriumTransfer,
+    isEvmExecutedEvent, 
+    isAssetTxFeePaidEvent,
+    isEquilibriumTransfer,
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -23,7 +30,7 @@ import { ethereumEncode } from '@polkadot/util-crypto';
 
 type TransferData = {
     isTransferAll: boolean,
-    transfer: Transfer | AssetTransfer,
+    transfer: Transfer | AssetTransfer | Swap,
 }
 
 export async function handleHistoryElement(extrinsic: SubstrateExtrinsic): Promise<void> {
@@ -61,8 +68,10 @@ function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, s
     return historyElement
 }
 
-function addTransferToHistoryElement(element: HistoryElement, transfer: Transfer | AssetTransfer) {
-    if ('assetId' in transfer) {
+function addTransferToHistoryElement(element: HistoryElement, transfer: Transfer | AssetTransfer | Swap) {
+    if ('assetIdIn' in transfer) {
+        element.swap = transfer
+    } else if ('assetId' in transfer) {
         element.assetTransfer = transfer
     } else {
         element.transfer = transfer
@@ -71,12 +80,15 @@ function addTransferToHistoryElement(element: HistoryElement, transfer: Transfer
 
 async function saveFailedTransfers(transfers: Array<TransferData>, extrinsic: SubstrateExtrinsic): Promise<void> {
     let promises = transfers.map(({ isTransferAll, transfer }) => {
-        const elementFrom = createHistoryElement(extrinsic, transfer.from, `-from`);
+        const isSwap = 'assetIdIn' in transfer
+        const from = isSwap ? transfer.sender : transfer.from
+        const to = isSwap ? transfer.receiver : transfer.to
+        const elementFrom = createHistoryElement(extrinsic, from, `-from`);
         addTransferToHistoryElement(elementFrom, transfer)
 
         // FIXME: Try to find more appropriate way to handle failed transferAll events
         if (!isTransferAll) {
-            const elementTo = createHistoryElement(extrinsic, transfer.to, `-to`);
+            const elementTo = createHistoryElement(extrinsic, to, `-to`);
             addTransferToHistoryElement(elementTo, transfer)
 
             return [elementTo.save(), elementFrom.save()]
@@ -129,13 +141,8 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
         return null;
     }
 
-    let transferCallsArgs = determineTransferCallsArgs(extrinsic.extrinsic.method)
-    if (transferCallsArgs.length == 0) {
-        return null;
-    }
-
     let sender = extrinsic.extrinsic.signer
-    return transferCallsArgs.map(([isTransferAll, address, amount, assetId]) => {
+    const transferCallback = (isTransferAll, address, amount, assetId?) => {
         const transfer: Transfer = {
             amount: amount.toString(),
             from: sender.toString(),
@@ -149,30 +156,71 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
             (transfer as AssetTransfer).assetId = assetId
         }
 
-        return {
+        return [{
             isTransferAll,
             transfer,
+        }]
+    }
+
+    let assetIdFee = "native"
+    let fee = calculateFeeAsString(extrinsic)
+    let foundAssetTxFeePaid = extrinsic.block.events.find((e) => isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)));
+    if (foundAssetTxFeePaid !== undefined)  {
+        const [who, actual_fee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
+        if ('interior' in rawAssetIdFee) {
+            assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
+            fee = actual_fee.toString();
         }
-    })
+    }
+    const swapCallback = (path, amountIn, amountOut, receiver) => {
+        const swap: Swap = {
+            assetIdIn: getAssetIdFromMultilocation(path[0]),
+            amountIn: amountIn.toString(),
+            assetIdOut: getAssetIdFromMultilocation(path[path["length"] - 1]),
+            amountOut: amountOut.toString(),
+            sender: sender.toString(),
+            receiver: receiver.toString(),
+            assetIdFee: assetIdFee,
+            fee: fee,
+            eventIdx: -1,
+            success: false
+        }
+
+        return [{
+            isTransferAll: false,
+            transfer: swap,
+        }]
+    }
+
+    let transferCalls = determineTransferCallsArgs(extrinsic.extrinsic.method, transferCallback, swapCallback)
+    if (transferCalls.length == 0) {
+        return null;
+    }
+
+    return transferCalls
 }
 
-function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [boolean, string, bigint, string?][] {
+function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>, transferCallback, swapCallback) : Array<TransferData> {
     if (isNativeTransfer(causeCall)) {
-        return [[false, ...extractArgsFromTransfer(causeCall)]]
+        return transferCallback(false, ...extractArgsFromTransfer(causeCall))
     } else if (isAssetTransfer(causeCall)) {
-        return [[false, ...extractArgsFromAssetTransfer(causeCall)]]
+        return transferCallback(false, ...extractArgsFromAssetTransfer(causeCall))
     } else if (isOrmlTransfer(causeCall)) {
-        return [[false, ...extractArgsFromOrmlTransfer(causeCall)]]
+        return transferCallback(false, ...extractArgsFromOrmlTransfer(causeCall))
     } else if (isEquilibriumTransfer(causeCall)) {
-        return [[false, ...extractArgsFromEquilibriumTransfer(causeCall)]]
+        return transferCallback(false, ...extractArgsFromEquilibriumTransfer(causeCall))
     } else if (isNativeTransferAll(causeCall)) {
-        return [[true, ...extractArgsFromTransferAll(causeCall)]]
+        return transferCallback(true, ...extractArgsFromTransferAll(causeCall))
     } else if (isOrmlTransferAll(causeCall)) {
-        return [[true, ...extractArgsFromOrmlTransferAll(causeCall)]]
+        return transferCallback(true, ...extractArgsFromOrmlTransferAll(causeCall))
+    } else if (isSwapExactTokensForTokens(causeCall)) {
+        return swapCallback(...extractArgsFromSwapExactTokensForTokens(causeCall))
+    } else if (isSwapTokensForExactTokens(causeCall)) {
+        return swapCallback(...extractArgsFromSwapTokensForExactTokens(causeCall))
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
-                return determineTransferCallsArgs(call)
+                return determineTransferCallsArgs(call, transferCallback, swapCallback)
                     .map((value, index, array) => {
                         return value
                     })
@@ -180,7 +228,7 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>) : [boolean, s
             .flat()
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
-        return determineTransferCallsArgs(proxyCall)
+        return determineTransferCallsArgs(proxyCall, transferCallback, swapCallback)
     } else {
         return []
     }
@@ -235,5 +283,27 @@ function extractArgsFromOrmlTransferAll(call: CallBase<AnyTuple>): [string, bigi
         destinationAddress.toString(),
         BigInt(0),
         currencyId.toHex().toString()
+    ]
+}
+
+function extractArgsFromSwapExactTokensForTokens(call: CallBase<AnyTuple>) {
+    const [path, amountIn, amountOut, receiver, _] = call.args
+
+    return [
+        path,
+        amountIn,
+        amountOut,
+        receiver
+    ]
+}
+
+function extractArgsFromSwapTokensForExactTokens(call: CallBase<AnyTuple>) {
+    const [path, amountOut, amountIn, receiver, _] = call.args
+
+    return [
+        path,
+        amountIn,
+        amountOut,
+        receiver
     ]
 }

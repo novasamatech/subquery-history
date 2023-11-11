@@ -16,6 +16,8 @@ network:
   chainId: '0x7c34d42fc815d392057c78b49f2755c753440ccd38bcb0405b3bcfb601d08734'
   endpoint: >-
     wss://rococo-asset-hub-rpc.polkadot.io
+  chaintypes:
+    file: ./dist/rococoAssethubChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
