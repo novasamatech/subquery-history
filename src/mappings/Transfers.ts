@@ -13,7 +13,9 @@ import {
   isSwapExecutedEvent,
   eventRecordToSubstrateEvent,
   getAssetIdFromMultilocation,
+  BigIntFromCodec,
 } from "./common";
+import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 type TransferPayload = {
   event: SubstrateEvent;
@@ -28,7 +30,7 @@ type TransferPayload = {
 export async function handleSwap(event: SubstrateEvent): Promise<void> {
   const [from, to, path, amountIn, amountOut] = getEventData(event);
 
-  let element = await HistoryElement.get(eventId(event))
+  let element = await HistoryElement.get(`${eventId(event)}-from`)
 
   if (element !== undefined) {
       // already processed swap previously
@@ -43,23 +45,28 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
     assetIdFee = "native"
     fee = calculateFeeAsString(event.extrinsic, from.toString())
   } else {
-    const [who, actual_fee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
+    const [who, actualFee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
     assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
-    fee = actual_fee.toString();
+    fee = actualFee.toString()
+
+    let { event: { data: [feeFrom, feeTo, feePath, feeAmountIn, feeAmountOut] } } = swaps[0]
+
     swaps = swaps.slice(1)
+    if (actualFee != feeAmountIn) {
+      let { event: { data: [refundFrom, refundTo, refundPath, refundAmountIn, refundAmountOut] } } = swaps[swaps.length - 1]
+
+      if (BigIntFromCodec(feeAmountIn) == BigIntFromCodec(actualFee) + BigIntFromCodec(refundAmountOut) && 
+         getAssetIdFromMultilocation(feePath[0]) == getAssetIdFromMultilocation(refundPath[refundPath["length"] - 1])) {
+          swaps = swaps.slice(swaps.length - 1)
+          // TODO: if fee splitted, than we will process the same block two times
+      }
+    }
   }
   await Promise.all(swaps.map((e) => processSwap(eventRecordToSubstrateEvent(e), assetIdFee, fee)))
 }
 
 async function processSwap(event: SubstrateEvent, assetIdFee: string, fee: string): Promise<void> {
-  const {event: {data: [from, to, path, amountIn, amountOut]}} = event
-
-  let element = await HistoryElement.get(eventId(event))
-
-  if (element !== undefined) {
-      // already processed swap previously
-      return;
-  }
+  const [from, to, path, amountIn, amountOut] = getEventData(event)
 
   const swap = {
     assetIdIn: getAssetIdFromMultilocation(path[0]),

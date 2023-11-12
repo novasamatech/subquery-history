@@ -4,6 +4,8 @@ import {Balance, EventRecord} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
+import {Codec} from "@polkadot/types/types";
+import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -147,6 +149,10 @@ export function getEventData(event: SubstrateEvent): GenericEventData {
 
 export function eventRecordToSubstrateEvent(eventRecord: EventRecord): SubstrateEvent {
     return eventRecord as unknown as SubstrateEvent
+}
+
+export function BigIntFromCodec(eventRecord: Codec): bigint {
+    return (eventRecord as unknown as INumber).toBigInt()
 }
 
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
