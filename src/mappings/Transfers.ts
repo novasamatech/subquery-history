@@ -52,7 +52,7 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
     let { event: { data: [feeFrom, feeTo, feePath, feeAmountIn, feeAmountOut] } } = swaps[0]
 
     swaps = swaps.slice(1)
-    if (actualFee != feeAmountIn) {
+    if (BigIntFromCodec(actualFee) != BigIntFromCodec(feeAmountIn)) {
       let { event: { data: [refundFrom, refundTo, refundPath, refundAmountIn, refundAmountOut] } } = swaps[swaps.length - 1]
 
       if (BigIntFromCodec(feeAmountIn) == BigIntFromCodec(actualFee) + BigIntFromCodec(refundAmountOut) && 
