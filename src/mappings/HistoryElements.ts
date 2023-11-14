@@ -173,10 +173,17 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
         }
     }
     const swapCallback = (path, amountIn, amountOut, receiver) => {
+        const assetIdIn = getAssetIdFromMultilocation(path[0], true)
+        const assetIdOut = getAssetIdFromMultilocation(path[path["length"] - 1], true)
+
+        if (assetIdIn === undefined || assetIdOut === undefined) {
+            return []
+        }
+
         const swap: Swap = {
-            assetIdIn: getAssetIdFromMultilocation(path[0]),
+            assetIdIn: assetIdIn,
             amountIn: amountIn.toString(),
-            assetIdOut: getAssetIdFromMultilocation(path[path["length"] - 1]),
+            assetIdOut: assetIdOut,
             amountOut: amountOut.toString(),
             sender: sender.toString(),
             receiver: receiver.toString(),

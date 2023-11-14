@@ -243,7 +243,7 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
     }
 }
 
-export function getAssetIdFromMultilocation(multilocation): string {
+export function getAssetIdFromMultilocation(multilocation, safe=false): string | undefined{
     let junctions = multilocation.interior;
 
     if (junctions.isHere) {
@@ -251,6 +251,10 @@ export function getAssetIdFromMultilocation(multilocation): string {
     } else if (multilocation.parents != "0") {
         return multilocation.toHex();
     } else {
-        return junctions.asX2[1].asGeneralIndex.toString();
+        const generalIndexLocation = junctions.asX2[1]
+        if (safe && !generalIndexLocation.isGeneralIndex) {
+            return undefined;
+        } 
+        return generalIndexLocation.asGeneralIndex.toString();
     }
 }
