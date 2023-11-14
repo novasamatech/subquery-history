@@ -82,7 +82,7 @@ async function processSwap(event: SubstrateEvent, assetIdFee: string, fee: strin
   }
 
   await createAssetTransmission(event, from.toString(), "-from", {"swap": swap});
-  if (from != to) {
+  if (from.toString() != to.toString()) {
     await createAssetTransmission(event, to.toString(), "-to", {"swap": swap});
   }
 }
