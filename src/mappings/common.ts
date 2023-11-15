@@ -252,11 +252,7 @@ export function getAssetIdFromMultilocation(multilocation, safe=false): string |
         } else if (multilocation.parents != "0") {
             return multilocation.toHex();
         } else {
-            const generalIndexLocation = junctions.asX2[1]
-            if (safe && !generalIndexLocation.isGeneralIndex) {
-                return undefined;
-            } 
-            return generalIndexLocation.asGeneralIndex.toString();
+            return junctions.asX2[1].asGeneralIndex.toString();
         }
     } catch (e) {
         if (safe) {
