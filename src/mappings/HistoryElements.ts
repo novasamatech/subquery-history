@@ -87,7 +87,7 @@ async function saveFailedTransfers(transfers: Array<TransferData>, extrinsic: Su
         addTransferToHistoryElement(elementFrom, transfer)
 
         // FIXME: Try to find more appropriate way to handle failed transferAll events
-        if (!isTransferAll) {
+        if ((!isTransferAll && !isSwap) || (from.toString() != to.toString())) {
             const elementTo = createHistoryElement(extrinsic, to, `-to`);
             addTransferToHistoryElement(elementTo, transfer)
 
