@@ -244,17 +244,25 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
 }
 
 export function getAssetIdFromMultilocation(multilocation, safe=false): string | undefined{
-    let junctions = multilocation.interior;
+    try {
+        let junctions = multilocation.interior;
 
-    if (junctions.isHere) {
-        return "native";
-    } else if (multilocation.parents != "0") {
-        return multilocation.toHex();
-    } else {
-        const generalIndexLocation = junctions.asX2[1]
-        if (safe && !generalIndexLocation.isGeneralIndex) {
-            return undefined;
-        } 
-        return generalIndexLocation.asGeneralIndex.toString();
+        if (junctions.isHere) {
+            return "native";
+        } else if (multilocation.parents != "0") {
+            return multilocation.toHex();
+        } else {
+            const generalIndexLocation = junctions.asX2[1]
+            if (safe && !generalIndexLocation.isGeneralIndex) {
+                return undefined;
+            } 
+            return generalIndexLocation.asGeneralIndex.toString();
+        }
+    } catch (e) {
+        if (safe) {
+            return undefined
+        } else {
+            throw e;
+        }
     }
 }
