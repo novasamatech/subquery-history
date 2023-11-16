@@ -5,6 +5,8 @@ runner:
   node:
     name: "@subql/node"
     version: "*"
+    options:
+      historical: false
   query:
     name: "@subql/query"
     version: "*"
