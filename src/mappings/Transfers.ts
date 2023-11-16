@@ -1,5 +1,6 @@
 import { Codec } from "@polkadot/types/types";
 import { HistoryElement } from "../types";
+import { HistoryElementProps } from '../types/models/HistoryElement';
 import { SubstrateEvent } from "@subql/types";
 import {
   blockNumber,
@@ -49,14 +50,14 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
     assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
     fee = actualFee.toString()
 
-    let { event: { data: [feeFrom, feeTo, feePath, feeAmountIn, feeAmountOut] } } = swaps[0]
+    let { event: { data: [feeFrom, feeTo, feePath, feeAmountIn, feeAmountOut] } } = swaps[0];
 
-    swaps = swaps.slice(1)
+    swaps = swaps.slice(1);
     if (BigIntFromCodec(actualFee) != BigIntFromCodec(feeAmountIn)) {
       let { event: { data: [refundFrom, refundTo, refundPath, refundAmountIn, refundAmountOut] } } = swaps[swaps.length - 1]
 
-      if (BigIntFromCodec(feeAmountIn) == BigIntFromCodec(actualFee) + BigIntFromCodec(refundAmountOut) && 
-         getAssetIdFromMultilocation(feePath[0]) == getAssetIdFromMultilocation(refundPath[refundPath["length"] - 1])) {
+      if (BigIntFromCodec(feeAmountIn) == BigIntFromCodec(actualFee) + BigIntFromCodec(refundAmountOut) &&
+         getAssetIdFromMultilocation((feePath as any)[0]) == getAssetIdFromMultilocation((refundPath as any)[(refundPath as any)["length"] - 1])) {
           swaps = swaps.slice(swaps.length - 1)
           // TODO: if fee splitted, than we will process the same block two times
       }
@@ -66,12 +67,12 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
 }
 
 async function processSwap(event: SubstrateEvent, assetIdFee: string, fee: string): Promise<void> {
-  const [from, to, path, amountIn, amountOut] = getEventData(event)
+  const [from, to, path, amountIn, amountOut] = getEventData(event);
 
   const swap = {
-    assetIdIn: getAssetIdFromMultilocation(path[0]),
+    assetIdIn: getAssetIdFromMultilocation((path as any)[0]),
     amountIn: amountIn.toString(),
-    assetIdOut: getAssetIdFromMultilocation(path[path["length"] - 1]),
+    assetIdOut: getAssetIdFromMultilocation((path as any)[(path as any)["length"] - 1]),
     amountOut: amountOut.toString(),
     sender: from.toString(),
     receiver: to.toString(),
@@ -222,10 +223,10 @@ async function createTransfer({
 }
 
 async function createAssetTransmission(
-  event,
-  address,
-  suffix,
-  data
+  event: SubstrateEvent,
+  address: any,
+  suffix: string,
+  data: Partial<HistoryElementProps>
 ) {
   const element = new HistoryElement(
     `${eventId(event)}${suffix}`,
@@ -247,7 +248,7 @@ async function createAssetTransmission(
   }
 
   for(var key in data) {
-    element[key] = data[key]
+    (element[key as keyof HistoryElementProps] as any) = data[key as keyof HistoryElementProps];
   }
 
   await element.save();

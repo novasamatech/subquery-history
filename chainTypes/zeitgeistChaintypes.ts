@@ -1,42 +1,46 @@
-import { OverrideBundleType } from '@polkadot/types/types';
-import * as typeDefs from '@zeitgeistpm/type-defs';
+import { OverrideBundleType } from "@polkadot/types/types";
+import * as typeDefs from "@zeitgeistpm/type-defs";
 
-function typesFromDefs (definitions: Record<string, { types: Record<string, any> }>): Record<string, any> {
-  return Object
-    .values(definitions)
-    .reduce((res: Record<string, any>, { types }): Record<string, any> => ({
+function typesFromDefs(
+  definitions: Record<string, { types: Record<string, any> }>
+): Record<string, any> {
+  return Object.values(definitions).reduce(
+    (res: Record<string, any>, { types }): Record<string, any> => ({
       ...res,
-      ...types
-    }), {});
+      ...types,
+    }),
+    {}
+  );
 }
 
 const types = {
   alias: {
     tokens: {
-      AccountData: 'TokensAccountData'
-    }
+      AccountData: "TokensAccountData",
+    },
   },
-  types: [{
-    minmax: [0, undefined],
-    types: {
-      ...typesFromDefs(typeDefs),
-      TokensAccountData: {
-        free: 'Balance',
-        frozen: 'Balance',
-        reserved: 'Balance'
-      }
-    }
-  }]
-}
+  types: [
+    {
+      minmax: [0, undefined],
+      types: {
+        ...typesFromDefs(typeDefs),
+        TokensAccountData: {
+          free: "Balance",
+          frozen: "Balance",
+          reserved: "Balance",
+        },
+      },
+    },
+  ],
+};
 
 const typesBundle: OverrideBundleType = {
   spec: {
     zeitgeist: types,
   },
-}
+};
 
 export default {
-  types: {
-  },
-  typesBundle
+  types: {},
+  typesBundle,
 };

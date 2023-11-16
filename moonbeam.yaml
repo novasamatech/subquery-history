@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-moonbeam
+name: subquery-common-api-polkadot-transactions-moonbeam
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d'
+  chainId: "0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d"
   endpoint: >-
     wss://moonbeam.api.onfinality.io/public-ws
   dictionary: https://api.subquery.network/sq/subquery/moonbeam-dictionary

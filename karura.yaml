@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-karura
+name: subquery-common-api-polkadot-transactions-karura
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b'
+  chainId: "0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b"
   endpoint: >-
     wss://karura.polkawallet.io
   dictionary: https://api.subquery.network/sq/AcalaNetwork/karura-dictionary

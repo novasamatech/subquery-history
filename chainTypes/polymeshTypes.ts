@@ -1,3 +1,3 @@
-import { typesBundle } from '@polymeshassociation/polymesh-types';
+import { typesBundle } from "@polymeshassociation/polymesh-types";
 
-export default { typesBundle }
+export default { typesBundle };

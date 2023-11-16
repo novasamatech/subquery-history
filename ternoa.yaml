@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-ternoa
+name: subquery-common-api-polkadot-transactions-ternoa
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e'
+  chainId: "0x6859c81ca95ef624c9dfe4dc6e3381c33e5d6509e35e147092bfbc780f777c4e"
   endpoint: wss://mainnet.ternoa.network
   chaintypes:
     file: ./dist/ternoaChaintypes.js

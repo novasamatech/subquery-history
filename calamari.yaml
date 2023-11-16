@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-calamari
+name: subquery-common-api-polkadot-transactions-calamari
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x4ac80c99289841dd946ef92765bf659a307d39189b3ce374a92b5f0415ee17a1'
+  chainId: "0x4ac80c99289841dd946ef92765bf659a307d39189b3ce374a92b5f0415ee17a1"
   endpoint: wss://calamari.systems
   dictionary: https://api.subquery.network/sq/subquery/calamari-dictionary
   chaintypes:

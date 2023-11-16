@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-nodle
+name: subquery-common-api-polkadot-transactions-nodle
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x97da7ede98d7bad4e36b4d734b6055425a3be036da2a332ea5a7037656427a21'
+  chainId: "0x97da7ede98d7bad4e36b4d734b6055425a3be036da2a332ea5a7037656427a21"
   endpoint: >-
     wss://nodle-parachain.api.onfinality.io/public-ws
   dictionary: https://api.subquery.network/sq/subquery/nodle-dictionary

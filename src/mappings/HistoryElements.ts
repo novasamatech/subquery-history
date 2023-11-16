@@ -19,7 +19,7 @@ import {
     isNativeTransferAll,
     isOrmlTransferAll,
     isEvmTransaction,
-    isEvmExecutedEvent, 
+    isEvmExecutedEvent,
     isAssetTxFeePaidEvent,
     isEquilibriumTransfer,
 } from "./common";
@@ -55,15 +55,14 @@ function createHistoryElement (extrinsic: SubstrateExtrinsic, address: string, s
     let extrinsicId = extrinsicIdFromBlockAndIdx(blockNumber, extrinsicIdx)
     let blockTimestamp = timestamp(extrinsic.block);
 
-    const historyElement = new HistoryElement(
-        `${extrinsicId}${suffix}`,
-        blockNumber,
-        blockTimestamp,
-        address
-    );
-    historyElement.extrinsicHash = extrinsicHash
-    historyElement.extrinsicIdx = extrinsicIdx
-    historyElement.timestamp = blockTimestamp
+    const historyElement = HistoryElement.create({
+      id: `${extrinsicId}${suffix}`,
+      blockNumber,
+      timestamp: blockTimestamp,
+      address,
+      extrinsicHash,
+      extrinsicIdx,
+    });
 
     return historyElement
 }
@@ -135,6 +134,9 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     await element.save()
 }
 
+type TransferCallback = (isTransferAll: boolean, address: string, amount: any, assetId?: string) => Array<{ isTransferAll: boolean, transfer: Transfer }>;
+type SwapCallback = (path: any[], amountId: any, amountOut: any, receiver: any) => Array<{ isTransferAll: boolean, transfer: Swap }>;
+
 /// Success Transfer emits Transfer event that is handled at Transfers.ts handleTransfer()
 function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferData> | null {
     if (extrinsic.success) {
@@ -142,7 +144,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
     }
 
     let sender = extrinsic.extrinsic.signer
-    const transferCallback = (isTransferAll, address, amount, assetId?) => {
+    const transferCallback: TransferCallback = (isTransferAll, address, amount, assetId?) => {
         const transfer: Transfer = {
             amount: amount.toString(),
             from: sender.toString(),
@@ -172,7 +174,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
             fee = actual_fee.toString();
         }
     }
-    const swapCallback = (path, amountIn, amountOut, receiver) => {
+    const swapCallback: SwapCallback = (path, amountIn, amountOut, receiver) => {
         const assetIdIn = getAssetIdFromMultilocation(path[0], true)
         const assetIdOut = getAssetIdFromMultilocation(path[path["length"] - 1], true)
 
@@ -207,7 +209,7 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
     return transferCalls
 }
 
-function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>, transferCallback, swapCallback) : Array<TransferData> {
+function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>, transferCallback: TransferCallback, swapCallback: SwapCallback) : Array<TransferData> {
     if (isNativeTransfer(causeCall)) {
         return transferCallback(false, ...extractArgsFromTransfer(causeCall))
     } else if (isAssetTransfer(causeCall)) {
@@ -293,7 +295,7 @@ function extractArgsFromOrmlTransferAll(call: CallBase<AnyTuple>): [string, bigi
     ]
 }
 
-function extractArgsFromSwapExactTokensForTokens(call: CallBase<AnyTuple>) {
+function extractArgsFromSwapExactTokensForTokens(call: CallBase<AnyTuple>): [any, any, any, any] {
     const [path, amountIn, amountOut, receiver, _] = call.args
 
     return [
@@ -304,7 +306,7 @@ function extractArgsFromSwapExactTokensForTokens(call: CallBase<AnyTuple>) {
     ]
 }
 
-function extractArgsFromSwapTokensForExactTokens(call: CallBase<AnyTuple>) {
+function extractArgsFromSwapTokensForExactTokens(call: CallBase<AnyTuple>): [any, any, any, any] {
     const [path, amountOut, amountIn, receiver, _] = call.args
 
     return [

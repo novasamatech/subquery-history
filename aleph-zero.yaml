@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-aleph-zero
+name: subquery-common-api-polkadot-transactions-aleph-zero
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e'
+  chainId: "0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e"
   endpoint: wss://ws.azero.dev
   chaintypes:
     file: ./dist/alephZeroChaintypes.js

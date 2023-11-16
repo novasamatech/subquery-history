@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-equilibrium
+name: subquery-common-api-polkadot-transactions-equilibrium
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907'
+  chainId: "0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907"
   endpoint: >-
     wss://equilibrium-rpc.dwellir.com
   chaintypes:

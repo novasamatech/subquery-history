@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-subsocial
+name: subquery-common-api-polkadot-transactions-subsocial
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
+    name: "@subql/node"
     version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f'
+  chainId: "0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f"
   endpoint: wss://para.subsocial.network
   chaintypes:
     file: ./dist/subsocialChaintypes.js

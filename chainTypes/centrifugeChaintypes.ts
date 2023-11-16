@@ -1,34 +1,34 @@
-import { OverrideBundleType } from '@polkadot/types/types';
+import { OverrideBundleType } from "@polkadot/types/types";
 
 export default {
   typesBundle: {
     spec: {
-      'centrifuge': {
+      centrifuge: {
         types: [
           {
             // on all versions
             minmax: [0, undefined],
             types: {
-              ParachainAccountIdOf: 'AccountId',
+              ParachainAccountIdOf: "AccountId",
               Proof: {
-                leafHash: 'Hash',
-                sortedHashes: 'Vec<Hash>'
+                leafHash: "Hash",
+                sortedHashes: "Vec<Hash>",
               },
               ProxyType: {
                 _enum: [
-                  'Any',
-                  'NonTransfer',
-                  'Governance',
-                  '_Staking',
-                  'NonProxy'
-                ]
+                  "Any",
+                  "NonTransfer",
+                  "Governance",
+                  "_Staking",
+                  "NonProxy",
+                ],
               },
-              RelayChainAccountId: 'AccountId',
-              RootHashOf: 'Hash'
-            }
-          }
-        ]
-      }
-    }
-  }
+              RelayChainAccountId: "AccountId",
+              RootHashOf: "Hash",
+            },
+          },
+        ],
+      },
+    },
+  },
 };

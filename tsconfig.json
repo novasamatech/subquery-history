@@ -11,10 +11,12 @@
     "rootDir": ".",
     "target": "es2020",
     "skipLibCheck": true,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "strict": true
   },
   "include": [
     "src/**/*",
+    "node_modules/@subql/types-core/dist/global.d.ts",
     "node_modules/@subql/types/dist/global.d.ts",
     "./chaintypes.ts"
   ]

@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-quartz
+name: subquery-common-api-polkadot-transactions-quartz
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554'
+  chainId: "0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554"
   endpoint: >-
     wss://quartz.api.onfinality.io/public-ws
   dictionary: https://api.subquery.network/sq/subquery/quartz-dictionary

@@ -231,7 +231,7 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
         validatorsSet = new Set(validatorsInSlashEra)
     }
 
-    const initialValidator = null
+    const initialValidator: any = null
 
     await buildRewardEvents(
         slashEvent.block,
@@ -286,10 +286,10 @@ async function buildRewardEvents<A>(
             const destinationAddress = accountsMapping[accountAddress]
 
             const element = new HistoryElement(
-                eventId,
-                block.block.header.number.toNumber(),
-                blockTimestamp,
-                destinationAddress != undefined ? destinationAddress : accountAddress
+              eventId,
+              block.block.header.number.toNumber(),
+              blockTimestamp,
+              destinationAddress != undefined ? destinationAddress : accountAddress
             );
 
             if (extrinsic !== undefined) {
@@ -334,7 +334,7 @@ async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): P
         const eraIndex = await cachedStakingRewardEraIndex(rewardEvent)
 
         const validatorEvent = rewardEvent.block.events.find(event =>
-            event.event.section == rewardEvent.event.section && 
+            event.event.section == rewardEvent.event.section &&
             event.event.method == rewardEvent.event.method
         )
         const validatorId = validatorEvent?.event.data[0].toString()
@@ -345,8 +345,8 @@ async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): P
             validator: validatorId,
             era: eraIndex
         }
-    
-        return element       
+
+        return element
     })
 }
 
@@ -397,7 +397,7 @@ export async function handleGenericForTxHistory(event: SubstrateEvent, address: 
         element.extrinsicHash = extrinsic.extrinsic.hash.toString()
         element.extrinsicIdx = extrinsic.idx
     }
-    
+
     (await fieldCallback(element)).save()
 }
 

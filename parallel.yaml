@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-parallel
+name: subquery-common-api-polkadot-transactions-parallel
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97'
+  chainId: "0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97"
   endpoint: >-
     wss://parallel.api.onfinality.io/public-ws
   dictionary: https://api.subquery.network/sq/subquery/parallel-dictionary

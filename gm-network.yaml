@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-gm
+name: subquery-common-api-polkadot-transactions-gm
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x19a3733beb9cb8a970a308d835599e9005e02dc007a35440e461a451466776f8'
+  chainId: "0x19a3733beb9cb8a970a308d835599e9005e02dc007a35440e461a451466776f8"
   endpoint: wss://ws.gm.bldnodes.org
 dataSources:
   - name: main
@@ -49,4 +49,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-

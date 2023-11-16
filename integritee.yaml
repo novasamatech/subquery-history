@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-integritee
+name: subquery-common-api-polkadot-transactions-integritee
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xcdedc8eadbfa209d3f207bba541e57c3c58a667b05a2e1d1e86353c9000758da'
+  chainId: "0xcdedc8eadbfa209d3f207bba541e57c3c58a667b05a2e1d1e86353c9000758da"
   endpoint: wss://kusama.api.integritee.network
   chaintypes:
     file: ./dist/integriteeChaintypes.js

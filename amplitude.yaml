@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-amplitude
+name: subquery-common-api-polkadot-transactions-amplitude
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf'
+  chainId: "0xcceae7f3b9947cdb67369c026ef78efa5f34a08fe5808d373c04421ecf4f1aaf"
   endpoint: >-
     wss://rpc-amplitude.pendulumchain.tech
 dataSources:

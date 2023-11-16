@@ -77,10 +77,8 @@ const definitions: OverrideBundleDefinition = {
         TrustedCall: {
           _enum: {
             balance_transfer: "BalanceTransferArgs",
-            ceremonies_register_participant:
-              "RegisterParticipantArgs",
-            ceremonies_register_attestations:
-              "RegisterAttestationsArgs",
+            ceremonies_register_participant: "RegisterParticipantArgs",
+            ceremonies_register_attestations: "RegisterAttestationsArgs",
             ceremonies_grant_reputation: "GrantReputationArgs",
           },
         },
@@ -90,8 +88,7 @@ const definitions: OverrideBundleDefinition = {
           "(AccountId, CommunityIdentifier, Option<ProofOfAttendance<MultiSignature, AccountId>>)",
         RegisterAttestationsArgs:
           "(AccountId, Vec<Attestation<MultiSignature, AccountId, u64>>)",
-        GrantReputationArgs:
-          "(AccountId, CommunityIdentifier, AccountId)",
+        GrantReputationArgs: "(AccountId, CommunityIdentifier, AccountId)",
         BalanceType: "i128",
         BalanceEntry: {
           principal: "BalanceType",
@@ -173,8 +170,7 @@ const definitions: OverrideBundleDefinition = {
           s2: "u64",
         },
         CommunityCeremonyStats: {
-          communityCeremony:
-            "(CommunityIdentifier, CeremonyIndexType)",
+          communityCeremony: "(CommunityIdentifier, CeremonyIndexType)",
           assignment: "Assignment",
           assignmentCount: "AssignmentCount",
           meetupCount: "MeetupIndexType",
@@ -235,8 +231,7 @@ const definitions: OverrideBundleDefinition = {
           url: "Option<Text>",
         },
         SystemNumber: "u32",
-        SchedulerState:
-          "(CeremonyIndexType, CeremonyPhaseType, SystemNumber)",
+        SchedulerState: "(CeremonyIndexType, CeremonyPhaseType, SystemNumber)",
       },
     },
   ],
@@ -251,4 +246,6 @@ const definitions: OverrideBundleDefinition = {
   },
 };
 
-export default { typesBundle: { spec: { "encointer-parachain": definitions } } };
+export default {
+  typesBundle: { spec: { "encointer-parachain": definitions } },
+};

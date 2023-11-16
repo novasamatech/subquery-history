@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-encointer
+name: subquery-common-api-polkadot-transactions-encointer
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b'
+  chainId: "0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b"
   endpoint: wss://kusama.api.encointer.org
   chaintypes:
     file: ./dist/encointerChaintypes.js

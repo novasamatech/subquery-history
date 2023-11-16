@@ -8,6 +8,7 @@ import {
 import {SubstrateEvent} from "@subql/types";
 import {eventIdFromBlockAndIdxAndAddress, timestamp, eventIdWithAddress, blockNumber} from "./common";
 import {Codec} from "@polkadot/types/types";
+import { u32 } from '@polkadot/types-codec';
 import {INumber} from "@polkadot/types-codec/types/interfaces";
 import {PalletNominationPoolsPoolMember} from "@polkadot/types/lookup";
 import {handleGenericForTxHistory, updateAccumulatedGenericReward} from "./Rewards";
@@ -30,8 +31,8 @@ async function handlePoolRewardForTxHistory(rewardEvent: SubstrateEvent<[account
             amount: amount.toString(),
             isReward: true,
             poolId: poolId.toNumber()
-        } 
-        return element       
+        }
+        return element
     })
 }
 
@@ -77,9 +78,9 @@ export async function handlePoolUnbondingSlash(unbondingSlashEvent: SubstrateEve
     const poolIdNumber = poolId.toNumber()
     const eraIdNumber = era.toNumber()
 
-    const unbondingPools = (await api.query.nominationPools.subPoolsStorage(poolIdNumber)).unwrap()
+    const unbondingPools = (await api.query.nominationPools.subPoolsStorage(poolIdNumber)).unwrap();
 
-    const pool = unbondingPools.withEra[eraIdNumber] ?? unbondingPools.noEra
+    const pool = unbondingPools.withEra.get(eraIdNumber as unknown as u32) ?? unbondingPools.noEra;
 
     await handleRelaychainPooledStakingSlash(
         unbondingSlashEvent,
@@ -87,7 +88,7 @@ export async function handlePoolUnbondingSlash(unbondingSlashEvent: SubstrateEve
         pool.points.toBigInt(),
         slash.toBigInt(),
         (member: PalletNominationPoolsPoolMember) : bigint => {
-            return member.unbondingEras[eraIdNumber]?.toBigInt() ?? BigInt(0)
+            return member.unbondingEras.get(eraIdNumber as unknown as u32)?.toBigInt() ?? BigInt(0)
         }
     )
 }
@@ -128,27 +129,26 @@ async function handleRelaychainPooledStakingSlash(
 }
 
 async function handlePoolSlashForTxHistory(slashEvent: SubstrateEvent, poolId: number, accountId: string, personalSlash: bigint): Promise<void> {
-    const extrinsic = slashEvent.extrinsic;
-    const block = slashEvent.block;
-    const blockNumber = block.block.header.number.toString()
-    const blockTimestamp = timestamp(block)
-    const eventId = eventIdFromBlockAndIdxAndAddress(blockNumber, slashEvent.idx.toString(), accountId)
+  const extrinsic = slashEvent.extrinsic;
+  const block = slashEvent.block;
+  const blockNumber = block.block.header.number.toString()
+  const blockTimestamp = timestamp(block)
+  const eventId = eventIdFromBlockAndIdxAndAddress(blockNumber, slashEvent.idx.toString(), accountId)
 
-    const element = new HistoryElement(
-        eventId,
-        block.block.header.number.toNumber(),
-        blockTimestamp,
-        accountId
-    );
-    if (extrinsic !== undefined) {
-        element.extrinsicHash = extrinsic.extrinsic.hash.toString()
-        element.extrinsicIdx = extrinsic.idx
+  const element = HistoryElement.create({
+    id: eventId,
+    timestamp: blockTimestamp,
+    blockNumber: block.block.header.number.toNumber(),
+    extrinsicHash: extrinsic !== undefined ? extrinsic.extrinsic.hash.toString() : null,
+    extrinsicIdx: extrinsic !== undefined ? extrinsic.idx : null,
+    address: accountId,
+    poolReward: {
+      eventIdx: slashEvent.idx,
+      amount: personalSlash.toString(),
+      isReward: false,
+      poolId: poolId,
     }
-    element.poolReward = {
-        eventIdx: slashEvent.idx,
-        amount: personalSlash.toString(),
-        isReward: false,
-        poolId: poolId
-    }
-    await element.save()
+  });
+
+  await element.save();
 }

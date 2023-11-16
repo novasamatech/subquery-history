@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-crust
+name: subquery-common-api-polkadot-transactions-crust
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x4319cc49ee79495b57a1fec4d2bd43f59052dcc690276de566c2691d6df4f7b8'
+  chainId: "0x4319cc49ee79495b57a1fec4d2bd43f59052dcc690276de566c2691d6df4f7b8"
   endpoint: wss://crust-parachain.crustapps.net
   chaintypes:
     file: ./dist/crustChaintypes.js

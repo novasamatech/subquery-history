@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-kintsugi
+name: subquery-common-api-polkadot-transactions-kintsugi
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x9af9a64e6e4da8e3073901c3ff0cc4c3aad9563786d89daf6ad820b6e14a0b8b'
+  chainId: "0x9af9a64e6e4da8e3073901c3ff0cc4c3aad9563786d89daf6ad820b6e14a0b8b"
   endpoint: >-
     wss://kintsugi.api.onfinality.io/public-ws
   chaintypes:

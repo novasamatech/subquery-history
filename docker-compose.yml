@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   postgres:
     container_name: "postgres-${PROJECT_PATH}"
@@ -53,4 +53,3 @@ services:
     command:
       - --name=app
       - --playground
-

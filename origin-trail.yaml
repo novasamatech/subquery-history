@@ -1,19 +1,19 @@
 specVersion: 1.0.0
-name: subquery-nova-origin-trail
+name: subquery-common-api-polkadot-transactions-origin-trail
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xe7e0962324a3b86c83404dbea483f25fb5dab4c224791c81b756cfc948006174'
+  chainId: "0xe7e0962324a3b86c83404dbea483f25fb5dab4c224791c81b756cfc948006174"
   endpoint: wss://parachain-rpc.origin-trail.network
 dataSources:
   - name: main
