@@ -96,7 +96,7 @@ async function handleRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<vo
 
     for (const eventRecord of rewardEvent.block.events) {
         if (
-            eventRecord.event.section == rewardEvent.event.section && 
+            eventRecord.event.section == rewardEvent.event.section &&
             eventRecord.event.method == rewardEvent.event.method
         ) {
 

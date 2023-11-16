@@ -2,7 +2,7 @@ import {
     AccountPoolReward,
     AccumulatedReward,
     AccumulatedPoolReward,
-    HistoryElement, 
+    HistoryElement,
     RewardType,
 } from '../types';
 import {SubstrateEvent} from "@subql/types";
