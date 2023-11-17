@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-darwinia
+name: subquery-nova-crab
 version: 1.0.0
 runner:
   node:
@@ -13,8 +13,8 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xf0b8924b12e8108550d28870bc03f7b45a947e1b2b9abf81bfb0b89ecb60570e'
-  endpoint: wss://rpc.darwinia.network
+  chainId: '0x86e49c195aeae7c5c4a86ced251f1a28c67b3c35d8289c387ede1776cdd88b24'
+  endpoint: wss://darwiniacrab-rpc.dwellir.com
 dataSources:
   - name: main
     kind: substrate/Runtime
