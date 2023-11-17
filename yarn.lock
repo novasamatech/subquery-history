@@ -1443,7 +1443,7 @@
   dependencies:
     "@octokit/openapi-types" "^12.11.0"
 
-"@open-web3/orml-type-definitions@^0.9.4-7":
+"@open-web3/orml-type-definitions@^0.9.4-38", "@open-web3/orml-type-definitions@^0.9.4-7":
   version "0.9.4-38"
   resolved "https://registry.yarnpkg.com/@open-web3/orml-type-definitions/-/orml-type-definitions-0.9.4-38.tgz#fc7642f6a518da2618ae39fa76fe046ee57c1e80"
   integrity sha512-kV0++JlRLEf7Z1y+Jm+792zqx6Q7dzpGP73rJJmQrBaeTML5mQzu4veZ24TVtcLV6hsGjUU/ixrJODNj6CCuZQ==
@@ -1463,6 +1463,13 @@
   integrity sha512-64cIrOcS5z2SSzTAITg3qDdQReoBLCZhAGHzR1VnYQzF0u59Ow6XnWmg0/R4EuyhnsqW4aMhnrmlVE7RhG9kPg==
   dependencies:
     "@open-web3/orml-type-definitions" "^1.1.4"
+
+"@peaqnetwork/type-definitions@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@peaqnetwork/type-definitions/-/type-definitions-0.0.4.tgz#a893ff95bf824d13c902d3b5912b2954fc12e1e6"
+  integrity sha512-bMja9T9PHQrEy4Uhh0ZTWvKGpgiDd51tZg4ZOpgC1KtVBF6Wx+bNtt+Zyg0DKwRh2Eg+xI5OEBPycsFOpdIWIA==
+  dependencies:
+    "@open-web3/orml-type-definitions" "^0.9.4-38"
 
 "@phala/typedefs@^0.2.31":
   version "0.2.31"
