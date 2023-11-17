@@ -56,7 +56,9 @@
     "kintsugiChaintypes": "./chainTypes/kintsugiChaintypes.ts",
     "moonbeamChaintypes": "./chainTypes/moonbeamChaintypes.ts",
     "parallelHeikoChaintypes": "./chainTypes/parallelHeikoChaintypes.ts",
+    "rococoAssethubChaintypes": "./chainTypes/rococoAssethubChaintypes.ts",
     "shidenChaintypes": "./chainTypes/shidenChaintypes.ts",
+    "statemineChaintypes": "./chainTypes/statemineChaintypes.ts",
     "subsocialChaintypes": "./chainTypes/subsocialChaintypes.ts",
     "zeitgeistChaintypes": "./chainTypes/zeitgeistChaintypes.ts",
     "ternoaChaintypes": "./chainTypes/ternoaChaintypes.ts",
@@ -65,7 +67,8 @@
     "polymeshChaintypes": "./chainTypes/polymeshTypes.ts",
     "crustChaintypes": "./chainTypes/crustChaintypes.ts",
     "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts",
-    "calamariChainTypes": "./chainTypes/calamariChainTypes.ts"
+    "calamariChainTypes": "./chainTypes/calamariChainTypes.ts",
+    "westmintChaintypes": "./chainTypes/westmintChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"

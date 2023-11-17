@@ -33,6 +33,19 @@ type PoolReward @jsonField {
   poolId: Int!
 }
 
+type Swap @jsonField {
+  assetIdIn: String!
+  amountIn: String!
+  assetIdOut: String!
+  amountOut: String!
+  sender: String!
+  receiver: String!
+  assetIdFee: String!
+  fee: String!
+  eventIdx: Int!
+  success: Boolean!
+}
+
 enum RewardType {
   reward
   slash  
@@ -89,6 +102,7 @@ type HistoryElement @entity {
   extrinsic: Extrinsic
   transfer: Transfer
   assetTransfer: AssetTransfer
+  swap: Swap
 }
 
 type EraValidatorInfo @entity {

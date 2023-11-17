@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-statemine
+name: subquery-nova-rococo-assethub
 version: 1.0.0
 runner:
   node:
@@ -13,12 +13,11 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
+  chainId: '0x7c34d42fc815d392057c78b49f2755c753440ccd38bcb0405b3bcfb601d08734'
   endpoint: >-
-    wss://rpc-asset-hub-kusama.luckyfriday.io
-  dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
+    wss://rococo-asset-hub-rpc.polkadot.io
   chaintypes:
-    file: ./dist/statemineChaintypes.js
+    file: ./dist/rococoAssethubChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime

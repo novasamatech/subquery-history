@@ -1,9 +1,11 @@
 import {SubstrateBlock, SubstrateEvent} from "@subql/types";
 import {SubstrateExtrinsic} from "@subql/types";
-import {Balance} from "@polkadot/types/interfaces";
+import {Balance, EventRecord} from "@polkadot/types/interfaces";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
+import {Codec} from "@polkadot/types/types";
+import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"]
 const transferCalls = ["transfer", "transferKeepAlive"]
@@ -42,6 +44,22 @@ export function isEvmTransaction(call: CallBase<AnyTuple>): boolean {
 
 export function isEvmExecutedEvent(event: SubstrateEvent): boolean {
     return event.event.section === 'ethereum' && event.event.method === "Executed"
+}
+
+export function isAssetTxFeePaidEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'assetTxPayment' && event.event.method === "AssetTxFeePaid"
+}
+
+export function isSwapExecutedEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'assetConversion' && event.event.method === "SwapExecuted"
+}
+
+export function isSwapExactTokensForTokens(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "assetConversion" && call.method === "swapExactTokensForTokens"
+}
+
+export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "assetConversion" && call.method === "swapTokensForExactTokens"
 }
 
 export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
@@ -129,6 +147,14 @@ export function getEventData(event: SubstrateEvent): GenericEventData {
     return event.event.data as GenericEventData
 }
 
+export function eventRecordToSubstrateEvent(eventRecord: EventRecord): SubstrateEvent {
+    return eventRecord as unknown as SubstrateEvent
+}
+
+export function BigIntFromCodec(eventRecord: Codec): bigint {
+    return (eventRecord as unknown as INumber).toBigInt()
+}
+
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
     const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
 
@@ -214,5 +240,25 @@ function exportFeeFromTreasureDepositEvent(extrinsic: SubstrateExtrinsic): bigin
         return (fee as unknown as Balance).toBigInt()
     } else  {
         return BigInt(0)
+    }
+}
+
+export function getAssetIdFromMultilocation(multilocation, safe=false): string | undefined{
+    try {
+        let junctions = multilocation.interior;
+
+        if (junctions.isHere) {
+            return "native";
+        } else if (multilocation.parents != "0") {
+            return multilocation.toHex();
+        } else {
+            return junctions.asX2[1].asGeneralIndex.toString();
+        }
+    } catch (e) {
+        if (safe) {
+            return undefined
+        } else {
+            throw e;
+        }
     }
 }
