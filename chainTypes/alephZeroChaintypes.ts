@@ -3,14 +3,17 @@
 
 /* eslint-disable sort-keys */
 
-import { OverrideBundleDefinition } from "@polkadot/types/types";
+import type { OverrideBundleDefinition } from "@polkadot/types/types";
+
+// structs need to be in order
+/* eslint-disable sort-keys */
 
 const definitions: OverrideBundleDefinition = {
   types: [
     {
-      minmax: [0, 4],
+      minmax: [3, undefined],
       types: {
-        DispatchError: "DispatchErrorPre6First",
+        DispatchErrorModule: "DispatchErrorModuleU8",
       },
     },
   ],

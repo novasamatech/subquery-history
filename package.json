@@ -54,6 +54,7 @@
     "acalaChaintypes": "./chainTypes/acalaChaintypes.ts",
     "ajunaChaintypes": "./chainTypes/ajunaChaintypes.ts",
     "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
+    "astarChaintypes": "./chainTypes/astarChaintypes.ts",
     "basiliskChaintypes": "./chainTypes/basiliskChaintypes.ts",
     "centrifugeChaintypes": "./chainTypes/centrifugeChaintypes.ts",
     "encointerChaintypes": "./chainTypes/encointerChaintypes.ts",

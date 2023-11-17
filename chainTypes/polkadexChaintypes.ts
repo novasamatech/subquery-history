@@ -19,7 +19,7 @@ const definitions: OverrideBundleDefinition = {
           perPeriod: "Compact<Balance>",
         },
         VestingScheduleOf: "OrmlVestingSchedule",
-        DispatchError: "DispatchErrorPre6First",
+        DispatchErrorModule: "DispatchErrorModuleU8",
       },
     },
   ],
