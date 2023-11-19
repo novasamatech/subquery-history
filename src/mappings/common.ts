@@ -117,6 +117,12 @@ export function timestamp(block: SubstrateBlock): bigint {
 
 export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: string = ''): string {
     if (extrinsic) {
+        const transactionPaymentFee = exportFeeFromTransactionFeePaidEvent(extrinsic)
+
+        if (transactionPaymentFee != undefined) {
+            return transactionPaymentFee.toString()
+        }
+
         const withdrawFee = exportFeeFromBalancesWithdrawEvent(extrinsic, from)
 
         if (withdrawFee !== BigInt(0)) {
@@ -125,12 +131,6 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
                 return feeRefund ? (withdrawFee - feeRefund).toString() : withdrawFee.toString();
             }
             return withdrawFee.toString()
-        }
-
-        const transactionPaymentFee = exportFeeFromTransactionFeePaidEvent(extrinsic)
-
-        if (transactionPaymentFee != undefined) {
-            return transactionPaymentFee.toString()
         }
 
         let balancesFee = exportFeeFromBalancesDepositEvent(extrinsic)
