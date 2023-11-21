@@ -89,11 +89,10 @@ export async function handleSwap(event: SubstrateEvent): Promise<void> {
       }
     }
   }
-  await Promise.all(
-    swaps.map((e) =>
-      processSwap(eventRecordToSubstrateEvent(e), assetIdFee, fee),
-    ),
-  );
+
+  for (const swap of swaps) {
+    await processSwap(eventRecordToSubstrateEvent(swap), assetIdFee, fee);
+  }
 }
 
 async function processSwap(

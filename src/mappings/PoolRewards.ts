@@ -179,38 +179,36 @@ async function handleRelaychainPooledStakingSlash(
 
   const members = await getPoolMembers(blockNumber(event));
 
-  await Promise.all(
-    members.map(async ([accountId, member]) => {
-      let memberPoints: bigint;
-      if (member.poolId.toNumber() === poolId) {
-        memberPoints = memberPointsCounter(member);
-        if (memberPoints != BigInt(0)) {
-          const personalSlash = (slash * memberPoints) / poolPoints;
+  for (const [accountId, member] of members) {
+    let memberPoints: bigint;
+    if (member.poolId.toNumber() === poolId) {
+      memberPoints = memberPointsCounter(member);
+      if (memberPoints != BigInt(0)) {
+        const personalSlash = (slash * memberPoints) / poolPoints;
 
-          await handlePoolSlashForTxHistory(
-            event,
-            poolId,
-            accountId,
-            personalSlash,
-          );
-          let accumulatedReward = await updateAccumulatedGenericReward(
-            AccumulatedPoolReward,
-            accountId,
-            personalSlash,
-            false,
-          );
-          await updateAccountPoolRewards(
-            event,
-            accountId,
-            personalSlash,
-            poolId,
-            RewardType.slash,
-            accumulatedReward.amount,
-          );
-        }
+        await handlePoolSlashForTxHistory(
+          event,
+          poolId,
+          accountId,
+          personalSlash,
+        );
+        let accumulatedReward = await updateAccumulatedGenericReward(
+          AccumulatedPoolReward,
+          accountId,
+          personalSlash,
+          false,
+        );
+        await updateAccountPoolRewards(
+          event,
+          accountId,
+          personalSlash,
+          poolId,
+          RewardType.slash,
+          accumulatedReward.amount,
+        );
       }
-    }),
-  );
+    }
+  }
 }
 
 async function handlePoolSlashForTxHistory(

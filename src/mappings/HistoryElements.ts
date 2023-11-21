@@ -94,7 +94,7 @@ async function saveFailedTransfers(
   transfers: Array<TransferData>,
   extrinsic: SubstrateExtrinsic,
 ): Promise<void> {
-  let promises = transfers.map(({ isTransferAll, transfer }) => {
+  for (const { isTransferAll, transfer } of transfers) {
     const isSwap = "assetIdIn" in transfer;
     const from = isSwap ? transfer.sender : transfer.from;
     const to = isSwap ? transfer.receiver : transfer.to;
@@ -106,12 +106,12 @@ async function saveFailedTransfers(
       const elementTo = createHistoryElement(extrinsic, to, `-to`);
       addTransferToHistoryElement(elementTo, transfer);
 
-      return [elementTo.save(), elementFrom.save()];
+      await elementTo.save();
+      await elementFrom.save();
     }
 
-    return [elementFrom.save()];
-  });
-  await Promise.allSettled(promises);
+    await elementFrom.save();
+  }
 }
 
 async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
