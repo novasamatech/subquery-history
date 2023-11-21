@@ -3,17 +3,17 @@ name: subquery-nova-crab
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
+    name: "@subql/query"
     version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x86e49c195aeae7c5c4a86ced251f1a28c67b3c35d8289c387ede1776cdd88b24'
+  chainId: "0x86e49c195aeae7c5c4a86ced251f1a28c67b3c35d8289c387ede1776cdd88b24"
   endpoint: wss://darwiniacrab-rpc.dwellir.com
 dataSources:
   - name: main

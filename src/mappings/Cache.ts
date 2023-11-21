@@ -22,7 +22,7 @@ let poolMembers: {
 
 export async function cachedRewardDestination(
   accountAddress: string,
-  event: SubstrateEvent
+  event: SubstrateEvent,
 ): Promise<PalletStakingRewardDestination> {
   const blockId = blockNumber(event);
   let cachedBlock = rewardDestinationByAddress[blockId];
@@ -60,7 +60,7 @@ export async function cachedRewardDestination(
     // TODO: Commented code doesn't work now, may be fixed later
     // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
     const payees = await api.queryMulti(
-      allAccountsInBlock.map((account) => [api.query.staking.payee, account])
+      allAccountsInBlock.map((account) => [api.query.staking.payee, account]),
     );
 
     const rewardDestinations = payees.map((payee) => {
@@ -90,7 +90,7 @@ export async function cachedRewardDestination(
 
 export async function cachedController(
   accountAddress: string,
-  event: SubstrateEvent
+  event: SubstrateEvent,
 ): Promise<string> {
   const blockId = blockNumber(event);
   let cachedBlock = controllersByStash[blockId];
@@ -124,7 +124,7 @@ export async function cachedController(
     for (let accountId of allAccountsInBlock) {
       const rewardDestination = await cachedRewardDestination(
         accountId.toString(),
-        event
+        event,
       );
 
       if (rewardDestination.isController) {
@@ -145,7 +145,7 @@ export async function cachedController(
       controllerNeedAccounts.map((account) => [
         api.query.staking.bonded,
         account,
-      ])
+      ]),
     );
     const controllers = bonded.map((bonded) => {
       return bonded.toString();
@@ -171,7 +171,7 @@ export async function cachedController(
 }
 
 export async function cachedStakingRewardEraIndex(
-  event: SubstrateEvent
+  event: SubstrateEvent,
 ): Promise<number> {
   const blockId = blockNumber(event);
   let cachedEra = parachainStakingRewardEra[blockId];
@@ -194,7 +194,7 @@ export async function cachedStakingRewardEraIndex(
 }
 
 export async function getPoolMembers(
-  blockId: number
+  blockId: number,
 ): Promise<[string, PalletNominationPoolsPoolMember][]> {
   const cachedMembers = poolMembers[blockId];
   if (cachedMembers != undefined) {
@@ -205,7 +205,10 @@ export async function getPoolMembers(
     await api.query.nominationPools.poolMembers.entries()
   )
     .filter(([_, member]) => member.isSome)
-    .map(([accountId, member]) => [accountId.args[0].toString(), member.unwrap()]);
+    .map(([accountId, member]) => [
+      accountId.args[0].toString(),
+      member.unwrap(),
+    ]);
   poolMembers = {};
   poolMembers[blockId] = members;
   return members;

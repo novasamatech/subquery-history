@@ -29,11 +29,11 @@ const mockBondedPools = {
     points: mockNumber(1000),
     roles: {
       depositor: mockAddress(
-        "13wcqPQM6W5C3BdZDegusda4akT8XL7RfjcXP6RHuo85ANNS"
+        "13wcqPQM6W5C3BdZDegusda4akT8XL7RfjcXP6RHuo85ANNS",
       ),
       root: mockAddress("13wcqPQM6W5C3BdZDegusda4akT8XL7RfjcXP6RHuo85ANNS"),
       nominator: mockAddress(
-        "13wcqPQM6W5C3BdZDegusda4akT8XL7RfjcXP6RHuo85ANNS"
+        "13wcqPQM6W5C3BdZDegusda4akT8XL7RfjcXP6RHuo85ANNS",
       ),
       bouncer: mockAddress("13wcqPQM6W5C3BdZDegusda4akT8XL7RfjcXP6RHuo85ANNS"),
     },
@@ -153,12 +153,12 @@ describe("handlePoolSlash", () => {
     poolId = mockNumber(42);
     slashAmount = mockNumber(10000);
 
-    jest
-      .spyOn(HistoryElement.prototype, "save")
-      .mockImplementation(function (this: HistoryElement) {
-        historyElementResults.push(this);
-        return Promise.resolve();
-      });
+    jest.spyOn(HistoryElement.prototype, "save").mockImplementation(function (
+      this: HistoryElement,
+    ) {
+      historyElementResults.push(this);
+      return Promise.resolve();
+    });
     jest.spyOn(AccumulatedPoolReward, "get").mockResolvedValue(undefined);
     jest
       .spyOn(AccumulatedPoolReward.prototype, "save")
@@ -213,7 +213,7 @@ describe("handlePoolSlash", () => {
     bondedSlashEvent =
       new SubstrateTestEventBuilder().buildEventForBondedPoolSlash(
         poolId,
-        slashAmount
+        slashAmount,
       );
     await handlePoolBondedSlash(bondedSlashEvent);
   });
@@ -227,7 +227,7 @@ describe("handlePoolSlash", () => {
       new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(
         mockNumber(1),
         poolId,
-        slashAmount
+        slashAmount,
       );
     await handlePoolUnbondingSlash(unbondingSlashEvent);
   });
@@ -241,7 +241,7 @@ describe("handlePoolSlash", () => {
       new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(
         mockNumber(4904),
         poolId,
-        slashAmount
+        slashAmount,
       );
     await handlePoolUnbondingSlash(unbondingSlashEvent);
   });
@@ -253,7 +253,7 @@ describe("handlePoolSlash", () => {
       new SubstrateTestEventBuilder().buildEventForUnbondingPoolSlash(
         mockNumber(5426),
         poolId,
-        slashAmount
+        slashAmount,
       );
     await handlePoolUnbondingSlash(unbondingSlashEvent);
   });
@@ -266,7 +266,7 @@ describe("handlePoolSlash", () => {
     const result_2 = await getPoolMembers(0);
 
     expect(mockAPI.query.nominationPools.poolMembers.entries).toBeCalledTimes(
-      1
+      1,
     );
     expect(result_1).toBe(result_2);
   });
@@ -289,7 +289,7 @@ describe("handlePoolReward", () => {
     rewardEvent = new SubstrateTestEventBuilder().buildEventForPoolReward(
       accountId,
       poolId,
-      rewardAmount
+      rewardAmount,
     );
   });
 

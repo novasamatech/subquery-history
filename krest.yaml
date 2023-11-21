@@ -3,17 +3,17 @@ name: subquery-nova-krest
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
+    name: "@subql/query"
     version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0xb3dd5ad6a82872b30aabaede8f41dfd4ff6c32ff82f8757d034a45be63cf104c'
+  chainId: "0xb3dd5ad6a82872b30aabaede8f41dfd4ff6c32ff82f8757d034a45be63cf104c"
   endpoint: >-
     wss://archive-node.peaq.network
   chaintypes:

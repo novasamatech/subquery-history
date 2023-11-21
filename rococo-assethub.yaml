@@ -3,17 +3,17 @@ name: subquery-nova-rococo-assethub
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
+    name: "@subql/query"
     version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x7c34d42fc815d392057c78b49f2755c753440ccd38bcb0405b3bcfb601d08734'
+  chainId: "0x7c34d42fc815d392057c78b49f2755c753440ccd38bcb0405b3bcfb601d08734"
   endpoint: >-
     wss://rococo-asset-hub-rpc.polkadot.io
   chaintypes:

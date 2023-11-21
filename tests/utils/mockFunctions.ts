@@ -17,7 +17,7 @@ export class SubstrateTestEventBuilder<T extends AnyTuple = AnyTuple> {
 
   withBlock(
     timestamp: Date = new Date(),
-    blockNumber: number = 1
+    blockNumber: number = 1,
   ): SubstrateTestEventBuilder<T> {
     this._event.block = {
       timestamp: timestamp,
@@ -57,7 +57,7 @@ export class SubstrateTestEventBuilder<T extends AnyTuple = AnyTuple> {
     rewardAccountId,
     poolId,
     amount,
-    idx = 0
+    idx = 0,
   ): SubstrateEvent<T> {
     return this.withBlock()
       .withEvent([rewardAccountId, poolId, amount], idx)
@@ -72,7 +72,7 @@ export class SubstrateTestEventBuilder<T extends AnyTuple = AnyTuple> {
     era,
     poolId,
     amount,
-    idx = 0
+    idx = 0,
   ): SubstrateEvent<T> {
     return this.withBlock().withEvent([era, poolId, amount], idx).build();
   }

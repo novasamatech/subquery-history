@@ -3,7 +3,7 @@ import { eventId } from "./common";
 import { EraValidatorInfo } from "../types/models/EraValidatorInfo";
 
 export async function handleStakersElected(
-  event: SubstrateEvent
+  event: SubstrateEvent,
 ): Promise<void> {
   await handleNewEra(event);
 }
@@ -12,7 +12,7 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
   const currentEra = (await api.query.staking.currentEra()).unwrap();
 
   const exposures = await api.query.staking.erasStakersClipped.entries(
-    currentEra.toBigInt()
+    currentEra.toBigInt(),
   );
 
   for (const [key, exposure] of exposures) {

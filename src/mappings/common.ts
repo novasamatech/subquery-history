@@ -48,23 +48,37 @@ export function isEvmExecutedEvent(event: TypedEventRecord<Codec[]>): boolean {
 }
 
 export function isAssetTxFeePaidEvent(event: SubstrateEvent): boolean {
-    return event.event.section === 'assetTxPayment' && event.event.method === "AssetTxFeePaid"
+  return (
+    event.event.section === "assetTxPayment" &&
+    event.event.method === "AssetTxFeePaid"
+  );
 }
 
 export function isSwapExecutedEvent(event: SubstrateEvent): boolean {
-    return event.event.section === 'assetConversion' && event.event.method === "SwapExecuted"
+  return (
+    event.event.section === "assetConversion" &&
+    event.event.method === "SwapExecuted"
+  );
 }
 
-export function isSwapExactTokensForTokens(call: CallBase<AnyTuple>) : boolean {
-    return call.section === "assetConversion" && call.method === "swapExactTokensForTokens"
+export function isSwapExactTokensForTokens(call: CallBase<AnyTuple>): boolean {
+  return (
+    call.section === "assetConversion" &&
+    call.method === "swapExactTokensForTokens"
+  );
 }
 
-export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>) : boolean {
-    return call.section === "assetConversion" && call.method === "swapTokensForExactTokens"
+export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>): boolean {
+  return (
+    call.section === "assetConversion" &&
+    call.method === "swapTokensForExactTokens"
+  );
 }
 
-export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
-    return ormlSections.includes(call.section) && transferCalls.includes(call.method)
+export function isOrmlTransfer(call: CallBase<AnyTuple>): boolean {
+  return (
+    ormlSections.includes(call.section) && transferCalls.includes(call.method)
+  );
 }
 
 export function isNativeTransferAll(call: CallBase<AnyTuple>): boolean {
@@ -76,20 +90,20 @@ export function isOrmlTransferAll(call: CallBase<AnyTuple>): boolean {
 }
 
 export function callsFromBatch(
-  batchCall: CallBase<AnyTuple>
+  batchCall: CallBase<AnyTuple>,
 ): CallBase<AnyTuple>[] {
   return batchCall.args[0] as Vec<CallBase<AnyTuple>>;
 }
 
 export function callFromProxy(
-  proxyCall: CallBase<AnyTuple>
+  proxyCall: CallBase<AnyTuple>,
 ): CallBase<AnyTuple> {
   return proxyCall.args[2] as CallBase<AnyTuple>;
 }
 
 export function eventIdWithAddress(
   event: SubstrateEvent,
-  address: String
+  address: String,
 ): string {
   return `${eventId(event)}-${address}`;
 }
@@ -105,7 +119,7 @@ export function eventIdFromBlockAndIdx(blockNumber: string, eventIdx: string) {
 export function eventIdFromBlockAndIdxAndAddress(
   blockNumber: string,
   eventIdx: string,
-  address: string
+  address: string,
 ) {
   return `${blockNumber}-${eventIdx}-${address}`;
 }
@@ -123,20 +137,24 @@ export function blockNumber(event: SubstrateEvent): number {
 
 export function extrinsicIdFromBlockAndIdx(
   blockNumber: number,
-  extrinsicIdx: number
+  extrinsicIdx: number,
 ): string {
   return `${blockNumber.toString()}-${extrinsicIdx.toString()}`;
 }
 
 export function timestamp(block: SubstrateBlock): bigint {
   return BigInt(
-    Math.round(block.timestamp ? block.timestamp.getTime() / 1000 : -1)
+    Math.round(block.timestamp ? block.timestamp.getTime() / 1000 : -1),
   );
 }
 
-export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: string = ''): string {
+export function calculateFeeAsString(
+  extrinsic?: SubstrateExtrinsic,
+  from: string = "",
+): string {
   if (extrinsic) {
-    const transactionPaymentFee = exportFeeFromTransactionFeePaidEvent(extrinsic);
+    const transactionPaymentFee =
+      exportFeeFromTransactionFeePaidEvent(extrinsic);
 
     if (transactionPaymentFee != undefined) {
       return transactionPaymentFee.toString();
@@ -145,9 +163,11 @@ export function calculateFeeAsString(extrinsic?: SubstrateExtrinsic, from: strin
     const withdrawFee = exportFeeFromBalancesWithdrawEvent(extrinsic, from);
 
     if (withdrawFee !== BigInt(0)) {
-      if (isEvmTransaction(extrinsic.extrinsic.method)){
+      if (isEvmTransaction(extrinsic.extrinsic.method)) {
         const feeRefund = exportFeeRefund(extrinsic, from);
-        return feeRefund ? (withdrawFee - feeRefund).toString() : withdrawFee.toString();
+        return feeRefund
+          ? (withdrawFee - feeRefund).toString()
+          : withdrawFee.toString();
       }
       return withdrawFee.toString();
     }
@@ -166,17 +186,19 @@ export function getEventData(event: SubstrateEvent): GenericEventData {
   return event.event.data as GenericEventData;
 }
 
-export function eventRecordToSubstrateEvent(eventRecord: EventRecord): SubstrateEvent {
-    return eventRecord as unknown as SubstrateEvent
+export function eventRecordToSubstrateEvent(
+  eventRecord: EventRecord,
+): SubstrateEvent {
+  return eventRecord as unknown as SubstrateEvent;
 }
 
 export function BigIntFromCodec(eventRecord: Codec): bigint {
-    return (eventRecord as unknown as INumber).toBigInt()
+  return (eventRecord as unknown as INumber).toBigInt();
 }
 
 function exportFeeRefund(
   extrinsic: SubstrateExtrinsic,
-  from: string = ""
+  from: string = "",
 ): bigint {
   const extrinsicSigner = from || extrinsic.extrinsic.signer.toString();
 
@@ -184,7 +206,7 @@ function exportFeeRefund(
     (event) =>
       event.event.method == "Deposit" &&
       event.event.section == "balances" &&
-      event.event.data[0].toString() === extrinsicSigner
+      event.event.data[0].toString() === extrinsicSigner,
   );
 
   if (eventRecord != undefined) {
@@ -202,11 +224,11 @@ function exportFeeRefund(
 
 function exportFeeFromBalancesWithdrawEvent(
   extrinsic: SubstrateExtrinsic,
-  from: string = ""
+  from: string = "",
 ): bigint {
   const eventRecord = extrinsic.events.find(
     (event) =>
-      event.event.method == "Withdraw" && event.event.section == "balances"
+      event.event.method == "Withdraw" && event.event.section == "balances",
   );
 
   if (eventRecord !== undefined) {
@@ -228,12 +250,12 @@ function exportFeeFromBalancesWithdrawEvent(
 
 function exportFeeFromTransactionFeePaidEvent(
   extrinsic: SubstrateExtrinsic,
-  from: string = ""
+  from: string = "",
 ): bigint | undefined {
   const eventRecord = extrinsic.events.find(
     (event) =>
       event.event.method == "TransactionFeePaid" &&
-      event.event.section == "transactionPayment"
+      event.event.section == "transactionPayment",
   );
 
   if (eventRecord !== undefined) {
@@ -254,7 +276,7 @@ function exportFeeFromTransactionFeePaidEvent(
 }
 
 function exportFeeFromBalancesDepositEvent(
-  extrinsic: SubstrateExtrinsic
+  extrinsic: SubstrateExtrinsic,
 ): bigint {
   const eventRecord = extrinsic.events.find((event) => {
     return event.event.method == "Deposit" && event.event.section == "balances";
@@ -274,7 +296,7 @@ function exportFeeFromBalancesDepositEvent(
 }
 
 function exportFeeFromTreasureDepositEvent(
-  extrinsic: SubstrateExtrinsic
+  extrinsic: SubstrateExtrinsic,
 ): bigint {
   const eventRecord = extrinsic.events.find((event) => {
     return event.event.method == "Deposit" && event.event.section == "treasury";
@@ -293,22 +315,25 @@ function exportFeeFromTreasureDepositEvent(
   }
 }
 
-export function getAssetIdFromMultilocation(multilocation: any, safe=false): string | undefined{
-    try {
-        let junctions = multilocation.interior;
+export function getAssetIdFromMultilocation(
+  multilocation: any,
+  safe = false,
+): string | undefined {
+  try {
+    let junctions = multilocation.interior;
 
-        if (junctions.isHere) {
-            return "native";
-        } else if (multilocation.parents != "0") {
-            return multilocation.toHex();
-        } else {
-            return junctions.asX2[1].asGeneralIndex.toString();
-        }
-    } catch (e) {
-        if (safe) {
-            return undefined
-        } else {
-            throw e;
-        }
+    if (junctions.isHere) {
+      return "native";
+    } else if (multilocation.parents != "0") {
+      return multilocation.toHex();
+    } else {
+      return junctions.asX2[1].asGeneralIndex.toString();
     }
+  } catch (e) {
+    if (safe) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
 }
