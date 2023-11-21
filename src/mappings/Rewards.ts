@@ -345,7 +345,7 @@ async function buildRewardEvents<A>(
     } = eventRecord;
 
     const newAccumulator = produceNewAccumulator(
-      innerAccumulator,
+      accumulator,
       account.toString(),
     );
 
