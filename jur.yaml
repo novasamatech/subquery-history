@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-statemine
+name: subquery-nova-jur
 version: 1.0.0
 runner:
   node:
@@ -13,12 +13,11 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
+  chainId: '0x58d1393b47b11707978fbc07e77d7b6f7d9aa88d207dc008a52385f7dba6156a'
   endpoint: >-
-    wss://rpc-asset-hub-kusama.luckyfriday.io
-  dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
+    wss://jur-mainnet-archive-rpc-1.icebergnodes.io
   chaintypes:
-    file: ./dist/statemineChaintypes.js
+    file: ./dist/jurChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -53,8 +52,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted

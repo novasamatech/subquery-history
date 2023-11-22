@@ -1,6 +1,7 @@
 import {SubstrateEvent} from "@subql/types";
 import {eventId} from "./common";
 import { EraValidatorInfo } from "../types/models/EraValidatorInfo";
+import { IndividualExposure } from "../types";
 
 export async function handleStakersElected(event: SubstrateEvent): Promise<void> {
     await handleNewEra(event)
@@ -15,17 +16,19 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
         const [, validatorId] = key.args
 
         let validatorIdString = validatorId.toString()
-        const eraValidatorInfo = new EraValidatorInfo(eventId(event)+validatorIdString)
-        eraValidatorInfo.era = currentEra.toNumber()
-        eraValidatorInfo.address = validatorIdString
-        eraValidatorInfo.total = exposure.total.toBigInt()
-        eraValidatorInfo.own = exposure.own.toBigInt()
-        eraValidatorInfo.others = exposure.others.map(other => {
-            return {
-                who: other.who.toString(),
-                value: other.value.toString()
-            }
-        })
+        const eraValidatorInfo = new EraValidatorInfo(
+            eventId(event)+validatorIdString,
+            validatorIdString,
+            currentEra.toNumber(),
+            exposure.total.toBigInt(),
+            exposure.own.toBigInt(),
+            exposure.others.map(other => {
+                return {
+                    who: other.who.toString(),
+                    value: other.value.toString()
+                } as IndividualExposure
+            })
+        )
         return eraValidatorInfo.save()
     })
 

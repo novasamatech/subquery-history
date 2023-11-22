@@ -6,25 +6,25 @@ import {
     RewardType,
 } from '../types';
 import {SubstrateEvent} from "@subql/types";
+import {eventIdFromBlockAndIdxAndAddress, timestamp, eventIdWithAddress, blockNumber} from "./common";
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
 import {PalletNominationPoolsPoolMember} from "@polkadot/types/lookup";
-import {handleGenericForTxHistory, updateAccumulatedGenericReward, updateGenericAccountRewards} from "./Rewards";
+import {handleGenericForTxHistory, updateAccumulatedGenericReward} from "./Rewards";
 import {getPoolMembers} from "./Cache";
-import {eventIdFromBlockAndIdxAndAddress, timestamp, blockNumber} from "./common";
 
 
 export async function handlePoolReward(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
     await handlePoolRewardForTxHistory(rewardEvent)
     let accumulatedReward = await updateAccumulatedPoolReward(rewardEvent, true)
-    await updateAccountPoolRewards(rewardEvent, RewardType.reward, accumulatedReward.amount)
+    let { event: { data: [accountId, poolId, amount] } } = rewardEvent
+    await updateAccountPoolRewards(rewardEvent, accountId.toString(), amount.toBigInt(), poolId.toNumber(), RewardType.reward, accumulatedReward.amount)
 }
 
 
 async function handlePoolRewardForTxHistory(rewardEvent: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>): Promise<void> {
-    handleGenericForTxHistory(rewardEvent, async (element: HistoryElement) => {
-        const {event: {data: [account, poolId, amount]}} = rewardEvent
-        element.address = account.toString()
+    const {event: {data: [account, poolId, amount]}} = rewardEvent
+    handleGenericForTxHistory(rewardEvent, account.toString(), async (element: HistoryElement) => {
         element.poolReward = {
             eventIdx: rewardEvent.idx,
             amount: amount.toString(),
@@ -40,21 +40,19 @@ async function updateAccumulatedPoolReward(event: SubstrateEvent<[accountId: Cod
     return await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId.toString(), amount.toBigInt(), isReward)
 }
 
-async function updateAccountPoolRewards(event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
-    let { event: { data: [accountId, poolId, amount] } } = event
-
-    updateGenericAccountRewards(
-        AccountPoolReward,
-        event,
-        accountId.toString(),
-        amount.toBigInt(),
-        rewardType,
+async function updateAccountPoolRewards(event: SubstrateEvent, accountAddress: string, amount: bigint, poolId: number, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
+    let id = eventIdWithAddress(event, accountAddress)
+    let accountPoolReward = new AccountPoolReward(
+        id,
+        accountAddress,
+        blockNumber(event),
+        timestamp(event.block),
+        amount,
         accumulatedAmount,
-        (element: AccountPoolReward) => {
-            element.poolId = poolId.toNumber()
-            return element
-        }
-    )
+        rewardType,
+        poolId
+    );
+    await accountPoolReward.save()
 }
 
 export async function handlePoolBondedSlash(bondedSlashEvent: SubstrateEvent<[poolId: INumber, slash: INumber]>): Promise<void> {
@@ -62,8 +60,6 @@ export async function handlePoolBondedSlash(bondedSlashEvent: SubstrateEvent<[po
     const poolId = poolIdEncoded.toNumber()
 
     const pool = (await api.query.nominationPools.bondedPools(poolId)).unwrap()
-
-    const members = await api.query.nominationPools.poolMembers.entries()
 
     await handleRelaychainPooledStakingSlash(
         bondedSlashEvent,
@@ -114,21 +110,17 @@ async function handleRelaychainPooledStakingSlash(
         if (member.poolId.toNumber() === poolId) {
             memberPoints = memberPointsCounter(member)
             if (memberPoints != BigInt(0)) {
-                const personalSlash = (slash / poolPoints) * memberPoints
+                const personalSlash = (slash * memberPoints) / poolPoints
 
                 await handlePoolSlashForTxHistory(event, poolId, accountId, personalSlash)
                 let accumulatedReward = await updateAccumulatedGenericReward(AccumulatedPoolReward, accountId, personalSlash, false)
-                await updateGenericAccountRewards(
-                    AccountPoolReward,
+                await updateAccountPoolRewards(
                     event,
                     accountId,
                     personalSlash,
+                    poolId,
                     RewardType.slash,
-                    accumulatedReward.amount,
-                    (element: AccountPoolReward) => {
-                        element.poolId = poolId
-                        return element
-                    }
+                    accumulatedReward.amount
                 )
             }
         }
@@ -142,14 +134,16 @@ async function handlePoolSlashForTxHistory(slashEvent: SubstrateEvent, poolId: n
     const blockTimestamp = timestamp(block)
     const eventId = eventIdFromBlockAndIdxAndAddress(blockNumber, slashEvent.idx.toString(), accountId)
 
-    const element = new HistoryElement(eventId);
-    element.timestamp = blockTimestamp
-    element.blockNumber = block.block.header.number.toNumber()
+    const element = new HistoryElement(
+        eventId,
+        block.block.header.number.toNumber(),
+        blockTimestamp,
+        accountId
+    );
     if (extrinsic !== undefined) {
         element.extrinsicHash = extrinsic.extrinsic.hash.toString()
         element.extrinsicIdx = extrinsic.idx
     }
-    element.address = accountId
     element.poolReward = {
         eventIdx: slashEvent.idx,
         amount: personalSlash.toString(),

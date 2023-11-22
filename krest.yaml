@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-statemine
+name: subquery-nova-krest
 version: 1.0.0
 runner:
   node:
@@ -13,12 +13,11 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
+  chainId: '0xb3dd5ad6a82872b30aabaede8f41dfd4ff6c32ff82f8757d034a45be63cf104c'
   endpoint: >-
-    wss://rpc-asset-hub-kusama.luckyfriday.io
-  dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
+    wss://archive-node.peaq.network
   chaintypes:
-    file: ./dist/statemineChaintypes.js
+    file: ./dist/krestChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -28,11 +27,7 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
+        # TODO: implement parachain staking handler for krest
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -42,6 +37,11 @@ dataSources:
           kind: substrate/EventHandler
           filter:
             module: assets
+            method: Transferred
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: localassets
             method: Transferred
         - handler: handleCurrencyTransfer
           kind: substrate/EventHandler
@@ -53,8 +53,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted

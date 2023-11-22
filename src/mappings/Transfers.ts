@@ -9,7 +9,13 @@ import {
   getEventData,
   isEvmTransaction,
   isEvmExecutedEvent,
+  isAssetTxFeePaidEvent,
+  isSwapExecutedEvent,
+  eventRecordToSubstrateEvent,
+  getAssetIdFromMultilocation,
+  BigIntFromCodec,
 } from "./common";
+import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 type TransferPayload = {
   event: SubstrateEvent;
@@ -20,6 +26,66 @@ type TransferPayload = {
   suffix: string;
   assetId?: string;
 };
+
+export async function handleSwap(event: SubstrateEvent): Promise<void> {
+  const [from, to, path, amountIn, amountOut] = getEventData(event);
+
+  let element = await HistoryElement.get(`${eventId(event)}-from`)
+
+  if (element !== undefined) {
+      // already processed swap previously
+      return;
+  }
+
+  let assetIdFee: string
+  let fee: string
+  let foundAssetTxFeePaid = event.block.events.find((e) => isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)));
+  let swaps = event.block.events.filter((e) => isSwapExecutedEvent(eventRecordToSubstrateEvent(e)));
+  if (foundAssetTxFeePaid === undefined) {
+    assetIdFee = "native"
+    fee = calculateFeeAsString(event.extrinsic, from.toString())
+  } else {
+    const [who, actualFee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
+    assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
+    fee = actualFee.toString()
+
+    let { event: { data: [feeFrom, feeTo, feePath, feeAmountIn, feeAmountOut] } } = swaps[0]
+
+    swaps = swaps.slice(1)
+    if (BigIntFromCodec(actualFee) != BigIntFromCodec(feeAmountIn)) {
+      let { event: { data: [refundFrom, refundTo, refundPath, refundAmountIn, refundAmountOut] } } = swaps[swaps.length - 1]
+
+      if (BigIntFromCodec(feeAmountIn) == BigIntFromCodec(actualFee) + BigIntFromCodec(refundAmountOut) && 
+         getAssetIdFromMultilocation(feePath[0]) == getAssetIdFromMultilocation(refundPath[refundPath["length"] - 1])) {
+          swaps = swaps.slice(swaps.length - 1)
+          // TODO: if fee splitted, than we will process the same block two times
+      }
+    }
+  }
+  await Promise.all(swaps.map((e) => processSwap(eventRecordToSubstrateEvent(e), assetIdFee, fee)))
+}
+
+async function processSwap(event: SubstrateEvent, assetIdFee: string, fee: string): Promise<void> {
+  const [from, to, path, amountIn, amountOut] = getEventData(event)
+
+  const swap = {
+    assetIdIn: getAssetIdFromMultilocation(path[0]),
+    amountIn: amountIn.toString(),
+    assetIdOut: getAssetIdFromMultilocation(path[path["length"] - 1]),
+    amountOut: amountOut.toString(),
+    sender: from.toString(),
+    receiver: to.toString(),
+    assetIdFee: assetIdFee,
+    fee: fee,
+    eventIdx: event.idx,
+    success: true
+  }
+
+  await createAssetTransmission(event, from.toString(), "-from", {"swap": swap});
+  if (from.toString() != to.toString()) {
+    await createAssetTransmission(event, to.toString(), "-to", {"swap": swap});
+  }
+}
 
 export async function handleTransfer(event: SubstrateEvent): Promise<void> {
   const [from, to, amount] = getEventData(event);
@@ -129,10 +195,44 @@ async function createTransfer({
   amount,
   assetId = null,
 }: TransferPayload) {
-  const element = new HistoryElement(`${eventId(event)}${suffix}`);
-  element.address = address.toString();
-  element.timestamp = timestamp(event.block);
-  element.blockNumber = blockNumber(event);
+  const transfer = {
+    amount: amount.toString(),
+    from: from.toString(),
+    to: to.toString(),
+    fee: calculateFeeAsString(event.extrinsic, from.toString()),
+    eventIdx: event.idx,
+    success: true,
+  }
+
+  let data;
+  if (assetId) {
+    data = {
+      "assetTransfer": {
+        ...transfer,
+        assetId: assetId,
+      }
+    }
+  } else {
+    data = {
+      "transfer": transfer
+    }
+  }
+
+  await createAssetTransmission(event, address, suffix, data);
+}
+
+async function createAssetTransmission(
+  event,
+  address,
+  suffix,
+  data
+) {
+  const element = new HistoryElement(
+    `${eventId(event)}${suffix}`,
+    blockNumber(event),
+    timestamp(event.block),
+    address.toString(),
+  );
   if (event.extrinsic !== undefined) {
     if (isEvmTransaction(event.extrinsic.extrinsic.method)) {
       const executedEvent = event.extrinsic.events.find(isEvmExecutedEvent);
@@ -146,22 +246,8 @@ async function createTransfer({
     element.extrinsicIdx = event.extrinsic.idx;
   }
 
-  const transfer = {
-    amount: amount.toString(),
-    from: from.toString(),
-    to: to.toString(),
-    fee: calculateFeeAsString(event.extrinsic, from.toString()),
-    eventIdx: event.idx,
-    success: true,
-  }
-
-  if (assetId) {
-    element.assetTransfer = {
-      ...transfer,
-      assetId: assetId,
-    };
-  } else {
-    element.transfer = transfer
+  for(var key in data) {
+    element[key] = data[key]
   }
 
   await element.save();

@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-statemine
+name: subquery-nova-crab
 version: 1.0.0
 runner:
   node:
@@ -13,12 +13,8 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a'
-  endpoint: >-
-    wss://rpc-asset-hub-kusama.luckyfriday.io
-  dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
-  chaintypes:
-    file: ./dist/statemineChaintypes.js
+  chainId: '0x86e49c195aeae7c5c4a86ced251f1a28c67b3c35d8289c387ede1776cdd88b24'
+  endpoint: wss://darwiniacrab-rpc.dwellir.com
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -53,8 +49,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted

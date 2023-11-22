@@ -26,6 +26,8 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+          filter:
+            isSigned: true
         - handler: handleReward
           kind: substrate/EventHandler
           filter:
@@ -51,6 +53,16 @@ dataSources:
           filter:
             module: staking
             method: Slashed
+        - handler: handlePoolBondedSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PoolSlashed
+        - handler: handlePoolUnbondingSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: UnbondingPoolSlashed
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
