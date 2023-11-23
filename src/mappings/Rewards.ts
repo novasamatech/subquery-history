@@ -15,7 +15,9 @@ import {
     eventIdWithAddress,
     isProxy,
     callFromProxy,
-    blockNumber
+    blockNumber,
+    eventRecordToSubstrateEvent,
+    getRewardData
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -276,7 +278,7 @@ async function buildRewardEvents<A>(
 
             if (!(eventRecord.event.method == eventMethod && eventRecord.event.section == eventSection)) return accumulator
 
-            let {event: {data: [account, amount]}} = eventRecord
+            let [account, amount] = getRewardData(eventRecordToSubstrateEvent(eventRecord))
 
             const newAccumulator = produceNewAccumulator(innerAccumulator, account.toString())
 
@@ -307,12 +309,12 @@ async function buildRewardEvents<A>(
 }
 
 async function updateAccumulatedReward(event: SubstrateEvent<[accountId: Codec, reward: INumber]>, isReward: boolean): Promise<AccumulatedReward> {
-    let {event: {data: [accountId, amount]}} = event
+    let [accountId, amount] = getRewardData(event)
     return await updateAccumulatedGenericReward(AccumulatedReward, accountId.toString(), (amount as unknown as Balance).toBigInt(), isReward)
 }
 
 async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardType, accumulatedAmount: bigint): Promise<void> {
-    let { event: { data: [accountId, amount] } } = event
+    let [accountId, amount] = getRewardData(event)
 
     const accountAddress = accountId.toString()
     let id = eventIdWithAddress(event, accountAddress)
@@ -329,7 +331,7 @@ async function updateAccountRewards(event: SubstrateEvent, rewardType: RewardTyp
 }
 
 async function handleParachainRewardForTxHistory(rewardEvent: SubstrateEvent): Promise<void> {
-    const {event: {data: [account, amount]}} = rewardEvent
+    const [account, amount] = getRewardData(rewardEvent)
     handleGenericForTxHistory(rewardEvent, account.toString(), async (element: HistoryElement) => {
         const eraIndex = await cachedStakingRewardEraIndex(rewardEvent)
 
