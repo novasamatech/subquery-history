@@ -25,28 +25,33 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
+        - handler: handleReward
           kind: substrate/EventHandler
           filter:
-            module: parachainStaking
+            module: staking
+            method: Reward
+        - handler: handleRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
             method: Rewarded
+        - handler: handleSlash
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slash
+        - handler: handleSlashed
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slashed
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
             module: balances
             method: Transfer
-        - handler: handleAssetTransfer
+        - handler: handleStakersElected
           kind: substrate/EventHandler
           filter:
-            module: assets
-            method: Transferred
-        - handler: handleCurrencyTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: currencies
-            method: Transferred
-        - handler: handleTokenTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: tokens
-            method: Transfer
+            module: staking
+            method: StakersElected
