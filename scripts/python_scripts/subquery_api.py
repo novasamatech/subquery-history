@@ -1,4 +1,6 @@
 from typing import List
+from datetime import datetime, timedelta
+import re
 import requests
 
 
@@ -124,3 +126,33 @@ class SubQueryDeploymentAPI():
                 return obj
         else:
             print("Project not found.")
+            
+    def get_logs(self, project_name: str, sid: str, level: str = 'info', stage: bool = False):
+        params = {
+            'level': level,
+            'stage': str(stage).lower(),
+            'sid': sid
+        }
+
+        response = self._send_request(method="GET", path=f'/v3/subqueries/{project_name}/logs')
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
+        
+    def parse_logs(self, logs):
+        for log in logs['result']:
+            message = log.get('message')
+            timestamp = log.get('timestamp')
+            if message and 'Target height' in message and 'Current height' in message:
+                log_time = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+                if datetime.utcnow() - log_time <= timedelta(hours=1):
+                    target_height = re.search('Target height: ([\d,]+)', message).group(1)
+                    current_height = re.search('Current height: ([\d,]+)', message).group(1)
+                    # Remove commas from the numbers
+                    target_height = int(target_height.replace(',', ''))
+                    current_height = int(current_height.replace(',', ''))
+                    return target_height, current_height
+        return None, None
+
