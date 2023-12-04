@@ -93,9 +93,12 @@ class SubQueryDeploymentAPI():
 
         sync_status = self._send_request(
             method="GET",
-            path=f"/subqueries/{deployment.project_key}/deployments/{deployment.id}/sync-status"
+            path=f"/v3/subqueries/{deployment.project_key}/deployments/{deployment.id}/sync-status"
         ).json()
-        deployment.__setattr__('sync_status', sync_status)
+        if len(sync_status['networks']) == 0:
+            deployment.__setattr__('sync_status', None)
+            return deployment
+        deployment.__setattr__('sync_status', sync_status['networks'][0])
 
         return deployment
 

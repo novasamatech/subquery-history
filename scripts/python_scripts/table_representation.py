@@ -84,20 +84,21 @@ class ProjectTableGenerator():
                     f"Unknown deployment type: {deployment.type} in project: {project}")
 
         def fill_status_bar(instance: DeploymentInstance):
-            if (instance):
-                commit = instance.version[0:8]
-                if (instance.status == 'processing'):
-                    progress_bar = '![0](https://progress-bar.dev/0?title=Processing...)'
-                elif (instance.status == 'error' and self.get_sync_percentage(instance, project) == '0'):
-                    progress_bar = '![0](https://progress-bar.dev/0?title=Error)'
-                else:
-                    percent = self.get_sync_percentage(instance, project)
-                    progress_bar = '![%s](https://progress-bar.dev/%s?title=%s)' % (
-                        percent, percent, instance.type.capitalize())
-            else:
-                progress_bar = '![0](https://progress-bar.dev/0?title=N/A)'
-                commit = '-'
-            return progress_bar, commit
+            if not instance:
+                return '![0](https://progress-bar.dev/0?title=N/A)', '-'
+
+            commit = instance.version[0:8]
+            if not instance.sync_status:
+                return '![0](https://progress-bar.dev/0?title=Error)', commit
+
+            if instance.status == 'processing':
+                return '![0](https://progress-bar.dev/0?title=Processing...)', commit
+
+            if instance.status == 'error' and self.get_sync_percentage(instance, project) == '0':
+                return '![0](https://progress-bar.dev/0?title=Error)', commit
+
+            percent = self.get_sync_percentage(instance, project)
+            return f'![{percent}](https://progress-bar.dev/{percent}?title={instance.type.capitalize()})', commit
 
         prod_status, prod_commit = fill_status_bar(prod)
         stage_status, stage_commit = fill_status_bar(stage)
@@ -105,19 +106,16 @@ class ProjectTableGenerator():
         return prod_status, prod_commit, stage_status, stage_commit
 
     def get_sync_percentage(self, instance: DeploymentInstance, project: SubQueryProject) -> str:
-        # Adding global variable in order to simplify access to messaage for notifications
-
         processing_block = instance.sync_status.get('processingBlock')
         target_block = instance.sync_status.get('targetBlock')
         telegram = TelegramNotifications()
 
-        if processing_block != -1 and processing_block is not None:
-            status = int((processing_block / target_block) * 100)
-
-            return str(status)
-        elif target_block is not None and target_block == 0:
-            telegram.add_row_in_telegram_notification(project=project, instance=instance)
-            return '0'
+        if processing_block and target_block:
+            if processing_block != -1:
+                return str(int((processing_block / target_block) * 100))
+            else:
+                telegram.add_row_in_telegram_notification(project=project, instance=instance)
+                return '0'
         else:
             telegram.add_row_in_telegram_notification(project=project, instance=instance)
             return '0'
