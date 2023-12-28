@@ -209,6 +209,16 @@ export async function handleSlash(slashEvent: SubstrateEvent<[accountId: Codec, 
     // }
 }
 
+async function getValidators(era: number): Promise<Set<string>> {
+    const eraStakersInSlashEra = await (api.query.staking.erasStakersClipped ? api.query.staking.erasStakersClipped.keys(era) : api.query.staking.erasStakersOverview.keys(era))
+    const validatorsInSlashEra = eraStakersInSlashEra.map((key) => {
+        let [, validatorId] = key.args
+
+        return validatorId.toString()
+    })
+    return new Set(validatorsInSlashEra)
+}
+
 async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void> {
     let element = await HistoryElement.get(eventId(slashEvent))
 
@@ -223,14 +233,8 @@ async function handleSlashForTxHistory(slashEvent: SubstrateEvent): Promise<void
 
     const slashEra = !slashDeferDuration ? currentEra : currentEra - slashDeferDuration.toNumber()
 
-    if (api.query.staking.erasStakersClipped) {
-        const eraStakersInSlashEra = await api.query.staking.erasStakersClipped.entries(slashEra);
-        const validatorsInSlashEra = eraStakersInSlashEra.map(([key, exposure]) => {
-            let [, validatorId] = key.args
-
-            return validatorId.toString()
-        })
-        validatorsSet = new Set(validatorsInSlashEra)
+    if (api.query.staking.erasStakersOverview || api.query.staking.erasStakersClipped) {
+        validatorsSet = await getValidators(slashEra)
     }
 
     const initialValidator = null
