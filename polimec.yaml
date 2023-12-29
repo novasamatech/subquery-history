@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-nova-polymec
+name: subquery-nova-polimec
 version: 1.0.0
 runner:
   node:
