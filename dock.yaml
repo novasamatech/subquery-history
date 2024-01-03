@@ -1,0 +1,64 @@
+specVersion: 1.0.0
+name: subquery-nova-dock
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: '*'
+  query:
+    name: '@subql/query'
+    version: v1.5.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
+network:
+  chainId: '0x6bfe24dca2a3be10f22212678ac13a6446ec764103c0f3471c71609eac384aae'
+  endpoint: >-
+    wss://mainnet-node.dock.io
+  chaintypes:
+    file: ./dist/dockChaintypes.js
+dataSources:
+  - name: main
+    kind: substrate/Runtime
+    startBlock: 12885
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleHistoryElement
+          kind: substrate/CallHandler
+        - handler: handleReward
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Reward
+        - handler: handleRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Rewarded
+        - handler: handleSlash
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slash
+        - handler: handleSlashed
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slashed
+        - handler: handleTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: Transfer
+        - handler: handleNewEra
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakingElection
+        - handler: handleStakersElected
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakersElected
