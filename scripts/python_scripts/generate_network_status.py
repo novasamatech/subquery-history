@@ -54,4 +54,5 @@ if __name__ == '__main__':
             dapps_table=generate_project_table()
         ))
 
-    telegram.send_notification()
+    # TODO: Temp remove, waiting for https://app.clickup.com/t/862kc4b47
+    # telegram.send_notification()
