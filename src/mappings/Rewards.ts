@@ -439,7 +439,7 @@ async function handleParachainRewardForTxHistory(
 }
 
 export async function handleParachainRewarded(
-  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
+  rewardEvent: SubstrateEvent,
 ): Promise<void> {
   await handleParachainRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
@@ -533,12 +533,13 @@ function decodeDataFromReward(event: SubstrateEvent): [Codec, Codec] {
   // In early version staking.Reward data only have 2 parameters [accountId, amount]
   // Now rewarded changed to https://polkadot.js.org/docs/substrate/events/#rewardedaccountid32-palletstakingrewarddestination-u128
   // And we can direct access property from data
-  let [accountId, amount]: [Codec, Codec] =
-    event.event.data.length === 2
-      ? event.event.data
-      : ({
-          stash: (event.event.data as any).stash,
-          amount: (event.event.data as any).amount,
-        } as any);
+  let accountId: Codec;
+  let amount: Codec;
+  if (event.event.data.length === 2) {
+    [accountId, amount] = event.event.data;
+  } else {
+    accountId = (event.event.data as any).stash;
+    amount = (event.event.data as any).amount;
+  }
   return [accountId, amount];
 }
