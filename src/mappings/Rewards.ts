@@ -59,14 +59,12 @@ function extractArgsFromPayoutValidator(
 }
 
 export async function handleRewarded(
-  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
+  rewardEvent: SubstrateEvent,
 ): Promise<void> {
   await handleReward(rewardEvent);
 }
 
-export async function handleReward(
-  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
-): Promise<void> {
+export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
   await handleRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
   await updateAccountRewards(
@@ -378,14 +376,10 @@ async function buildRewardEvents<A>(
 }
 
 async function updateAccumulatedReward(
-  event: SubstrateEvent<[accountId: Codec, reward: INumber]>,
+  event: SubstrateEvent,
   isReward: boolean,
 ): Promise<AccumulatedReward> {
-  let {
-    event: {
-      data: [accountId, amount],
-    },
-  } = event;
+  let [accountId, amount] = decodeDataFromReward(event);
   return await updateAccumulatedGenericReward(
     AccumulatedReward,
     accountId.toString(),
@@ -399,12 +393,7 @@ async function updateAccountRewards(
   rewardType: RewardType,
   accumulatedAmount: bigint,
 ): Promise<void> {
-  let {
-    event: {
-      data: [accountId, amount],
-    },
-  } = event;
-
+  let [accountId, amount] = decodeDataFromReward(event);
   const accountAddress = accountId.toString();
   let id = eventIdWithAddress(event, accountAddress);
   let accountReward = new AccountReward(
@@ -422,11 +411,7 @@ async function updateAccountRewards(
 async function handleParachainRewardForTxHistory(
   rewardEvent: SubstrateEvent,
 ): Promise<void> {
-  const {
-    event: {
-      data: [account, amount],
-    },
-  } = rewardEvent;
+  let [account, amount] = decodeDataFromReward(rewardEvent);
   handleGenericForTxHistory(
     rewardEvent,
     account.toString(),
@@ -454,7 +439,7 @@ async function handleParachainRewardForTxHistory(
 }
 
 export async function handleParachainRewarded(
-  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
+  rewardEvent: SubstrateEvent,
 ): Promise<void> {
   await handleParachainRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
@@ -542,4 +527,19 @@ interface AccountRewardsInterface {
 
   type: RewardType;
   save(): Promise<void>;
+}
+
+function decodeDataFromReward(event: SubstrateEvent): [Codec, Codec] {
+  // In early version staking.Reward data only have 2 parameters [accountId, amount]
+  // Now rewarded changed to https://polkadot.js.org/docs/substrate/events/#rewardedaccountid32-palletstakingrewarddestination-u128
+  // And we can direct access property from data
+  let accountId: Codec;
+  let amount: Codec;
+  if (event.event.data.length === 2) {
+    [accountId, amount] = event.event.data;
+  } else {
+    accountId = (event.event.data as any).stash;
+    amount = (event.event.data as any).amount;
+  }
+  return [accountId, amount];
 }
