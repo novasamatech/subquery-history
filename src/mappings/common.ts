@@ -6,9 +6,11 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
+import * as events from "events";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"]
 const transferCalls = ["transfer", "transferKeepAlive"]
+
 const ormlSections = ["currencies", "tokens"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
@@ -50,6 +52,10 @@ export function isAssetTxFeePaidEvent(event: SubstrateEvent): boolean {
     return event.event.section === 'assetTxPayment' && event.event.method === "AssetTxFeePaid"
 }
 
+export function isCurrencyDepositedEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'currencies' && event.event.method === "Deposited"
+}
+
 export function isSwapExecutedEvent(event: SubstrateEvent): boolean {
     return event.event.section === 'assetConversion' && event.event.method === "SwapExecuted"
 }
@@ -60,6 +66,14 @@ export function isSwapExactTokensForTokens(call: CallBase<AnyTuple>) : boolean {
 
 export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>) : boolean {
     return call.section === "assetConversion" && call.method === "swapTokensForExactTokens"
+}
+
+export function isHydraDxBuy(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "omnipool" && call.method == "buy"
+}
+
+export function isHydraDxSell(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "omnipool" && call.method == "sell"
 }
 
 export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
@@ -213,6 +227,24 @@ function exportFeeFromTransactionFeePaidEvent(extrinsic: SubstrateExtrinsic, fro
     }
 
     return undefined
+}
+
+export function extractTransactionPaidFee(events: EventRecord[]): string | undefined {
+    const eventRecord = events.find((event) =>
+        event.event.method == "TransactionFeePaid" && event.event.section == "transactionPayment"
+    )
+
+    if (eventRecord == undefined) return undefined
+
+    const {
+        event: {
+            data: [ _, fee, tip ]
+        }
+    } = eventRecord
+
+    const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt()
+
+    return fullFee.toString()
 }
 
 function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigint {

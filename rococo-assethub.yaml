@@ -52,7 +52,7 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleSwap
+        - handler: handleAssetConversionSwap
           kind: substrate/EventHandler
           filter:
             module: assetConversion

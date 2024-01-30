@@ -19,14 +19,17 @@ import {
     isNativeTransferAll,
     isOrmlTransferAll,
     isEvmTransaction,
-    isEvmExecutedEvent, 
+    isEvmExecutedEvent,
     isAssetTxFeePaidEvent,
-    isEquilibriumTransfer,
+    isEquilibriumTransfer, isHydraDxBuy, isHydraDxSell,
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
 import {u64} from "@polkadot/types";
 import { ethereumEncode } from '@polkadot/util-crypto';
+import {u128, u32} from "@polkadot/types-codec";
+import {convertHydraDxTokenIdToString, findHydraDxFeeTyped} from "./swaps";
+import {Codec} from "@polkadot/types/types";
 
 type TransferData = {
     isTransferAll: boolean,
@@ -162,17 +165,18 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
         }]
     }
 
-    let assetIdFee = "native"
-    let fee = calculateFeeAsString(extrinsic)
-    let foundAssetTxFeePaid = extrinsic.block.events.find((e) => isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)));
-    if (foundAssetTxFeePaid !== undefined)  {
-        const [who, actual_fee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
-        if ('interior' in rawAssetIdFee) {
-            assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
-            fee = actual_fee.toString();
+    const assetHubSwapCallback = (path, amountIn, amountOut, receiver) => {
+        let assetIdFee = "native"
+        let fee = calculateFeeAsString(extrinsic)
+        let foundAssetTxFeePaid = extrinsic.block.events.find((e) => isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)));
+        if (foundAssetTxFeePaid !== undefined)  {
+            const [who, actual_fee, tip, rawAssetIdFee] = getEventData(eventRecordToSubstrateEvent(foundAssetTxFeePaid))
+            if ('interior' in rawAssetIdFee) {
+                assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee)
+                fee = actual_fee.toString();
+            }
         }
-    }
-    const swapCallback = (path, amountIn, amountOut, receiver) => {
+
         const assetIdIn = getAssetIdFromMultilocation(path[0], true)
         const assetIdOut = getAssetIdFromMultilocation(path[path["length"] - 1], true)
 
@@ -199,7 +203,32 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
         }]
     }
 
-    let transferCalls = determineTransferCallsArgs(extrinsic.extrinsic.method, transferCallback, swapCallback)
+    const hydraDxSwapCallback = (assetIn: u32, assetOut: u32, amountIn: u128, amountOut: u128) => {
+        let fee = findHydraDxFeeTyped(extrinsic.events)
+
+        const assetIdIn = convertHydraDxTokenIdToString(assetIn)
+        const assetIdOut = convertHydraDxTokenIdToString(assetOut)
+
+        const swap: Swap = {
+            assetIdIn: assetIdIn,
+            amountIn: amountIn.toString(),
+            assetIdOut: assetIdOut,
+            amountOut: amountOut.toString(),
+            sender: sender.toString(),
+            receiver: sender.toString(),
+            assetIdFee: fee.tokenId,
+            fee: fee.amount,
+            eventIdx: -1,
+            success: false
+        }
+
+        return {
+            isTransferAll: false,
+            transfer: swap,
+        }
+    }
+
+    let transferCalls = determineTransferCallsArgs(extrinsic.extrinsic.method, transferCallback, assetHubSwapCallback, hydraDxSwapCallback)
     if (transferCalls.length == 0) {
         return null;
     }
@@ -207,7 +236,12 @@ function findFailedTransferCalls(extrinsic: SubstrateExtrinsic): Array<TransferD
     return transferCalls
 }
 
-function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>, transferCallback, swapCallback) : Array<TransferData> {
+function determineTransferCallsArgs(
+    causeCall: CallBase<AnyTuple>,
+    transferCallback,
+    assetHubSwapCallback,
+    hydraDxSwapCallback
+) : Array<TransferData> {
     if (isNativeTransfer(causeCall)) {
         return transferCallback(false, ...extractArgsFromTransfer(causeCall))
     } else if (isAssetTransfer(causeCall)) {
@@ -221,13 +255,17 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>, transferCallb
     } else if (isOrmlTransferAll(causeCall)) {
         return transferCallback(true, ...extractArgsFromOrmlTransferAll(causeCall))
     } else if (isSwapExactTokensForTokens(causeCall)) {
-        return swapCallback(...extractArgsFromSwapExactTokensForTokens(causeCall))
+        return assetHubSwapCallback(...extractArgsFromSwapExactTokensForTokens(causeCall))
     } else if (isSwapTokensForExactTokens(causeCall)) {
-        return swapCallback(...extractArgsFromSwapTokensForExactTokens(causeCall))
+        return assetHubSwapCallback(...extractArgsFromSwapTokensForExactTokens(causeCall))
+    } else if (isHydraDxBuy(causeCall)) {
+        return [hydraDxSwapCallback(...extractArgsFromHydraDxBuy(causeCall))]
+    } else if (isHydraDxSell(causeCall)) {
+        return [hydraDxSwapCallback(...extractArgsFromHydraDxSell(causeCall))]
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
-                return determineTransferCallsArgs(call, transferCallback, swapCallback)
+                return determineTransferCallsArgs(call, transferCallback, assetHubSwapCallback, hydraDxSwapCallback)
                     .map((value, index, array) => {
                         return value
                     })
@@ -235,7 +273,7 @@ function determineTransferCallsArgs(causeCall: CallBase<AnyTuple>, transferCallb
             .flat()
     } else if (isProxy(causeCall)) {
         let proxyCall = callFromProxy(causeCall)
-        return determineTransferCallsArgs(proxyCall, transferCallback, swapCallback)
+        return determineTransferCallsArgs(proxyCall, transferCallback, assetHubSwapCallback, hydraDxSwapCallback)
     } else {
         return []
     }
@@ -312,5 +350,28 @@ function extractArgsFromSwapTokensForExactTokens(call: CallBase<AnyTuple>) {
         amountIn,
         amountOut,
         receiver
+    ]
+}
+
+function extractArgsFromHydraDxSell(call: CallBase<AnyTuple>): Codec[] {
+    const [assetIn, assetOut, amount, minBuyAmount, _] = call.args
+
+    return [
+        assetIn,
+        assetOut,
+        amount, // amountIn
+        minBuyAmount // amountOut
+    ]
+}
+
+
+function extractArgsFromHydraDxBuy(call: CallBase<AnyTuple>): Codec[] {
+    const [assetOut, assetIn, amount, maxSellAmount, _] = call.args
+
+    return [
+        assetIn,
+        assetOut,
+        maxSellAmount, // amountIn
+        amount // amountOut
     ]
 }
