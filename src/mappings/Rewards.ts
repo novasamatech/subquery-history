@@ -285,7 +285,7 @@ async function handleSlashForTxHistory(
     validatorsSet = new Set(validatorsInSlashEra);
   }
 
-  const initialValidator = null;
+  const initialValidator: any = null;
 
   await buildRewardEvents(
     slashEvent.block,
