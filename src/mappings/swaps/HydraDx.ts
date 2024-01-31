@@ -96,7 +96,7 @@ export function convertHydraDxTokenIdToString(hydraDxTokenId: Codec): string {
 }
 
 function findLastEvent(events: EventRecord[], expression: (event: EventRecord) => boolean): EventRecord | undefined {
-    const currenciesDepositedEvents = events.filter((e) => isCurrencyDepositedEvent(eventRecordToSubstrateEvent(e)))
+    const currenciesDepositedEvents = events.filter(expression)
 
     if (currenciesDepositedEvents.length == 0) {
         return undefined
