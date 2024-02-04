@@ -37,6 +37,10 @@ function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
   return call.method == "payoutStakers";
 }
 
+function isPayoutStakersByPage(call: CallBase<AnyTuple>): boolean {
+  return call.method == "payoutStakersByPage";
+}
+
 function isPayoutValidator(call: CallBase<AnyTuple>): boolean {
   return call.method == "payoutValidator";
 }
@@ -45,6 +49,14 @@ function extractArgsFromPayoutStakers(
   call: CallBase<AnyTuple>,
 ): [string, number] {
   const [validatorAddressRaw, eraRaw] = call.args;
+
+  return [validatorAddressRaw.toString(), (eraRaw as EraIndex).toNumber()];
+}
+
+function extractArgsFromPayoutStakersByPage(
+  call: CallBase<AnyTuple>,
+): [string, number] {
+  const [validatorAddressRaw, eraRaw, _] = call.args;
 
   return [validatorAddressRaw.toString(), (eraRaw as EraIndex).toNumber()];
 }
@@ -202,6 +214,8 @@ function determinePayoutCallsArgs(
 ): [string, number][] {
   if (isPayoutStakers(causeCall)) {
     return [extractArgsFromPayoutStakers(causeCall)];
+  } else if (isPayoutStakersByPage(causeCall)) {
+    return [extractArgsFromPayoutStakersByPage(causeCall)];
   } else if (isPayoutValidator(causeCall)) {
     return [extractArgsFromPayoutValidator(causeCall, sender)];
   } else if (isBatch(causeCall)) {
