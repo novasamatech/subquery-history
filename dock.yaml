@@ -21,27 +21,17 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 12885
+    startBlock: 1
     mapping:
       file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleReward
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Reward
         - handler: handleRewarded
           kind: substrate/EventHandler
           filter:
             module: staking
             method: Rewarded
-        - handler: handleSlash
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: Slash
         - handler: handleSlashed
           kind: substrate/EventHandler
           filter:
