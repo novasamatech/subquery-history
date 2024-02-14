@@ -14,7 +14,7 @@ schema:
   file: ./schema.graphql
 network:
   chainId: '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d'
-  endpoint: wss://rpc-01.hydradx.io
+  endpoint: wss://rpc.hydradx.cloud
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -24,11 +24,6 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -49,3 +44,13 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
+        - handler: handleOmnipoolSwap
+          kind: substrate/EventHandler
+          filter:
+            module: omnipool
+            method: SellExecuted
+        - handler: handleOmnipoolSwap
+          kind: substrate/EventHandler
+          filter:
+            module: omnipool
+            method: BuyExecuted
