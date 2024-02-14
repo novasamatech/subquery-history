@@ -68,12 +68,20 @@ export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>) : boolean {
     return call.section === "assetConversion" && call.method === "swapTokensForExactTokens"
 }
 
-export function isHydraDxBuy(call: CallBase<AnyTuple>) : boolean {
+export function isHydraOmnipoolBuy(call: CallBase<AnyTuple>) : boolean {
     return call.section === "omnipool" && call.method == "buy"
 }
 
-export function isHydraDxSell(call: CallBase<AnyTuple>) : boolean {
+export function isHydraOmnipoolSell(call: CallBase<AnyTuple>) : boolean {
     return call.section === "omnipool" && call.method == "sell"
+}
+
+export function isHydraRouterBuy(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "router" && call.method == "buy"
+}
+
+export function isHydraRouterSell(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "router" && call.method == "sell"
 }
 
 export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {

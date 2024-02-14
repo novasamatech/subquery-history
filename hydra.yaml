@@ -54,3 +54,8 @@ dataSources:
           filter:
             module: omnipool
             method: BuyExecuted
+        - handler: handleHydraRouterSwap
+          kind: substrate/EventHandler
+          filter:
+            module: router
+            method: Executed

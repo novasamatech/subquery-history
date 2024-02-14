@@ -14,6 +14,8 @@ import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 type OmnipoolSwapArgs = [who: AccountId32, assetIn: u32, assetOut: u32, amountIn: u128, amountOut: u128, assetFeeAmount: u128, protocolFeeAmount: u128]
 
+type RouterSwapArgs = [assetIn: u32, assetOut: u32, amountIn: u128, amountOut: u128];
+
 export async function handleOmnipoolSwap(event: SubstrateEvent<OmnipoolSwapArgs>): Promise<void> {
     let element = await HistoryElement.get(`${eventId(event)}-from`)
     if (element !== undefined) {
@@ -28,6 +30,37 @@ export async function handleOmnipoolSwap(event: SubstrateEvent<OmnipoolSwapArgs>
 
     const fee = findHydraDxFeeTyped(event.extrinsic.events)
     const [who, assetIn, assetOut, amountIn, amountOut] = event.event.data
+
+    const swap = {
+        assetIdIn: convertHydraDxTokenIdToString(assetIn),
+        amountIn: amountIn.toString(),
+        assetIdOut: convertHydraDxTokenIdToString(assetOut),
+        amountOut: amountOut.toString(),
+        sender: who,
+        receiver: who,
+        assetIdFee: fee.tokenId,
+        fee: fee.amount,
+        eventIdx: event.idx,
+        success: true
+    }
+
+    logger.info(`Constructed swap ${JSON.stringify(swap)}`)
+
+    await createAssetTransmission(event, who.toString(), "-from", {"swap": swap});
+}
+
+export async function handleHydraRouterSwap(event: SubstrateEvent<RouterSwapArgs>): Promise<void> {
+    let element = await HistoryElement.get(`${eventId(event)}-from`)
+    if (element !== undefined) {
+        return;
+    }
+    if (event.extrinsic == undefined) {
+        return;
+    }
+
+    const who = event.extrinsic.signer.toString()
+    const fee = findHydraDxFeeTyped(event.extrinsic.events)
+    const [assetIn, assetOut, amountIn, amountOut] = event.event.data
 
     const swap = {
         assetIdIn: convertHydraDxTokenIdToString(assetIn),
