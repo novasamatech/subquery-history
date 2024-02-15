@@ -6,6 +6,7 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
+import { u8aToHex } from "@polkadot/util"
 import * as events from "events";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"]
@@ -178,7 +179,10 @@ export function BigIntFromCodec(eventRecord: Codec): bigint {
 }
 
 export function convertOrmlCurrencyIdToString(currencyId: Codec): string {
-    return currencyId.toHex(true)
+    // make sure first we have scale encoded bytes
+    const bytes = currencyId.toU8a()
+
+    return u8aToHex(bytes).toString()
 }
 
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {

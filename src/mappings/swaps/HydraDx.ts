@@ -2,7 +2,8 @@ import {SubstrateEvent, TypedEventRecord} from "@subql/types";
 import {
     eventId,
     eventRecordToSubstrateEvent, extractTransactionPaidFee, getEventData,
-    isCurrencyDepositedEvent
+    isCurrencyDepositedEvent,
+    convertOrmlCurrencyIdToString
 } from "../common";
 import {HistoryElement} from "../../types";
 import {createAssetTransmission} from "../Transfers";
@@ -145,7 +146,7 @@ export function convertHydraDxTokenIdToString(hydraDxTokenId: Codec): string {
     if (asString == "0") {
         return "native"
     } else {
-        return hydraDxTokenId.toHex(true)
+        return convertOrmlCurrencyIdToString(hydraDxTokenId)
     }
 }
 
