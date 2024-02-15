@@ -21,7 +21,11 @@ import {
     isEvmTransaction,
     isEvmExecutedEvent,
     isAssetTxFeePaidEvent,
-    isEquilibriumTransfer, isHydraDxBuy, isHydraDxSell,
+    isEquilibriumTransfer, 
+    isHydraOmnipoolBuy, 
+    isHydraOmnipoolSell,
+    isHydraRouterSell,
+    isHydraRouterBuy,
     convertOrmlCurrencyIdToString
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
@@ -365,7 +369,7 @@ function extractArgsFromHydraRouterSell(call: CallBase<AnyTuple>): Codec[] {
         assetIn,
         assetOut,
         amountIn,
-        amountOut
+        minAmountOut
     ]
 }
 

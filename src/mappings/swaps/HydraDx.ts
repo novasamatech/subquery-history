@@ -9,7 +9,7 @@ import {createAssetTransmission} from "../Transfers";
 import {AccountId32} from "@polkadot/types/interfaces/runtime";
 import {u128, u32} from "@polkadot/types-codec";
 import {EventRecord} from "@polkadot/types/interfaces";
-import {Codec} from "@polkadot/types/types";
+import {Codec, AnyTuple} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
 
 type OmnipoolSwapArgs = [who: AccountId32, assetIn: u32, assetOut: u32, amountIn: u128, amountOut: u128, assetFeeAmount: u128, protocolFeeAmount: u128]
@@ -17,6 +17,11 @@ type OmnipoolSwapArgs = [who: AccountId32, assetIn: u32, assetOut: u32, amountIn
 type RouterSwapArgs = [assetIn: u32, assetOut: u32, amountIn: u128, amountOut: u128];
 
 export async function handleOmnipoolSwap(event: SubstrateEvent<OmnipoolSwapArgs>): Promise<void> {
+    if (isPartOfRouterSwap(event)) {
+        // TODO: we currently don't support swaps in batch
+        return;
+    }
+
     let element = await HistoryElement.get(`${eventId(event)}-from`)
     if (element !== undefined) {
         // already processed swap previously
@@ -58,7 +63,7 @@ export async function handleHydraRouterSwap(event: SubstrateEvent<RouterSwapArgs
         return;
     }
 
-    const who = event.extrinsic.signer.toString()
+    const who = event.extrinsic.extrinsic.signer.toString()
     const fee = findHydraDxFeeTyped(event.extrinsic.events)
     const [assetIn, assetOut, amountIn, amountOut] = event.event.data
 
@@ -106,6 +111,19 @@ export function findHydraDxFee(events: EventRecord[]): Fee | undefined {
         tokenId: convertHydraDxTokenIdToString(currencyId),
         amount: (amount as INumber).toString()
     }
+}
+
+function isPartOfRouterSwap<T extends AnyTuple>(event: SubstrateEvent<T>): boolean {
+    for (const eventRecord of event.extrinsic.events) {
+        if (
+            eventRecord.event.section == "router" && 
+            eventRecord.event.method == "Executed"
+        ) {
+            return true
+        }
+    }
+
+    return false
 }
 
 function findNativeFee(events: EventRecord[]): Fee | undefined {
