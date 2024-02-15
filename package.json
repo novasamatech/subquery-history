@@ -8,7 +8,8 @@
     "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
     "codegen": "./node_modules/.bin/subql codegen",
     "validate": "./node_modules/.bin/subql validate",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "local-publish": "cd ./scripts && ./local-publish.sh"
   },
   "files": [
     "dist",

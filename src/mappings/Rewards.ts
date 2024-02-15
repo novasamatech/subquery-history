@@ -24,7 +24,7 @@ import {
 import { CallBase } from "@polkadot/types/types/calls";
 import { AnyTuple } from "@polkadot/types/types/codec";
 import { EraIndex } from "@polkadot/types/interfaces/staking";
-import { Balance } from "@polkadot/types/interfaces";
+import { Balance, EventRecord } from "@polkadot/types/interfaces";
 import {
   cachedRewardDestination,
   cachedController,
@@ -59,12 +59,14 @@ function extractArgsFromPayoutValidator(
 }
 
 export async function handleRewarded(
-  rewardEvent: SubstrateEvent,
+  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
 ): Promise<void> {
   await handleReward(rewardEvent);
 }
 
-export async function handleReward(rewardEvent: SubstrateEvent): Promise<void> {
+export async function handleReward(
+  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
+): Promise<void> {
   await handleRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
   await updateAccountRewards(
@@ -326,53 +328,61 @@ async function buildRewardEvents<A>(
   let blockNumber = block.block.header.number.toString();
   let blockTimestamp = timestamp(block);
 
-  let accumulator = initialInnerAccumulator;
-  for (const [eventIndex, eventRecord] of block.events.entries()) {
-    if (
-      !(
-        eventRecord.event.method == eventMethod &&
-        eventRecord.event.section == eventSection
+  const [, savingPromises] = block.events.reduce<[A, Promise<void>[]]>(
+    (accumulator, eventRecord, eventIndex) => {
+      let [innerAccumulator, currentPromises] = accumulator;
+
+      if (
+        !(
+          eventRecord.event.method == eventMethod &&
+          eventRecord.event.section == eventSection
+        )
       )
-    )
-      continue;
+        return accumulator;
 
-    let {
-      event: {
-        data: [account, amount],
-      },
-    } = eventRecord;
+      let [account, amount] = decodeDataFromReward(
+        eventRecordToSubstrateEvent(eventRecord),
+      );
 
-    const newAccumulator = produceNewAccumulator(
-      accumulator,
-      account.toString(),
-    );
+      const newAccumulator = produceNewAccumulator(
+        innerAccumulator,
+        account.toString(),
+      );
 
-    const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString());
+      const eventId = eventIdFromBlockAndIdx(
+        blockNumber,
+        eventIndex.toString(),
+      );
 
-    const accountAddress = account.toString();
-    const destinationAddress = accountsMapping[accountAddress];
+      const accountAddress = account.toString();
+      const destinationAddress = accountsMapping[accountAddress];
 
-    const element = new HistoryElement(
-      eventId,
-      block.block.header.number.toNumber(),
-      blockTimestamp,
-      destinationAddress != undefined ? destinationAddress : accountAddress,
-    );
+      const element = new HistoryElement(
+        eventId,
+        block.block.header.number.toNumber(),
+        blockTimestamp,
+        destinationAddress != undefined ? destinationAddress : accountAddress,
+      );
 
-    if (extrinsic !== undefined) {
-      element.extrinsicHash = extrinsic.extrinsic.hash.toString();
-      element.extrinsicIdx = extrinsic.idx;
-    }
-    element.reward = produceReward(
-      newAccumulator,
-      eventIndex,
-      accountAddress,
-      amount.toString(),
-    );
+      if (extrinsic !== undefined) {
+        element.extrinsicHash = extrinsic.extrinsic.hash.toString();
+        element.extrinsicIdx = extrinsic.idx;
+      }
+      element.reward = produceReward(
+        newAccumulator,
+        eventIndex,
+        accountAddress,
+        amount.toString(),
+      );
 
-    await element.save();
-    accumulator = newAccumulator;
-  }
+      currentPromises.push(element.save());
+
+      return [newAccumulator, currentPromises];
+    },
+    [initialInnerAccumulator, []],
+  );
+
+  await Promise.allSettled(savingPromises);
 }
 
 async function updateAccumulatedReward(
@@ -439,7 +449,7 @@ async function handleParachainRewardForTxHistory(
 }
 
 export async function handleParachainRewarded(
-  rewardEvent: SubstrateEvent,
+  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
 ): Promise<void> {
   await handleParachainRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
@@ -529,17 +539,24 @@ interface AccountRewardsInterface {
   save(): Promise<void>;
 }
 
+export function eventRecordToSubstrateEvent(
+  eventRecord: EventRecord,
+): SubstrateEvent {
+  return eventRecord as unknown as SubstrateEvent;
+}
+
 function decodeDataFromReward(event: SubstrateEvent): [Codec, Codec] {
   // In early version staking.Reward data only have 2 parameters [accountId, amount]
   // Now rewarded changed to https://polkadot.js.org/docs/substrate/events/#rewardedaccountid32-palletstakingrewarddestination-u128
   // And we can direct access property from data
-  let accountId: Codec;
-  let amount: Codec;
-  if (event.event.data.length === 2) {
-    [accountId, amount] = event.event.data;
+  const {
+    event: { data: innerData },
+  } = event;
+  let account: Codec, amount: Codec;
+  if (innerData.length == 2) {
+    [account, amount] = innerData;
   } else {
-    accountId = (event.event.data as any).stash;
-    amount = (event.event.data as any).amount;
+    [account, , amount] = innerData;
   }
-  return [accountId, amount];
+  return [account, amount];
 }
