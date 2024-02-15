@@ -177,6 +177,10 @@ export function BigIntFromCodec(eventRecord: Codec): bigint {
     return (eventRecord as unknown as INumber).toBigInt()
 }
 
+export function convertOrmlCurrencyIdToString(currencyId: Codec): string {
+    return currencyId.toHex(true)
+}
+
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
     const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
 

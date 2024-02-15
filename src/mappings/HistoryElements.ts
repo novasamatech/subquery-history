@@ -22,6 +22,7 @@ import {
     isEvmExecutedEvent,
     isAssetTxFeePaidEvent,
     isEquilibriumTransfer, isHydraDxBuy, isHydraDxSell,
+    convertOrmlCurrencyIdToString
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -331,7 +332,7 @@ function extractArgsFromOrmlTransferAll(call: CallBase<AnyTuple>): [string, bigi
     return [
         destinationAddress.toString(),
         BigInt(0),
-        currencyId.toHex().toString()
+        convertOrmlCurrencyIdToString(currencyId)
     ]
 }
 
