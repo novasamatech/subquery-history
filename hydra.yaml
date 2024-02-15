@@ -58,4 +58,4 @@ dataSources:
           kind: substrate/EventHandler
           filter:
             module: router
-            method: Executed
+            method: RouteExecuted
