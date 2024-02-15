@@ -17,11 +17,6 @@ type OmnipoolSwapArgs = [who: AccountId32, assetIn: u32, assetOut: u32, amountIn
 type RouterSwapArgs = [assetIn: u32, assetOut: u32, amountIn: u128, amountOut: u128];
 
 export async function handleOmnipoolSwap(event: SubstrateEvent<OmnipoolSwapArgs>): Promise<void> {
-    if (isPartOfRouterSwap(event)) {
-        // TODO: we currently don't support swaps in batch
-        return;
-    }
-
     let element = await HistoryElement.get(`${eventId(event)}-from`)
     if (element !== undefined) {
         // already processed swap previously
@@ -33,6 +28,11 @@ export async function handleOmnipoolSwap(event: SubstrateEvent<OmnipoolSwapArgs>
         return;
     }
 
+    if (isPartOfRouterSwap(event.extrinsic.events)) {
+        // TODO: we currently don't support swaps in batch
+        return;
+    }
+
     const fee = findHydraDxFeeTyped(event.extrinsic.events)
     const [who, assetIn, assetOut, amountIn, amountOut] = event.event.data
 
@@ -41,15 +41,16 @@ export async function handleOmnipoolSwap(event: SubstrateEvent<OmnipoolSwapArgs>
         amountIn: amountIn.toString(),
         assetIdOut: convertHydraDxTokenIdToString(assetOut),
         amountOut: amountOut.toString(),
-        sender: who,
-        receiver: who,
+        sender: who.toString(),
+        receiver: who.toString(),
         assetIdFee: fee.tokenId,
         fee: fee.amount,
         eventIdx: event.idx,
         success: true
     }
 
-    logger.info(`Constructed swap ${JSON.stringify(swap)}`)
+    const blockNumber = event.block.block.header.number
+    logger.info(`Constructed omnipool swap ${JSON.stringify(swap)} for block ${blockNumber.toString()}`)
 
     await createAssetTransmission(event, who.toString(), "-from", {"swap": swap});
 }
@@ -72,15 +73,16 @@ export async function handleHydraRouterSwap(event: SubstrateEvent<RouterSwapArgs
         amountIn: amountIn.toString(),
         assetIdOut: convertHydraDxTokenIdToString(assetOut),
         amountOut: amountOut.toString(),
-        sender: who,
-        receiver: who,
+        sender: who.toString(),
+        receiver: who.toString(),
         assetIdFee: fee.tokenId,
         fee: fee.amount,
         eventIdx: event.idx,
         success: true
     }
 
-    logger.info(`Constructed swap ${JSON.stringify(swap)}`)
+    const blockNumber = event.block.block.header.number
+    logger.info(`Constructed router swap ${JSON.stringify(swap)} for block ${blockNumber.toString()}`)
 
     await createAssetTransmission(event, who.toString(), "-from", {"swap": swap});
 }
@@ -113,11 +115,12 @@ export function findHydraDxFee(events: EventRecord[]): Fee | undefined {
     }
 }
 
-function isPartOfRouterSwap<T extends AnyTuple>(event: SubstrateEvent<T>): boolean {
-    for (const eventRecord of event.extrinsic.events) {
+function isPartOfRouterSwap(events: TypedEventRecord<Codec[]>[]): boolean {
+    const eventRecords = events as EventRecord[]
+    for (const eventRecord of eventRecords) {
         if (
             eventRecord.event.section == "router" && 
-            eventRecord.event.method == "Executed"
+            eventRecord.event.method == "RouteExecuted"
         ) {
             return true
         }
