@@ -34,11 +34,6 @@ dataSources:
           filter:
             module: assets
             method: Transferred
-        - handler: handleCurrencyTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: currencies
-            method: Transferred
         - handler: handleTokenTransfer
           kind: substrate/EventHandler
           filter:
