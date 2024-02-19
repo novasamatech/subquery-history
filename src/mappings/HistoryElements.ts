@@ -21,7 +21,12 @@ import {
     isEvmTransaction,
     isEvmExecutedEvent,
     isAssetTxFeePaidEvent,
-    isEquilibriumTransfer, isHydraDxBuy, isHydraDxSell,
+    isEquilibriumTransfer, 
+    isHydraOmnipoolBuy, 
+    isHydraOmnipoolSell,
+    isHydraRouterSell,
+    isHydraRouterBuy,
+    convertOrmlCurrencyIdToString
 } from "./common";
 import {CallBase} from "@polkadot/types/types/calls";
 import {AnyTuple} from "@polkadot/types/types/codec";
@@ -258,10 +263,14 @@ function determineTransferCallsArgs(
         return assetHubSwapCallback(...extractArgsFromSwapExactTokensForTokens(causeCall))
     } else if (isSwapTokensForExactTokens(causeCall)) {
         return assetHubSwapCallback(...extractArgsFromSwapTokensForExactTokens(causeCall))
-    } else if (isHydraDxBuy(causeCall)) {
-        return [hydraDxSwapCallback(...extractArgsFromHydraDxBuy(causeCall))]
-    } else if (isHydraDxSell(causeCall)) {
-        return [hydraDxSwapCallback(...extractArgsFromHydraDxSell(causeCall))]
+    } else if (isHydraOmnipoolBuy(causeCall)) {
+        return [hydraDxSwapCallback(...extractArgsFromHydraOmnipoolBuy(causeCall))]
+    } else if (isHydraOmnipoolSell(causeCall)) {
+        return [hydraDxSwapCallback(...extractArgsFromHydraOmnipoolSell(causeCall))]
+    } else if (isHydraRouterBuy(causeCall)) {
+        return [hydraDxSwapCallback(...extractArgsFromHydraRouterBuy(causeCall))]
+    } else if (isHydraRouterSell(causeCall)) {
+        return [hydraDxSwapCallback(...extractArgsFromHydraRouterSell(causeCall))]
     } else if (isBatch(causeCall)) {
         return callsFromBatch(causeCall)
             .map(call => {
@@ -327,7 +336,7 @@ function extractArgsFromOrmlTransferAll(call: CallBase<AnyTuple>): [string, bigi
     return [
         destinationAddress.toString(),
         BigInt(0),
-        currencyId.toHex().toString()
+        convertOrmlCurrencyIdToString(currencyId)
     ]
 }
 
@@ -353,7 +362,29 @@ function extractArgsFromSwapTokensForExactTokens(call: CallBase<AnyTuple>) {
     ]
 }
 
-function extractArgsFromHydraDxSell(call: CallBase<AnyTuple>): Codec[] {
+function extractArgsFromHydraRouterSell(call: CallBase<AnyTuple>): Codec[] {
+    const [assetIn, assetOut, amountIn, minAmountOut, _] = call.args
+
+    return [
+        assetIn,
+        assetOut,
+        amountIn,
+        minAmountOut
+    ]
+}
+
+function extractArgsFromHydraRouterBuy(call: CallBase<AnyTuple>): Codec[] {
+    const [assetIn, assetOut, amountOut, maxAmountIn, _] = call.args
+
+    return [
+        assetIn,
+        assetOut,
+        maxAmountIn,
+        amountOut
+    ]
+}
+
+function extractArgsFromHydraOmnipoolSell(call: CallBase<AnyTuple>): Codec[] {
     const [assetIn, assetOut, amount, minBuyAmount, _] = call.args
 
     return [
@@ -365,7 +396,7 @@ function extractArgsFromHydraDxSell(call: CallBase<AnyTuple>): Codec[] {
 }
 
 
-function extractArgsFromHydraDxBuy(call: CallBase<AnyTuple>): Codec[] {
+function extractArgsFromHydraOmnipoolBuy(call: CallBase<AnyTuple>): Codec[] {
     const [assetOut, assetIn, amount, maxSellAmount, _] = call.args
 
     return [

@@ -14,6 +14,7 @@ import {
   eventRecordToSubstrateEvent,
   getAssetIdFromMultilocation,
   BigIntFromCodec,
+  convertOrmlCurrencyIdToString
 } from "./common";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
 
@@ -76,7 +77,7 @@ export async function handleOrmlTransfer(event: SubstrateEvent): Promise<void> {
     to,
     suffix: "-from",
     amount,
-    assetId: currencyId.toHex().toString(),
+    assetId: convertOrmlCurrencyIdToString(currencyId),
   });
   await createTransfer({
     event,
@@ -85,7 +86,7 @@ export async function handleOrmlTransfer(event: SubstrateEvent): Promise<void> {
     to,
     suffix: "-to",
     amount,
-    assetId: currencyId.toHex().toString(),
+    assetId: convertOrmlCurrencyIdToString(currencyId),
   });
 }
 
