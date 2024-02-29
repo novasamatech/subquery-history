@@ -54,3 +54,8 @@ dataSources:
           filter:
             module: router
             method: RouteExecuted
+        - handler: handleHydraRouterSwap
+          kind: substrate/EventHandler
+          filter:
+            module: router
+            method: Executed

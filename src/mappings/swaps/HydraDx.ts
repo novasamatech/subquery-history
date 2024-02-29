@@ -121,7 +121,7 @@ function isPartOfRouterSwap(events: TypedEventRecord<Codec[]>[]): boolean {
     for (const eventRecord of eventRecords) {
         if (
             eventRecord.event.section == "router" && 
-            eventRecord.event.method == "RouteExecuted"
+            (eventRecord.event.method == "Executed" || eventRecord.event.method == "RouteExecuted")
         ) {
             return true
         }
