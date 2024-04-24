@@ -6,9 +6,12 @@ import {AnyTuple} from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from '@polkadot/types';
 import {Codec} from "@polkadot/types/types";
 import {INumber} from "@polkadot/types-codec/types/interfaces";
+import { u8aToHex } from "@polkadot/util"
+import * as events from "events";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"]
 const transferCalls = ["transfer", "transferKeepAlive"]
+
 const ormlSections = ["currencies", "tokens"]
 
 export function distinct<T>(array: Array<T>): Array<T> {
@@ -50,6 +53,10 @@ export function isAssetTxFeePaidEvent(event: SubstrateEvent): boolean {
     return event.event.section === 'assetTxPayment' && event.event.method === "AssetTxFeePaid"
 }
 
+export function isCurrencyDepositedEvent(event: SubstrateEvent): boolean {
+    return event.event.section === 'currencies' && event.event.method === "Deposited"
+}
+
 export function isSwapExecutedEvent(event: SubstrateEvent): boolean {
     return event.event.section === 'assetConversion' && event.event.method === "SwapExecuted"
 }
@@ -60,6 +67,22 @@ export function isSwapExactTokensForTokens(call: CallBase<AnyTuple>) : boolean {
 
 export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>) : boolean {
     return call.section === "assetConversion" && call.method === "swapTokensForExactTokens"
+}
+
+export function isHydraOmnipoolBuy(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "omnipool" && call.method == "buy"
+}
+
+export function isHydraOmnipoolSell(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "omnipool" && call.method == "sell"
+}
+
+export function isHydraRouterBuy(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "router" && call.method == "buy"
+}
+
+export function isHydraRouterSell(call: CallBase<AnyTuple>) : boolean {
+    return call.section === "router" && call.method == "sell"
 }
 
 export function isOrmlTransfer(call: CallBase<AnyTuple>) : boolean {
@@ -155,6 +178,13 @@ export function BigIntFromCodec(eventRecord: Codec): bigint {
     return (eventRecord as unknown as INumber).toBigInt()
 }
 
+export function convertOrmlCurrencyIdToString(currencyId: Codec): string {
+    // make sure first we have scale encoded bytes
+    const bytes = currencyId.toU8a()
+
+    return u8aToHex(bytes).toString()
+}
+
 function exportFeeRefund(extrinsic: SubstrateExtrinsic, from: string = ''): bigint {
     const extrinsicSigner = from || extrinsic.extrinsic.signer.toString()
 
@@ -213,6 +243,24 @@ function exportFeeFromTransactionFeePaidEvent(extrinsic: SubstrateExtrinsic, fro
     }
 
     return undefined
+}
+
+export function extractTransactionPaidFee(events: EventRecord[]): string | undefined {
+    const eventRecord = events.find((event) =>
+        event.event.method == "TransactionFeePaid" && event.event.section == "transactionPayment"
+    )
+
+    if (eventRecord == undefined) return undefined
+
+    const {
+        event: {
+            data: [ _, fee, tip ]
+        }
+    } = eventRecord
+
+    const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt()
+
+    return fullFee.toString()
 }
 
 function exportFeeFromBalancesDepositEvent(extrinsic: SubstrateExtrinsic): bigint {
