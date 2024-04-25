@@ -63,24 +63,33 @@ async function processEraStakersPaged(
     await api.query.staking.erasStakersOverview.entries(currentEra);
   const pages = await api.query.staking.erasStakersPaged.entries(currentEra);
 
-  const othersCounted = pages.reduce((accumulator, [key, exp]) => {
-    const exposure = (exp as unknown as Option<SpStakingExposurePage>).unwrap();
-    const [, validatorId, pageId] = key.args;
-    const pageNumber = (pageId as INumber).toNumber();
-    const validatorIdString = validatorId.toString();
+  interface AccumulatorType {
+    [key: string]: any;
+  }
 
-    const others = exposure.others.map(({ who, value }) => {
-      return {
-        who: who.toString(),
-        value: value.toString(),
-      } as IndividualExposure;
-    });
+  const othersCounted = pages.reduce(
+    (accumulator: AccumulatorType, [key, exp]) => {
+      const exposure = (
+        exp as unknown as Option<SpStakingExposurePage>
+      ).unwrap();
+      const [, validatorId, pageId] = key.args;
+      const pageNumber = (pageId as INumber).toNumber();
+      const validatorIdString = validatorId.toString();
 
-    (accumulator[validatorIdString] = accumulator[validatorIdString] || {})[
-      pageNumber
-    ] = others;
-    return accumulator;
-  }, {});
+      const others = exposure.others.map(({ who, value }) => {
+        return {
+          who: who.toString(),
+          value: value.toString(),
+        } as IndividualExposure;
+      });
+
+      (accumulator[validatorIdString] = accumulator[validatorIdString] || {})[
+        pageNumber
+      ] = others;
+      return accumulator;
+    },
+    {},
+  );
 
   const eraValidatorInfos = overview.map(([key, exp]) => {
     const exposure = (
