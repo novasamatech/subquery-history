@@ -16,7 +16,7 @@ schema:
   file: ./schema.graphql
 parent:
   untilBlock: 20438530
-  reference: "QmaH9tQhkV25xKwxL3nepEDpaCw56Bhu6H7cs1LXy1c4KZ"
+  reference: "QmaTy1aG5uZfeyUXRu8bDci1P6AzbTYBEzM57yEYk3MPEt"
 network:
   chainId: "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3"
   endpoint: >-
