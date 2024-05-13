@@ -1,0 +1,80 @@
+specVersion: 1.0.0
+name: subquery-nova-avail-turing-test
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: '*'
+  query:
+    name: '@subql/query'
+    version: v1.5.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
+network:
+  chainId: '0xd3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70'
+  endpoint: wss://turing-rpc.avail.so/ws
+  chaintypes:
+    file: ./dist/availChainTypes.js
+dataSources:
+  - name: main
+    kind: substrate/Runtime
+    startBlock: 1
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleHistoryElement
+          kind: substrate/CallHandler
+          filter:
+            isSigned: true
+        - handler: handleReward
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Reward
+        - handler: handleRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Rewarded
+        - handler: handlePoolReward
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PaidOut
+        - handler: handleSlash
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slash
+        - handler: handleSlashed
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slashed
+        - handler: handlePoolBondedSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PoolSlashed
+        - handler: handlePoolUnbondingSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: UnbondingPoolSlashed
+        - handler: handleTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: Transfer
+        - handler: handleNewEra
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakingElection
+        - handler: handleStakersElected
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: StakersElected
