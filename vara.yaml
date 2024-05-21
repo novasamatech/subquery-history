@@ -25,28 +25,55 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
+          filter:
+            isSigned: true
+        - handler: handleReward
           kind: substrate/EventHandler
           filter:
-            module: parachainStaking
+            module: staking
+            method: Reward
+        - handler: handleRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: staking
             method: Rewarded
+        - handler: handlePoolReward
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PaidOut
+        - handler: handleSlash
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slash
+        - handler: handleSlashed
+          kind: substrate/EventHandler
+          filter:
+            module: staking
+            method: Slashed
+        - handler: handlePoolBondedSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: PoolSlashed
+        - handler: handlePoolUnbondingSlash
+          kind: substrate/EventHandler
+          filter:
+            module: nominationPools
+            method: UnbondingPoolSlashed
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
             module: balances
             method: Transfer
-        - handler: handleAssetTransfer
+        - handler: handleNewEra
           kind: substrate/EventHandler
           filter:
-            module: assets
-            method: Transferred
-        - handler: handleCurrencyTransfer
+            module: staking
+            method: StakingElection
+        - handler: handleStakersElected
           kind: substrate/EventHandler
           filter:
-            module: currencies
-            method: Transferred
-        - handler: handleTokenTransfer
-          kind: substrate/EventHandler
-          filter:
-            module: tokens
-            method: Transfer
+            module: staking
+            method: StakersElected
