@@ -40,8 +40,9 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
+        # There is a problem they does not have constant - parachainStaking.rewardPaymentDelay
+        # - handler: handleParachainRewarded
+        #   kind: substrate/EventHandler
+        #   filter:
+        #     module: parachainStaking
+        #     method: Rewarded
