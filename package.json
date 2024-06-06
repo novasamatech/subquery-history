@@ -79,7 +79,8 @@
     "crustChaintypes": "./chainTypes/crustChaintypes.ts",
     "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts",
     "calamariChainTypes": "./chainTypes/calamariChainTypes.ts",
-    "westmintChaintypes": "./chainTypes/westmintChaintypes.ts"
+    "westmintChaintypes": "./chainTypes/westmintChaintypes.ts",
+    "hyperbridgeChainTypes": "./chainTypes/hyperbridgeChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
