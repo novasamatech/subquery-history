@@ -17,7 +17,7 @@ services:
 
   subquery-node:
     container_name: "node-${PROJECT_PATH}"
-    image: onfinality/subql-node:latest
+    image: onfinality/subql-node:v3.10.1
     depends_on:
       postgres:
         condition: service_healthy
@@ -33,8 +33,8 @@ services:
     command:
       - -f=/app/${PROJECT_PATH}
       - --disable-historical=true
-      # - --local #remove
-      # - --batch-size=50
+      - --worker=1
+      - --batch-size=10
 
   graphql-engine:
     container_name: "query-${PROJECT_PATH}"
