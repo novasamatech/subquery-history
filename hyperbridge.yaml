@@ -1,0 +1,49 @@
+specVersion: 1.0.0
+name: subquery-nova-hyperbridge
+version: 1.0.0
+runner:
+  node:
+    name: '@subql/node'
+    version: '>=4.6.2'
+  query:
+    name: '@subql/query'
+    version: v1.5.0
+description: Nova SubQuery project
+repository: https://github.com/nova-wallet/subquery-nova
+schema:
+  file: ./schema.graphql
+network:
+  chainId: '0x5388faf792c5232566d21493929b32c1f20a9c2b03e95615eefec2aa26d64b73'
+  endpoint: >-
+    wss://hyperbridge-paseo-rpc.blockops.network
+  chaintypes:
+    file: "./dist/hyperbridgeChaintypes.js"
+dataSources:
+  - name: main
+    kind: substrate/Runtime
+    startBlock: 1
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleHistoryElement
+          kind: substrate/CallHandler
+        - handler: handleTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: balances
+            method: Transfer
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: assets
+            method: Transferred
+        - handler: handleTokenTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: tokens
+            method: Transfer
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded

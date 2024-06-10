@@ -32,8 +32,8 @@ def generate_project_table():
     sub_query = SubQueryDeploymentAPI(auth_token=token, org=organisation)
     sub_query.collect_all_project_data()
 
-    table_generator = ProjectTableGenerator()
-    table = table_generator.generate_table(sub_query, nova_network_list)
+    table_generator = ProjectTableGenerator(sub_query, nova_network_list)
+    table = table_generator.generate_table()
 
     return table
 
@@ -54,4 +54,5 @@ if __name__ == '__main__':
             dapps_table=generate_project_table()
         ))
 
-    telegram.send_notification()
+    # TODO: Temp remove, waiting for https://app.clickup.com/t/862kc4b47
+    # telegram.send_notification()
