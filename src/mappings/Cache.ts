@@ -12,56 +12,89 @@ let parachainStakingRewardEra: {[blockId: string]: number} = {}
 
 let poolMembers: {[blockId: number]: [string, PalletNominationPoolsPoolMember][]} = {}
 
-export async function cachedRewardDestination(accountAddress: string, event: SubstrateEvent): Promise<PalletStakingRewardDestination> {
-    const blockId = blockNumber(event)
-    let cachedBlock = rewardDestinationByAddress[blockId]
+export async function cachedRewardDestination(
+  accountAddress: string,
+  event: SubstrateEvent,
+): Promise<PalletStakingRewardDestination> {
+  const blockId = blockNumber(event);
+  let cachedBlock = rewardDestinationByAddress[blockId];
 
-    if (cachedBlock !== undefined) {
-        return cachedBlock[accountAddress]
+  if (cachedBlock !== undefined) {
+    return cachedBlock[accountAddress];
+  } else {
+    rewardDestinationByAddress = {};
+
+    let method = event.event.method;
+    let section = event.event.section;
+
+    const allEventsInBlock = event.block.events.filter((blockEvent) => {
+      return (
+        blockEvent.event.method == method && blockEvent.event.section == section
+      );
+    });
+
+    let destinationByAddress: {
+      [address: string]: PalletStakingRewardDestination;
+    } = {};
+
+    let {
+      event: { data: innerData },
+    } = event;
+
+    if (innerData.length == 3) {
+      allEventsInBlock.forEach((event) => {
+        let {
+          event: {
+            data: [accountId, destination, _],
+          },
+        } = event;
+        let accountAddress = accountId.toString();
+        destinationByAddress[accountAddress] =
+          destination as PalletStakingRewardDestination;
+      });
     } else {
-        rewardDestinationByAddress = {}
+      const allAccountsInBlock = allEventsInBlock.map((event) => {
+        let {
+          event: {
+            data: [accountId],
+          },
+        } = event;
+        return accountId;
+      });
 
-        let method = event.event.method
-        let section = event.event.section
+      // looks like accountAddress not related to events so just try to query payee directly
+      if (allAccountsInBlock.length === 0) {
+        rewardDestinationByAddress[blockId] = {};
+        return await api.query.staking.payee(accountAddress);
+      }
 
-        const allAccountsInBlock = event.block.events
-            .filter(blockEvent => {
-                return blockEvent.event.method == method && blockEvent.event.section == section
-            })
-            .map(event => {
-                let {event: {data: [accountId, ]}} = event
-                return accountId
-            });
+      // TODO: Commented code doesn't work now, may be fixed later
+      // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
+      const payees = await api.queryMulti(
+        allAccountsInBlock.map((account) => [api.query.staking.payee, account]),
+      );
 
-        // looks like accountAddress not related to events so just try to query payee directly
-        if (allAccountsInBlock.length === 0) {
-            rewardDestinationByAddress[blockId] = {}
-            return await api.query.staking.payee(accountAddress)
-        }
+      const rewardDestinations = payees.map((payee) => {
+        return payee as PalletStakingRewardDestination;
+      });
 
-        // TODO: Commented code doesn't work now, may be fixed later
-        // const payees = await api.query.staking.payee.multi(allAccountsInBlock);
-        const payees = await api.queryMulti(allAccountsInBlock.map(account => ([api.query.staking.payee, account])));
-
-        const rewardDestinations = payees.map(payee => { return payee as PalletStakingRewardDestination });
-
-        let destinationByAddress: {[address: string]: PalletStakingRewardDestination} = {}
-
-        // something went wrong, so just query for single accountAddress
-        if (rewardDestinations.length !== allAccountsInBlock.length) {
-            const payee = await api.query.staking.payee(accountAddress)
-            destinationByAddress[accountAddress] = payee
-            rewardDestinationByAddress[blockId] = destinationByAddress
-            return payee
-        }
-        allAccountsInBlock.forEach((account, index) => {
-            let accountAddress = account.toString()
-            let rewardDestination = rewardDestinations[index]
-            destinationByAddress[accountAddress] = rewardDestination
-        })
-        rewardDestinationByAddress[blockId] = destinationByAddress
-        return destinationByAddress[accountAddress]
+      // something went wrong, so just query for single accountAddress
+      if (rewardDestinations.length !== allAccountsInBlock.length) {
+        const payee = await api.query.staking.payee(accountAddress);
+        destinationByAddress[accountAddress] = payee;
+        rewardDestinationByAddress[blockId] = destinationByAddress;
+        return payee;
+      }
+      allAccountsInBlock.forEach((account, index) => {
+        let accountAddress = account.toString();
+        let rewardDestination = rewardDestinations[index];
+        destinationByAddress[accountAddress] = rewardDestination;
+      });
     }
+
+    rewardDestinationByAddress[blockId] = destinationByAddress;
+    return destinationByAddress[accountAddress];
+  }
 }
 
 export async function cachedController(accountAddress: string, event: SubstrateEvent): Promise<string> {
