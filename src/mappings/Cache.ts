@@ -73,7 +73,9 @@ export async function cachedRewardDestination(
       // looks like accountAddress not related to events so just try to query payee directly
       if (allAccountsInBlock.length === 0) {
         rewardDestinationByAddress[blockId] = {};
-        return await api.query.staking.payee(accountAddress);
+        return (await api.query.staking.payee(
+          accountAddress,
+        )) as PalletStakingRewardDestination;
       }
 
       // TODO: Commented code doesn't work now, may be fixed later
@@ -88,7 +90,9 @@ export async function cachedRewardDestination(
 
       // something went wrong, so just query for single accountAddress
       if (rewardDestinations.length !== allAccountsInBlock.length) {
-        const payee = await api.query.staking.payee(accountAddress);
+        const payee = (await api.query.staking.payee(
+          accountAddress,
+        )) as PalletStakingRewardDestination;
         destinationByAddress[accountAddress] = payee;
         rewardDestinationByAddress[blockId] = destinationByAddress;
         return payee;
