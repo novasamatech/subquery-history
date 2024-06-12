@@ -6,6 +6,7 @@ import {
   PalletStakingRewardDestination,
   PalletNominationPoolsPoolMember,
 } from "@polkadot/types/lookup";
+import { Option } from "@polkadot/types";
 
 // Due to memory consumption optimization `rewardDestinationByAddress` contains only one key
 let rewardDestinationByAddress: {
@@ -225,10 +226,13 @@ export async function getPoolMembers(
   const members: [string, PalletNominationPoolsPoolMember][] = (
     await api.query.nominationPools.poolMembers.entries()
   )
-    .filter(([_, member]) => member.isSome)
+    .filter(
+      ([_, member]) =>
+        (member as Option<PalletNominationPoolsPoolMember>).isSome,
+    )
     .map(([accountId, member]) => [
       accountId.args[0].toString(),
-      member.unwrap(),
+      (member as Option<PalletNominationPoolsPoolMember>).unwrap(),
     ]);
   poolMembers = {};
   poolMembers[blockId] = members;

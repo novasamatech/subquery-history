@@ -15,12 +15,16 @@ import {
 import { Codec } from "@polkadot/types/types";
 import { u32 } from "@polkadot/types-codec";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
-import { PalletNominationPoolsPoolMember } from "@polkadot/types/lookup";
+import {
+  PalletNominationPoolsPoolMember,
+  PalletNominationPoolsSubPools,
+} from "@polkadot/types/lookup";
 import {
   handleGenericForTxHistory,
   updateAccumulatedGenericReward,
 } from "./Rewards";
 import { getPoolMembers } from "./Cache";
+import { Option } from "@polkadot/types";
 
 export async function handlePoolReward(
   rewardEvent: SubstrateEvent<
@@ -118,7 +122,10 @@ export async function handlePoolBondedSlash(
   } = bondedSlashEvent;
   const poolId = poolIdEncoded.toNumber();
 
-  const pool = (await api.query.nominationPools.bondedPools(poolId)).unwrap();
+  const poolOption = (await api.query.nominationPools.bondedPools(
+    poolId,
+  )) as Option<PalletNominationPoolsPoolMember>;
+  const pool = poolOption.unwrap();
 
   await handleRelaychainPooledStakingSlash(
     bondedSlashEvent,
@@ -145,7 +152,9 @@ export async function handlePoolUnbondingSlash(
   const eraIdNumber = era.toNumber();
 
   const unbondingPools = (
-    await api.query.nominationPools.subPoolsStorage(poolIdNumber)
+    (await api.query.nominationPools.subPoolsStorage(
+      poolIdNumber,
+    )) as Option<PalletNominationPoolsSubPools>
   ).unwrap();
 
   const pool =
