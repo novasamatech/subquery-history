@@ -6,6 +6,7 @@ import {
   PalletStakingRewardDestination,
   PalletNominationPoolsPoolMember,
 } from "@polkadot/types/lookup";
+import { Option } from "@polkadot/types";
 
 // Due to memory consumption optimization `rewardDestinationByAddress` contains only one key
 let rewardDestinationByAddress: {
@@ -73,7 +74,9 @@ export async function cachedRewardDestination(
       // looks like accountAddress not related to events so just try to query payee directly
       if (allAccountsInBlock.length === 0) {
         rewardDestinationByAddress[blockId] = {};
-        return await api.query.staking.payee(accountAddress);
+        return (await api.query.staking.payee(
+          accountAddress,
+        )) as unknown as PalletStakingRewardDestination;
       }
 
       // TODO: Commented code doesn't work now, may be fixed later
@@ -88,7 +91,9 @@ export async function cachedRewardDestination(
 
       // something went wrong, so just query for single accountAddress
       if (rewardDestinations.length !== allAccountsInBlock.length) {
-        const payee = await api.query.staking.payee(accountAddress);
+        const payee = (await api.query.staking.payee(
+          accountAddress,
+        )) as unknown as PalletStakingRewardDestination;
         destinationByAddress[accountAddress] = payee;
         rewardDestinationByAddress[blockId] = destinationByAddress;
         return payee;
@@ -221,10 +226,13 @@ export async function getPoolMembers(
   const members: [string, PalletNominationPoolsPoolMember][] = (
     await api.query.nominationPools.poolMembers.entries()
   )
-    .filter(([_, member]) => member.isSome)
+    .filter(
+      ([_, member]) =>
+        (member as Option<PalletNominationPoolsPoolMember>).isSome,
+    )
     .map(([accountId, member]) => [
       accountId.args[0].toString(),
-      member.unwrap(),
+      (member as Option<PalletNominationPoolsPoolMember>).unwrap(),
     ]);
   poolMembers = {};
   poolMembers[blockId] = members;

@@ -298,7 +298,7 @@ async function handleSlashForTxHistory(
 
   const slashEra = !slashDeferDuration
     ? currentEra
-    : currentEra - slashDeferDuration.toNumber();
+    : currentEra - Number(slashDeferDuration);
 
   if (
     api.query.staking.erasStakersOverview ||

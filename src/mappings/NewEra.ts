@@ -6,8 +6,9 @@ import {
   SpStakingPagedExposureMetadata,
   SpStakingExposurePage,
 } from "@polkadot/types/lookup";
-import { Option } from "@polkadot/types-codec";
+import { Option } from "@polkadot/types";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
+import { Exposure } from "@polkadot/types/interfaces";
 
 export async function handleStakersElected(
   event: SubstrateEvent,
@@ -16,7 +17,9 @@ export async function handleStakersElected(
 }
 
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
-  const currentEra = (await api.query.staking.currentEra()).unwrap().toNumber();
+  const currentEra = ((await api.query.staking.currentEra()) as Option<INumber>)
+    .unwrap()
+    .toNumber();
 
   if (api.query.staking.erasStakersOverview) {
     await processEraStakersPaged(event, currentEra);
@@ -36,13 +39,14 @@ async function processEraStakersClipped(
     const [, validatorId] = key.args;
 
     let validatorIdString = validatorId.toString();
+    const exp = exposure as unknown as Exposure;
     const eraValidatorInfo = new EraValidatorInfo(
       eventId(event) + validatorIdString,
       validatorIdString,
       currentEra,
-      exposure.total.toBigInt(),
-      exposure.own.toBigInt(),
-      exposure.others.map((other) => {
+      exp.total.toBigInt(),
+      exp.own.toBigInt(),
+      exp.others.map((other) => {
         return {
           who: other.who.toString(),
           value: other.value.toString(),
