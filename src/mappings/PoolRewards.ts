@@ -16,6 +16,7 @@ import { Codec } from "@polkadot/types/types";
 import { u32 } from "@polkadot/types-codec";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
 import {
+  PalletNominationPoolsBondedPoolInner,
   PalletNominationPoolsPoolMember,
   PalletNominationPoolsSubPools,
 } from "@polkadot/types/lookup";
@@ -124,7 +125,7 @@ export async function handlePoolBondedSlash(
 
   const poolOption = (await api.query.nominationPools.bondedPools(
     poolId,
-  )) as Option<PalletNominationPoolsPoolMember>;
+  )) as Option<PalletNominationPoolsBondedPoolInner>;
   const pool = poolOption.unwrap();
 
   await handleRelaychainPooledStakingSlash(

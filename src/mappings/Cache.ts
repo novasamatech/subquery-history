@@ -76,7 +76,7 @@ export async function cachedRewardDestination(
         rewardDestinationByAddress[blockId] = {};
         return (await api.query.staking.payee(
           accountAddress,
-        )) as PalletStakingRewardDestination;
+        )) as unknown as PalletStakingRewardDestination;
       }
 
       // TODO: Commented code doesn't work now, may be fixed later
@@ -93,7 +93,7 @@ export async function cachedRewardDestination(
       if (rewardDestinations.length !== allAccountsInBlock.length) {
         const payee = (await api.query.staking.payee(
           accountAddress,
-        )) as PalletStakingRewardDestination;
+        )) as unknown as PalletStakingRewardDestination;
         destinationByAddress[accountAddress] = payee;
         rewardDestinationByAddress[blockId] = destinationByAddress;
         return payee;
