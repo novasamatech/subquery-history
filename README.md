@@ -21,7 +21,11 @@ sh local-runner.sh ${project_file}.yaml
 ./node_modules/.bin/subql publish -f ${project_file}.yaml
 ```
 
+## Contributors
+
+Special thanks to the Nova Wallet team for contributing to these projects.
+
 ## License
 
-SubQuery Nova is available under the Apache 2.0 license. See the LICENSE file for more info.
-© Novasama Technologies GmbH 2023
+_SubQuery Common API - Polkadot Transactions_ is available under the Apache 2.0 license. See the LICENSE file for more info.
+© SubQuery Pte Ltd 2023
