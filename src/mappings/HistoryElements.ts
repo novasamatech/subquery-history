@@ -94,12 +94,12 @@ function createHistoryElement(
   let extrinsicId = extrinsicIdFromBlockAndIdx(blockNumber, extrinsicIdx);
   let blockTimestamp = timestamp(extrinsic.block);
 
-  const historyElement = new HistoryElement(
-    `${extrinsicId}${suffix}`,
+  const historyElement = HistoryElement.create({
+    id: `${extrinsicId}${suffix}`,
     blockNumber,
-    blockTimestamp,
+    timestamp: blockTimestamp,
     address,
-  );
+  });
   historyElement.extrinsicHash = extrinsicHash;
   historyElement.extrinsicIdx = extrinsicIdx;
   historyElement.timestamp = blockTimestamp;
