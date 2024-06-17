@@ -18,6 +18,7 @@
     "src/**/*",
     "node_modules/@subql/types-core/dist/global.d.ts",
     "node_modules/@subql/types/dist/global.d.ts",
-    "./chaintypes.ts"
+    "./chaintypes.ts",
+    "@types/**/*"
   ]
 }
