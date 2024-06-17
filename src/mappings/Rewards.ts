@@ -404,7 +404,9 @@ async function buildRewardEvents<A>(
     [initialInnerAccumulator, []],
   );
 
-  await Promise.allSettled(savingPromises);
+  for (const promise of savingPromises) {
+    await promise;
+  }
 }
 
 async function updateAccumulatedReward(
