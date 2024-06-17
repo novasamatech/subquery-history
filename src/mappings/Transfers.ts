@@ -17,7 +17,6 @@ import {
   BigIntFromCodec,
   convertOrmlCurrencyIdToString,
 } from "./common";
-import { INumber } from "@polkadot/types-codec/types/interfaces";
 
 type TransferPayload = {
   event: SubstrateEvent;
@@ -260,7 +259,7 @@ async function createTransfer({
   await createAssetTransmission(event, address, suffix, data);
 }
 
-async function createAssetTransmission(
+export async function createAssetTransmission(
   event: SubstrateEvent,
   address: any,
   suffix: string,

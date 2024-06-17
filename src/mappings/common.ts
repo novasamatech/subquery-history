@@ -380,3 +380,25 @@ export function getRewardData(event: SubstrateEvent): [Codec, Codec] {
   }
   return [account, amount];
 }
+
+export function extractTransactionPaidFee(
+  events: EventRecord[],
+): string | undefined {
+  const eventRecord = events.find(
+    (event) =>
+      event.event.method == "TransactionFeePaid" &&
+      event.event.section == "transactionPayment",
+  );
+
+  if (eventRecord == undefined) return undefined;
+
+  const {
+    event: {
+      data: [_, fee, tip],
+    },
+  } = eventRecord;
+
+  const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt();
+
+  return fullFee.toString();
+}
