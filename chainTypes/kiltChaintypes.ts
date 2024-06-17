@@ -6,7 +6,7 @@ export default {
   },
   typesBundle: {
     spec: {
-      'mashnet-node': typeBundleForPolkadot,
+      "mashnet-node": typeBundleForPolkadot,
       "kilt-spiritnet": typeBundleForPolkadot,
       "kilt-parachain": typeBundleForPolkadot,
     },

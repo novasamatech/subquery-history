@@ -3,17 +3,17 @@ name: subquery-nova-giant
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
   query:
-    name: '@subql/query'
+    name: "@subql/query"
     version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x49f4849244114177544d73d2412289f6d73a892b9eb1ca97cef81c9c0c9ec0ff'
+  chainId: "0x49f4849244114177544d73d2412289f6d73a892b9eb1ca97cef81c9c0c9ec0ff"
   endpoint: >-
     wss://rpc-anchor-1-giant-mainnet-ue1.giantprotocol.org:443
 dataSources:
