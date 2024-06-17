@@ -3,17 +3,19 @@ name: subquery-nova-joystream
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: "*"
+    options:
+      historical: true
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x6b5e488e0fa8f9821110d5c13f4c468abcd43ce5e297e62b34c53c3346465956'
+  chainId: "0x6b5e488e0fa8f9821110d5c13f4c468abcd43ce5e297e62b34c53c3346465956"
   endpoint: >-
     wss://rpc.joystream.org
 dataSources:
