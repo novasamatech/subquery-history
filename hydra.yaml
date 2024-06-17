@@ -16,7 +16,7 @@ schema:
   file: ./schema.graphql
 network:
   chainId: "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d"
-  endpoint: wss://rpc-01.hydradx.io
+  endpoint: wss://hydradx-rpc.dwellir.com
 dataSources:
   - name: main
     kind: substrate/Runtime
