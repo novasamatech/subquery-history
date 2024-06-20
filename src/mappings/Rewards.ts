@@ -350,61 +350,53 @@ async function buildRewardEvents<A>(
   let blockNumber = block.block.header.number.toString();
   let blockTimestamp = timestamp(block);
 
-  const [, savingPromises] = block.events.reduce<[A, Promise<void>[]]>(
-    (accumulator, eventRecord, eventIndex) => {
-      let [innerAccumulator, currentPromises] = accumulator;
+  let innerAccumulator = initialInnerAccumulator;
+  for (let eventIndex = 0; eventIndex < block.events.length; eventIndex++) {
+    const eventRecord = block.events[eventIndex];
 
-      if (
-        !(
-          eventRecord.event.method == eventMethod &&
-          eventRecord.event.section == eventSection
-        )
+    if (
+      !(
+        eventRecord.event.method === eventMethod &&
+        eventRecord.event.section === eventSection
       )
-        return accumulator;
+    )
+      continue;
 
-      let [account, amount] = decodeDataFromReward(
-        eventRecordToSubstrateEvent(eventRecord),
-      );
+    let [account, amount] = decodeDataFromReward(
+      eventRecordToSubstrateEvent(eventRecord),
+    );
 
-      const newAccumulator = produceNewAccumulator(
-        innerAccumulator,
-        account.toString(),
-      );
+    innerAccumulator = produceNewAccumulator(
+      innerAccumulator,
+      account.toString(),
+    );
 
-      const eventId = eventIdFromBlockAndIdx(
-        blockNumber,
-        eventIndex.toString(),
-      );
+    const eventId = eventIdFromBlockAndIdx(blockNumber, eventIndex.toString());
 
-      const accountAddress = account.toString();
-      const destinationAddress = accountsMapping[accountAddress];
+    const accountAddress = account.toString();
+    const destinationAddress = accountsMapping[accountAddress];
 
-      const element = new HistoryElement(
-        eventId,
-        block.block.header.number.toNumber(),
-        blockTimestamp,
-        destinationAddress != undefined ? destinationAddress : accountAddress,
-      );
+    const element = new HistoryElement(
+      eventId,
+      block.block.header.number.toNumber(),
+      blockTimestamp,
+      destinationAddress !== undefined ? destinationAddress : accountAddress,
+    );
 
-      if (extrinsic !== undefined) {
-        element.extrinsicHash = extrinsic.extrinsic.hash.toString();
-        element.extrinsicIdx = extrinsic.idx;
-      }
-      element.reward = produceReward(
-        newAccumulator,
-        eventIndex,
-        accountAddress,
-        amount.toString(),
-      );
+    if (extrinsic !== undefined) {
+      element.extrinsicHash = extrinsic.extrinsic.hash.toString();
+      element.extrinsicIdx = extrinsic.idx;
+    }
 
-      currentPromises.push(element.save());
+    element.reward = produceReward(
+      innerAccumulator,
+      eventIndex,
+      accountAddress,
+      amount.toString(),
+    );
 
-      return [newAccumulator, currentPromises];
-    },
-    [initialInnerAccumulator, []],
-  );
-
-  await Promise.allSettled(savingPromises);
+    await element.save();
+  }
 }
 
 async function updateAccumulatedReward(
