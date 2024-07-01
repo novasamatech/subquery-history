@@ -35,9 +35,8 @@ async function processEraStakersClipped(
   const exposures =
     await api.query.staking.erasStakersClipped.entries(currentEra);
 
-  const eraValidatorInfos = exposures.map(([key, exposure]) => {
+  for (const [key, exposure] of exposures) {
     const [, validatorId] = key.args;
-
     let validatorIdString = validatorId.toString();
     const exp = exposure as unknown as Exposure;
     const eraValidatorInfo = new EraValidatorInfo(
@@ -53,10 +52,8 @@ async function processEraStakersClipped(
         } as IndividualExposure;
       }),
     );
-    return eraValidatorInfo.save();
-  });
-
-  await Promise.allSettled(eraValidatorInfos);
+    await eraValidatorInfo.save();
+  }
 }
 
 async function processEraStakersPaged(
@@ -95,7 +92,7 @@ async function processEraStakersPaged(
     {},
   );
 
-  const eraValidatorInfos = overview.map(([key, exp]) => {
+  for (const [key, exp] of overview) {
     const exposure = (
       exp as unknown as Option<SpStakingPagedExposureMetadata>
     ).unwrap();
@@ -115,8 +112,6 @@ async function processEraStakersPaged(
       exposure.own.toBigInt(),
       others,
     );
-    return eraValidatorInfo.save();
-  });
-
-  await Promise.allSettled(eraValidatorInfos);
+    await eraValidatorInfo.save();
+  }
 }

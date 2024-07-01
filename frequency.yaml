@@ -4,10 +4,10 @@ version: 1.0.0
 runner:
   node:
     name: "@subql/node"
-    version: "*"
+    version: ">=4.6.6"
   query:
     name: "@subql/query"
-    version: v1.5.0
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
