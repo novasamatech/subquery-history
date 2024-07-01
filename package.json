@@ -86,7 +86,7 @@
     "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts",
     "calamariChainTypes": "./chainTypes/calamariChainTypes.ts",
     "westmintChaintypes": "./chainTypes/westmintChaintypes.ts",
-    "availChainTypes": "./chainTypes/availChainTypes.ts"
+    "availChaintypes": "./chainTypes/availChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
