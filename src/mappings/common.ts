@@ -5,6 +5,7 @@ import { CallBase } from "@polkadot/types/types/calls";
 import { AnyTuple, Codec } from "@polkadot/types/types/codec";
 import { Vec, GenericEventData } from "@polkadot/types";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
+import { u8aToHex } from "@polkadot/util";
 
 const batchCalls = ["batch", "batchAll", "forceBatch"];
 const transferCalls = ["transfer", "transferKeepAlive"];
@@ -54,6 +55,12 @@ export function isAssetTxFeePaidEvent(event: SubstrateEvent): boolean {
   );
 }
 
+export function isCurrencyDepositedEvent(event: SubstrateEvent): boolean {
+  return (
+    event.event.section === "currencies" && event.event.method === "Deposited"
+  );
+}
+
 export function isSwapExecutedEvent(event: SubstrateEvent): boolean {
   return (
     event.event.section === "assetConversion" &&
@@ -73,6 +80,22 @@ export function isSwapTokensForExactTokens(call: CallBase<AnyTuple>): boolean {
     call.section === "assetConversion" &&
     call.method === "swapTokensForExactTokens"
   );
+}
+
+export function isHydraOmnipoolBuy(call: CallBase<AnyTuple>): boolean {
+  return call.section === "omnipool" && call.method == "buy";
+}
+
+export function isHydraOmnipoolSell(call: CallBase<AnyTuple>): boolean {
+  return call.section === "omnipool" && call.method == "sell";
+}
+
+export function isHydraRouterBuy(call: CallBase<AnyTuple>): boolean {
+  return call.section === "router" && call.method == "buy";
+}
+
+export function isHydraRouterSell(call: CallBase<AnyTuple>): boolean {
+  return call.section === "router" && call.method == "sell";
 }
 
 export function isOrmlTransfer(call: CallBase<AnyTuple>): boolean {
@@ -194,6 +217,13 @@ export function eventRecordToSubstrateEvent(
 
 export function BigIntFromCodec(eventRecord: Codec): bigint {
   return (eventRecord as unknown as INumber).toBigInt();
+}
+
+export function convertOrmlCurrencyIdToString(currencyId: Codec): string {
+  // make sure first we have scale encoded bytes
+  const bytes = currencyId.toU8a();
+
+  return u8aToHex(bytes).toString();
 }
 
 function exportFeeRefund(
@@ -336,4 +366,39 @@ export function getAssetIdFromMultilocation(
       throw e;
     }
   }
+}
+
+export function getRewardData(event: SubstrateEvent): [Codec, Codec] {
+  const {
+    event: { data: innerData },
+  } = event;
+  let account: Codec, amount: Codec;
+  if (innerData.length == 2) {
+    [account, amount] = innerData;
+  } else {
+    [account, , amount] = innerData;
+  }
+  return [account, amount];
+}
+
+export function extractTransactionPaidFee(
+  events: EventRecord[],
+): string | undefined {
+  const eventRecord = events.find(
+    (event) =>
+      event.event.method == "TransactionFeePaid" &&
+      event.event.section == "transactionPayment",
+  );
+
+  if (eventRecord == undefined) return undefined;
+
+  const {
+    event: {
+      data: [_, fee, tip],
+    },
+  } = eventRecord;
+
+  const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt();
+
+  return fullFee.toString();
 }

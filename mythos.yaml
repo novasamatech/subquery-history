@@ -1,10 +1,12 @@
 specVersion: 1.0.0
-name: subquery-nova-rococo-assethub
+name: subquery-nova-mythos
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
-    version: ">=4.6.6"
+    version: "*"
+    options:
+      historical: true
   query:
     name: "@subql/query"
     version: "*"
@@ -13,11 +15,9 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x7c34d42fc815d392057c78b49f2755c753440ccd38bcb0405b3bcfb601d08734"
+  chainId: "0xf6ee56e9c5277df5b4ce6ae9983ee88f3cbed27d31beeb98f9f84f997a1ab0b9"
   endpoint: >-
-    wss://rococo-asset-hub-rpc.polkadot.io
-  chaintypes:
-    file: ./dist/rococoAssethubChaintypes.js
+    wss://polkadot-mythos-rpc.polkadot.io
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -42,6 +42,11 @@ dataSources:
           filter:
             module: assets
             method: Transferred
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: localassets
+            method: Transferred
         - handler: handleCurrencyTransfer
           kind: substrate/EventHandler
           filter:
@@ -52,8 +57,3 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleAssetConversionSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted
