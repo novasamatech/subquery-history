@@ -13,7 +13,7 @@ import { HistoryElement } from "../../types";
 import { createAssetTransmission } from "../Transfers";
 
 export async function handleAssetConversionSwap(
-  event: SubstrateEvent,
+  event: SubstrateEvent
 ): Promise<void> {
   const [from, to, path, amountIn, amountOut] = getEventData(event);
 
@@ -27,17 +27,17 @@ export async function handleAssetConversionSwap(
   let assetIdFee: string;
   let fee: string;
   let foundAssetTxFeePaid = event.block.events.find((e) =>
-    isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)),
+    isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e))
   );
   let swaps = event.block.events.filter((e) =>
-    isSwapExecutedEvent(eventRecordToSubstrateEvent(e)),
+    isSwapExecutedEvent(eventRecordToSubstrateEvent(e))
   );
   if (foundAssetTxFeePaid === undefined) {
     assetIdFee = "native";
     fee = calculateFeeAsString(event.extrinsic, from.toString());
   } else {
     const [who, actualFee, tip, rawAssetIdFee] = getEventData(
-      eventRecordToSubstrateEvent(foundAssetTxFeePaid),
+      eventRecordToSubstrateEvent(foundAssetTxFeePaid)
     );
     assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee);
     fee = actualFee.toString();
@@ -70,7 +70,7 @@ export async function handleAssetConversionSwap(
           BigIntFromCodec(actualFee) + BigIntFromCodec(refundAmountOut) &&
         getAssetIdFromMultilocation(feePathArray[0]) ==
           getAssetIdFromMultilocation(
-            refundPathArray[refundPathArray["length"] - 1],
+            refundPathArray[refundPathArray["length"] - 1]
           )
       ) {
         swaps = swaps.slice(swaps.length - 1);
@@ -78,21 +78,20 @@ export async function handleAssetConversionSwap(
       }
     }
   }
-  await Promise.all(
-    swaps.map((e) =>
-      processAssetConversionSwap(
-        eventRecordToSubstrateEvent(e),
-        assetIdFee,
-        fee,
-      ),
-    ),
-  );
+
+  for (const e of swaps) {
+    await processAssetConversionSwap(
+      eventRecordToSubstrateEvent(e),
+      assetIdFee,
+      fee
+    );
+  }
 }
 
 async function processAssetConversionSwap(
   event: SubstrateEvent,
   assetIdFee: string,
-  fee: string,
+  fee: string
 ): Promise<void> {
   const [from, to, path, amountIn, amountOut] = getEventData(event);
 
