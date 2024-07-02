@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-pichiu
+name: subquery-nova-pichiu
 version: 1.0.0
 runner:
   node:
