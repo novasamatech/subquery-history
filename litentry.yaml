@@ -1,21 +1,19 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-litentry
+name: subquery-nova-litentry
 version: 1.0.0
 runner:
   node:
-    name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
+    name: '@subql/node'
+    version: '*'
   query:
-    name: "@subql/query"
-    version: "*"
+    name: '@subql/query'
+    version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x2fc8bb6ed7c0051bdcf4866c322ed32b6276572713607e3297ccf411b8f14aa9"
+  chainId: '0x2fc8bb6ed7c0051bdcf4866c322ed32b6276572713607e3297ccf411b8f14aa9'
   endpoint: wss://rpc.litentry-parachain.litentry.io
 dataSources:
   - name: main

@@ -1,22 +1,20 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-hydra
+name: subquery-nova-hydra
 version: 1.0.0
 runner:
   node:
-    name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
+    name: '@subql/node'
+    version: '*'
   query:
-    name: "@subql/query"
-    version: "*"
+    name: '@subql/query'
+    version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d"
-  endpoint: wss://hydradx-rpc.dwellir.com
+  chainId: '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d'
+  endpoint: wss://rpc.hydradx.cloud
 dataSources:
   - name: main
     kind: substrate/Runtime

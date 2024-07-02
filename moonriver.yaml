@@ -1,21 +1,19 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-moonriver
+name: subquery-nova-moonriver
 version: 1.0.0
 runner:
   node:
-    name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
-  query:
-    name: "@subql/query"
+    name: '@subql/node'
     version: "*"
+  query:
+    name: '@subql/query'
+    version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b"
+  chainId: '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b'
   endpoint: >-
     wss://wss.api.moonriver.moonbeam.network
   dictionary: https://api.subquery.network/sq/subquery/moonriver-dictionary

@@ -1,21 +1,19 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-khala
+name: subquery-nova-khala
 version: 1.0.0
 runner:
   node:
-    name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
+    name: '@subql/node'
+    version: '*'
   query:
-    name: "@subql/query"
-    version: "*"
+    name: '@subql/query'
+    version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d"
+  chainId: '0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d'
   endpoint: wss://khala-rpc.dwellir.com
   dictionary: https://api.subquery.network/sq/subquery/khala-dictionary
   chaintypes:
