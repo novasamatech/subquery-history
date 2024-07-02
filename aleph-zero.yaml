@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-aleph-zero
+name: subquery-nova-aleph-zero
 version: 1.0.0
 runner:
   node:

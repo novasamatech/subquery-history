@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-zeitgeist
+name: subquery-nova-zeitgeist
 version: 1.0.0
 runner:
   node:
