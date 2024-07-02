@@ -1,5 +1,5 @@
 {
-  "name": "subquery-nova",
+  "name": "subquery-common-api-polkadot-transactions",
   "version": "1.0.0",
   "description": "Nova SubQuery projects",
   "main": "dist/index.js",
