@@ -1,6 +1,6 @@
 // Adapted from https://github.com/polkadot-js/apps/blob/master/packages/apps-config/src/api/spec/ajuna.ts
 
-import type { OverrideBundleDefinition } from '@polkadot/types/types';
+import type { OverrideBundleDefinition } from "@polkadot/types/types";
 
 /* eslint-disable sort-keys */
 const definitions: OverrideBundleDefinition = {
@@ -9,11 +9,11 @@ const definitions: OverrideBundleDefinition = {
       // on all versions
       minmax: [0, undefined],
       types: {
-        Address: 'MultiAddress',
-        LookupSource: 'MultiAddress'
-      }
-    }
-  ]
+        Address: "MultiAddress",
+        LookupSource: "MultiAddress",
+      },
+    },
+  ],
 };
 
-export default  { typesBundle: { spec: { "ajuna" : definitions }}}
+export default { typesBundle: { spec: { ajuna: definitions } } };

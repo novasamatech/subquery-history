@@ -1,22 +1,27 @@
 specVersion: 1.0.0
-name: subquery-nova-avail-turing-test
+name: subquery-common-api-polkadot-transactions-polkadot
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: ">= 4.6.3"
+    options:
+      historical: true
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
+parent:
+  reference: QmaTy1aG5uZfeyUXRu8bDci1P6AzbTYBEzM57yEYk3MPEt
+  untilBlock: 20438530
 network:
-  chainId: '0xd3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70'
-  endpoint: wss://turing-rpc.avail.so/ws
-  chaintypes:
-    file: ./dist/availChainTypes.js
+  chainId: "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3"
+  endpoint: >-
+    wss://polkadot.api.onfinality.io/public-ws
+  dictionary: https://api.subquery.network/sq/subquery/dictionary-polkadot
 dataSources:
   - name: main
     kind: substrate/Runtime

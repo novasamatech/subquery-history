@@ -3,17 +3,19 @@ name: subquery-nova-dock
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: ">=4.6.6"
+    options:
+      historical: true
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x6bfe24dca2a3be10f22212678ac13a6446ec764103c0f3471c71609eac384aae'
+  chainId: "0x6bfe24dca2a3be10f22212678ac13a6446ec764103c0f3471c71609eac384aae"
   endpoint: >-
     wss://mainnet-node.dock.io
   chaintypes:
