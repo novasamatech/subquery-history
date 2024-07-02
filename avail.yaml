@@ -19,7 +19,7 @@ network:
   endpoint: >-
     wss://zeref-api.slowops.xyz/ws
   chaintypes:
-    file: ./dist/availChaintypes.js
+    file: ./dist/availChainTypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
