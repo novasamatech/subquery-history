@@ -1,4 +1,4 @@
-import { typesBundleForPolkadot as typesBundle } from "@acala-network/type-definitions";
+import { acalaTypesBundle as typesBundle } from "@acala-network/types";
 
 export default {
   typesBundle,
