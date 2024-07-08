@@ -15,6 +15,8 @@ schema:
 network:
   chainId: '0xf3c7ad88f6a80f366c4be216691411ef0622e8b809b1046ea297ef106058d4eb'
   endpoint: wss://ws.manta.systems
+  chaintypes:
+    file: ./dist/mantaChainTypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime

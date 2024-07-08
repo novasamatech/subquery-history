@@ -81,7 +81,8 @@
     "calamariChainTypes": "./chainTypes/calamariChainTypes.ts",
     "westmintChaintypes": "./chainTypes/westmintChaintypes.ts",
     "hyperbridgeChainTypes": "./chainTypes/hyperbridgeChaintypes.ts",
-    "availChainTypes": "./chainTypes/availChainTypes.ts"
+    "availChainTypes": "./chainTypes/availChainTypes.ts",
+    "mantaChainTypes": "./chainTypes/mantaChainTypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
