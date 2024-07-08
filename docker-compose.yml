@@ -1,12 +1,13 @@
-version: '3'
+version: "3"
 services:
   postgres:
     container_name: "postgres-${PROJECT_PATH}"
-    image: postgres:12-alpine
+    image: postgres:16-alpine
     ports:
       - 5432:5432
     volumes:
       - .data/postgres:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -53,4 +54,3 @@ services:
     command:
       - --name=app
       - --playground
-

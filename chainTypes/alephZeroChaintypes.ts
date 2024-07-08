@@ -3,17 +3,20 @@
 
 /* eslint-disable sort-keys */
 
-import {OverrideBundleDefinition} from "@polkadot/types/types";
+import type { OverrideBundleDefinition } from "@polkadot/types/types";
+
+// structs need to be in order
+/* eslint-disable sort-keys */
 
 const definitions: OverrideBundleDefinition = {
-    types: [
-        {
-            minmax: [0, 4],
-            types: {
-                DispatchError: 'DispatchErrorPre6First',
-            }
-        },
-    ]
+  types: [
+    {
+      minmax: [3, undefined],
+      types: {
+        DispatchErrorModule: "DispatchErrorModuleU8",
+      },
+    },
+  ],
 };
 
-export default { typesBundle: { spec: { "aleph-node" : definitions }}};
+export default { typesBundle: { spec: { "aleph-node": definitions } } };
