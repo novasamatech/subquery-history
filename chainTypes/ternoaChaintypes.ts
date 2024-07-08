@@ -1,4 +1,4 @@
-import type { OverrideBundleDefinition } from '@polkadot/types/types';
+import type { OverrideBundleDefinition } from "@polkadot/types/types";
 
 const definitions: OverrideBundleDefinition = {
   types: [
@@ -6,91 +6,82 @@ const definitions: OverrideBundleDefinition = {
       // on all versions
       minmax: [0, undefined],
       types: {
-        AccountDataOf: 'AccountData',
-        Address: 'MultiAddress',
-        LookupSource: 'MultiAddress',
-        ShardIdentifier: 'Hash',
-        Url: 'Text',
-        URI: 'Text',
-        ClusterId: 'u32',
-        EnclaveId: 'u32',
-        MarketplaceId: 'u32',
-        BalanceCaps: 'Balance',
-        NFTId: 'u32',
-        TernoaString: 'Vec<u8>',
-        NFTSeriesId: 'Text',
+        AccountDataOf: "AccountData",
+        Address: "MultiAddress",
+        LookupSource: "MultiAddress",
+        ShardIdentifier: "Hash",
+        Url: "Text",
+        URI: "Text",
+        ClusterId: "u32",
+        EnclaveId: "u32",
+        MarketplaceId: "u32",
+        BalanceCaps: "Balance",
+        NFTId: "u32",
+        TernoaString: "Vec<u8>",
+        NFTSeriesId: "Text",
         NFTData: {
-          owner: 'AccountId',
-          ipfs_reference: 'Text',
-          series_id: 'NFTSeriesId',
-          locked: 'bool'
+          owner: "AccountId",
+          ipfs_reference: "Text",
+          series_id: "NFTSeriesId",
+          locked: "bool",
         },
         NFTSeriesDetails: {
-          owner: 'AccountId',
-          draft: 'bool'
+          owner: "AccountId",
+          draft: "bool",
         },
         NFTCurrencyCombined: {
-          caps: 'Balance',
-          tiime: 'Balance'
+          caps: "Balance",
+          tiime: "Balance",
         },
         NFTCurrency: {
           _enum: {
-            Caps: 'Balance',
-            Tiime: 'Balance',
-            Combined: 'NFTCurrencyCombined'
-          }
+            Caps: "Balance",
+            Tiime: "Balance",
+            Combined: "NFTCurrencyCombined",
+          },
         },
         NFTCurrencyId: {
-          _enum: [
-            'Caps',
-            'Tiime'
-          ]
+          _enum: ["Caps", "Tiime"],
         },
         SaleInformation: {
-          account_id: 'AccountId',
-          price: 'NFTCurrency',
-          marketplace_id: 'MarketplaceId'
+          account_id: "AccountId",
+          price: "NFTCurrency",
+          marketplace_id: "MarketplaceId",
         },
         MarketplaceType: {
-          _enum: [
-            'Public',
-            'Private'
-          ]
+          _enum: ["Public", "Private"],
         },
         MarketplaceInformation: {
-          kind: 'MarketplaceType',
-          commission_fee: 'u8',
-          owner: 'AccountId',
-          allow_list: 'Vec<AccountId>',
-          disallow_list: 'Vec<AccountId>',
-          name: 'Text',
-          uri: 'Option<URI>',
-          logo_uri: 'Option<URI>'
+          kind: "MarketplaceType",
+          commission_fee: "u8",
+          owner: "AccountId",
+          allow_list: "Vec<AccountId>",
+          disallow_list: "Vec<AccountId>",
+          name: "Text",
+          uri: "Option<URI>",
+          logo_uri: "Option<URI>",
         },
         Cluster: {
-          enclaves: 'Vec<EnclaveId>'
+          enclaves: "Vec<EnclaveId>",
         },
         Enclave: {
-          api_url: 'Url'
+          api_url: "Url",
         },
         CapsuleData: {
-          owner: 'AccountId',
-          ipfs_reference: 'Text'
+          owner: "AccountId",
+          ipfs_reference: "Text",
         },
-        CapsuleLedger: 'Vec<(NFTId, Balance)>',
+        CapsuleLedger: "Vec<(NFTId, Balance)>",
         Status: {
-          _enum: [
-            'Free',
-            'Reserved'
-          ]
+          _enum: ["Free", "Reserved"],
         },
         Request: {
-          shard: 'ShardIdentifier',
-          cyphertext: 'Vec<u8>'
-        }
-      }
-    }
-  ]
+          shard: "ShardIdentifier",
+          cyphertext: "Vec<u8>",
+        },
+      },
+    },
+  ],
 };
 
-export default { typesBundle: { spec: { ternoa: definitions }}};
+export default { typesBundle: { spec: { ternoa: definitions } } };

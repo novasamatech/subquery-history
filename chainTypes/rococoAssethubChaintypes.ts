@@ -5,26 +5,26 @@ const definitions: OverrideBundleDefinition = {
     {
       minmax: [0, 10004],
       types: {
-        NovaAssetId: "Option<AssetId>"
+        NovaAssetId: "Option<AssetId>",
       },
     },
     {
       minmax: [10005, null],
       types: {
-        NovaAssetId: "Option<MultiLocation>"
+        NovaAssetId: "Option<MultiLocation>",
       },
     },
   ],
   signedExtensions: {
     ChargeAssetTxPayment: {
       extrinsic: {
-        tip: 'Compact<Balance>',
+        tip: "Compact<Balance>",
         // eslint-disable-next-line sort-keys
-        assetId: 'NovaAssetId'
+        assetId: "NovaAssetId",
       },
-      payload: {}
-    }
-  }
+      payload: {},
+    },
+  },
 };
 
-export default { typesBundle: { spec: { "statemine": definitions } } };
+export default { typesBundle: { spec: { statemine: definitions } } };

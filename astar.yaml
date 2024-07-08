@@ -3,17 +3,21 @@ name: subquery-nova-astar
 version: 1.0.0
 runner:
   node:
-    name: '@subql/node'
-    version: '*'
+    name: "@subql/node"
+    version: ">=4.6.6"
+    options:
+      historical: true
   query:
-    name: '@subql/query'
-    version: v1.5.0
+    name: "@subql/query"
+    version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6'
+  chainId: "0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6"
+  chaintypes:
+    file: ./dist/astarChaintypes.js
   endpoint: wss://rpc.astar.network
   dictionary: https://api.subquery.network/sq/subquery/astar-dictionary
 dataSources:
