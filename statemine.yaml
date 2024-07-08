@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-statemine
+name: subquery-nova-statemine
 version: 1.0.0
 runner:
   node:
