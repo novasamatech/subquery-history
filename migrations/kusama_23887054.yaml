@@ -13,7 +13,7 @@ runner:
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 parent:
-  reference: Qmbe5g5vbEJYYAfpjcwNDzuhjeyaEQPQbxKyKx6PveYnR8
+  reference: QmSCNvH1dPT8AwSMbxbePDe5QNMVre81wHfXgA9MwLrFWF
   untilBlock: 23887054
 schema:
   file: ./schema.graphql
