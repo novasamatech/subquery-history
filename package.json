@@ -55,6 +55,7 @@
   },
   "exports": {
     "acalaChaintypes": "./chainTypes/acalaChaintypes.ts",
+    "altairChaintypes": "./chainTypes/altairChaintypes.ts",
     "ajunaChaintypes": "./chainTypes/ajunaChaintypes.ts",
     "alephZeroChaintypes": "./chainTypes/alephZeroChaintypes.ts",
     "astarChaintypes": "./chainTypes/astarChaintypes.ts",
