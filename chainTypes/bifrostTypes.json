@@ -1,5 +1,6 @@
 {
   "types": {
+    "DispatchErrorModule": "DispatchErrorModuleU8",
     "CallOf": "Call",
     "DispatchTime": {
       "_enum": {
