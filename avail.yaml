@@ -17,7 +17,7 @@ schema:
 network:
   chainId: "0xb91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a"
   chaintypes:
-    file: ./dist/availChaintypes.js
+    file: ./dist/availChainTypes.js
   endpoint: wss://zeref-api.slowops.xyz/ws
 dataSources:
   - name: main
