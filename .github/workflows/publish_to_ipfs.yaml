@@ -2,6 +2,7 @@ name: Publish to IPFS
 
 on:
   workflow_dispatch:
+  pull_request:
 
 env:
   SUBQL_ACCESS_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
@@ -15,7 +16,7 @@ jobs:
     outputs:
       project_files: ${{ steps.project_files.outputs.files }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: 🧾 Get list of projects
         id: project_files
@@ -32,6 +33,13 @@ jobs:
       - name: 🏗 Build from sources
         run: yarn build
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: |
+            dist
+            src/types
+
   deploy-to-IPFS:
     needs: setup
     name: 📬 Deploy to SubQuery IPFS
@@ -42,20 +50,21 @@ jobs:
       matrix: ${{fromJson(needs.setup.outputs.project_files)}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: 🔄 Install dependencies
-        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn install
 
-      - name: 🧬 Types generation
-        run: yarn codegen
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: .
 
       - name: 📬 Deploy to IPFS
         run: |
           ./node_modules/.bin/subql publish -f ${{ matrix.project_file }}  -o
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: cids
           path: .*cid
@@ -66,10 +75,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Download built artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: cids
           path: ./ipfs-cids
