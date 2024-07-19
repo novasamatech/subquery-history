@@ -6,6 +6,9 @@ on:
 env:
   SUBQL_ACCESS_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
 
+permissions:
+  contents: write
+
 jobs:
   setup:
     runs-on: ubuntu-latest
