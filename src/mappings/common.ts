@@ -282,24 +282,24 @@ function exportFeeFromTransactionFeePaidEvent(
   extrinsic: SubstrateExtrinsic,
   from: string = "",
 ): bigint | undefined {
-  const eventRecord = extrinsic.events.find(
-    (event) =>
+  for (let i = extrinsic.events.length - 1; i >= 0; i--) {
+    const event = extrinsic.events[i];
+    if (
       event.event.method == "TransactionFeePaid" &&
-      event.event.section == "transactionPayment",
-  );
+      event.event.section == "transactionPayment"
+    ) {
+      const {
+        event: {
+          data: [accountid, fee, tip],
+        },
+      } = event;
 
-  if (eventRecord !== undefined) {
-    const {
-      event: {
-        data: [accountid, fee, tip],
-      },
-    } = eventRecord;
+      const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt();
 
-    const fullFee = (fee as Balance).toBigInt() + (tip as Balance).toBigInt();
-
-    const extrinsicSigner = from || extrinsic.extrinsic.signer.toString();
-    const withdrawAccountId = accountid.toString();
-    return extrinsicSigner === withdrawAccountId ? fullFee : undefined;
+      const extrinsicSigner = from || extrinsic.extrinsic.signer.toString();
+      const withdrawAccountId = accountid.toString();
+      return extrinsicSigner === withdrawAccountId ? fullFee : undefined;
+    }
   }
 
   return undefined;
