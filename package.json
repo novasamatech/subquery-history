@@ -19,7 +19,7 @@
   "author": "SubQuery Team and Novasama",
   "license": "Apache-2.0",
   "dependencies": {
-    "@subql/common-substrate": "^4.3.0",
+    "@subql/common-substrate": "latest",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
@@ -40,7 +40,6 @@
     "@polkadot/types-codec": "^11",
     "@polymeshassociation/polymesh-types": "^5.4.1",
     "@subql/cli": "latest",
-    "@subql/common-substrate": "latest",
     "@subql/types": "latest",
     "@subsocial/types": "^0.6.8",
     "@types/jest": "^29.5.1",

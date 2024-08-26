@@ -2383,7 +2383,7 @@
     yaml "^2.5.0"
     yaml-loader "^0.8.1"
 
-"@subql/common-substrate@^4.3.0":
+"@subql/common-substrate@latest":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@subql/common-substrate/-/common-substrate-4.3.0.tgz#653b3b5b8c44c48d81a7711aa0b5ca3e6a1fe046"
   integrity sha512-et6VY+6aMyw+fKA0kTUSM4K/PY+SytJ2YtN8DVXWdMtf/cFys8AZZ9cWmk6kT1c+zEwYARTWR3VlbBksYjzuhw==
