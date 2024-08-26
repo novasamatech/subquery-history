@@ -13,6 +13,13 @@ overrideTypesBundle.spec.karura.types.push({
       origin: "PalletsOrigin",
     },
     ScheduleTaskIndex: "u32",
+    OrmlVestingSchedule: {
+      start: "BlockNumber",
+      period: "BlockNumber",
+      periodCount: "u32",
+      perPeriod: "Compact<Balance>",
+    },
+    VestingScheduleOf: "OrmlVestingSchedule",
   },
 });
 
