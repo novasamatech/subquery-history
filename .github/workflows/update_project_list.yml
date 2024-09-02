@@ -11,6 +11,10 @@ env:
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   generate_project_list:
     runs-on: ubuntu-latest
