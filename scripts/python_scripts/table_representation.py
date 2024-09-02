@@ -93,7 +93,7 @@ class ProjectTableGenerator:
         return f'{progress_bar} {percent}%', commit
 
     def generate_progress_bar(self, percent: int) -> str:
-        bar_length = 20
+        bar_length = 5
         filled_length = int(bar_length * percent // 100)
         bar = '█' * filled_length + '-' * (bar_length - filled_length)
         return f'[{bar}]'
