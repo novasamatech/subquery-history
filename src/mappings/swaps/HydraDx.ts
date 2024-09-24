@@ -119,13 +119,11 @@ export type Fee = {
   amount: string;
 };
 
-export function findHydraDxFeeTyped(
-  events: TypedEventRecord<Codec[]>[],
-): Fee | undefined {
+export function findHydraDxFeeTyped(events: TypedEventRecord<Codec[]>[]): Fee {
   return findHydraDxFee(events as EventRecord[]);
 }
 
-export function findHydraDxFee(events: EventRecord[]): Fee | undefined {
+export function findHydraDxFee(events: EventRecord[]): Fee {
   const lastCurrenciesDepositEvent = findLastEvent(events, (event) =>
     isCurrencyDepositedEvent(eventRecordToSubstrateEvent(event)),
   );
@@ -159,9 +157,9 @@ function isPartOfRouterSwap(events: TypedEventRecord<Codec[]>[]): boolean {
   return false;
 }
 
-function findNativeFee(events: EventRecord[]): Fee | undefined {
+function findNativeFee(events: EventRecord[]): Fee {
   let foundAssetTxFeePaid = extractTransactionPaidFee(events);
-  if (foundAssetTxFeePaid == undefined) return undefined;
+  if (foundAssetTxFeePaid == undefined) foundAssetTxFeePaid = "0";
 
   return {
     tokenId: "native",
