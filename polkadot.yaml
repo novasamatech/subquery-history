@@ -26,10 +26,10 @@ dataSources:
     mapping:
       file: ./dist/index.js
       handlers:
-        - handler: handleHistoryElement
-          kind: substrate/CallHandler
-          filter:
-            isSigned: true
+        # - handler: handleHistoryElement
+        #   kind: substrate/CallHandler
+        #   filter:
+        #     isSigned: true
         - handler: handleReward
           kind: substrate/EventHandler
           filter:
