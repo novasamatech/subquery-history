@@ -1,24 +1,23 @@
 specVersion: 1.0.0
-name: subquery-nova-manta
+name: subquery-nova-hyperbridge
 version: 1.0.0
 runner:
   node:
-    name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
+    name: '@subql/node'
+    version: '>=4.6.2'
   query:
-    name: "@subql/query"
-    version: "*"
+    name: '@subql/query'
+    version: v1.5.0
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0xf3c7ad88f6a80f366c4be216691411ef0622e8b809b1046ea297ef106058d4eb"
-  endpoint: wss://ws.manta.systems
+  chainId: '0x5388faf792c5232566d21493929b32c1f20a9c2b03e95615eefec2aa26d64b73'
+  endpoint: >-
+    wss://hyperbridge-paseo-rpc.blockops.network
   chaintypes:
-    file: ./dist/mantaChainTypes.js
+    file: "./dist/hyperbridgeChaintypes.js"
 dataSources:
   - name: main
     kind: substrate/Runtime
@@ -28,11 +27,6 @@ dataSources:
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
-        - handler: handleParachainRewarded
-          kind: substrate/EventHandler
-          filter:
-            module: parachainStaking
-            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -43,3 +37,13 @@ dataSources:
           filter:
             module: assets
             method: Transferred
+        - handler: handleTokenTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: tokens
+            method: Transfer
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
