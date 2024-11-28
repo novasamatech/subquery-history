@@ -141,21 +141,22 @@ export async function handlePoolBondedSlash(
 
 export async function handlePoolUnbondingSlash(
   unbondingSlashEvent: SubstrateEvent<
-    [era: INumber, poolId: INumber, slash: INumber]
+    [poolId: INumber, era: INumber, slash: INumber]
   >,
 ): Promise<void> {
   const {
     event: {
-      data: [era, poolId, slash],
+      data: [poolId, era, slash],
     },
   } = unbondingSlashEvent;
   const poolIdNumber = poolId.toNumber();
   const eraIdNumber = era.toNumber();
+  logger.info("poolId:" + poolIdNumber.toString());
+  const test = await api.query.nominationPools.subPoolsStorage(poolIdNumber);
+  logger.info("poolStorage:" + test.toString());
 
   const unbondingPools = (
-    (await api.query.nominationPools.subPoolsStorage(
-      poolIdNumber,
-    )) as Option<PalletNominationPoolsSubPools>
+    test as Option<PalletNominationPoolsSubPools>
   ).unwrap();
 
   const pool =
