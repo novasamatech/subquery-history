@@ -151,12 +151,11 @@ export async function handlePoolUnbondingSlash(
   } = unbondingSlashEvent;
   const poolIdNumber = poolId.toNumber();
   const eraIdNumber = era.toNumber();
-  logger.info("poolId:" + poolIdNumber.toString());
-  const test = await api.query.nominationPools.subPoolsStorage(poolIdNumber);
-  logger.info("poolStorage:" + test.toString());
 
   const unbondingPools = (
-    test as Option<PalletNominationPoolsSubPools>
+    (await api.query.nominationPools.subPoolsStorage(
+      poolIdNumber,
+    )) as Option<PalletNominationPoolsSubPools>
   ).unwrap();
 
   const pool =
