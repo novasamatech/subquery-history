@@ -34,8 +34,7 @@ services:
     command:
       - -f=/app/${PROJECT_PATH}
       - --disable-historical=true
-      # - --local #remove
-      # - --batch-size=50
+      - --batch-size=1
 
   graphql-engine:
     container_name: "query-${PROJECT_PATH}"
