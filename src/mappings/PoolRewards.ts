@@ -141,12 +141,12 @@ export async function handlePoolBondedSlash(
 
 export async function handlePoolUnbondingSlash(
   unbondingSlashEvent: SubstrateEvent<
-    [era: INumber, poolId: INumber, slash: INumber]
+    [poolId: INumber, era: INumber, slash: INumber]
   >,
 ): Promise<void> {
   const {
     event: {
-      data: [era, poolId, slash],
+      data: [poolId, era, slash],
     },
   } = unbondingSlashEvent;
   const poolIdNumber = poolId.toNumber();
