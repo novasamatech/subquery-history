@@ -146,7 +146,7 @@ export async function handlePoolUnbondingSlash(
 ): Promise<void> {
   const {
     event: {
-      data: [era, poolId, slash],
+      data: [poolId, era, slash],
     },
   } = unbondingSlashEvent;
   const poolIdNumber = poolId.toNumber();
