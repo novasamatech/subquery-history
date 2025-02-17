@@ -81,14 +81,22 @@ class ProjectTableGenerator:
 
     def fill_status_bar(self, instance: DeploymentInstance, project: SubQueryProject):
         if not instance:
-            return '![0](https://progress-bar.dev/0?title=N/A)', '-'
+            return 'N/A', '-'
         commit = instance.version[0:8]
         if instance.status == 'processing':
-            return '![0](https://progress-bar.dev/0?title=Processing...)', commit
+            return 'Processing...', commit
         if instance.status == 'error' and self.get_sync_percentage(instance, project) == '0':
-            return '![0](https://progress-bar.dev/0?title=Error)', commit
+            return 'Error', commit
         percent = self.get_sync_percentage(instance, project)
-        return f'![{percent}](https://progress-bar.dev/{percent}?title={instance.type.capitalize()})', commit
+        percent = min(int(percent), 100)
+        progress_bar = self.generate_progress_bar(percent)
+        return f'{progress_bar} {percent}%', commit
+
+    def generate_progress_bar(self, percent: int) -> str:
+        bar_length = 5
+        filled_length = int(bar_length * percent // 100)
+        bar = '█' * filled_length + '-' * (bar_length - filled_length)
+        return f'[{bar}]'
 
     def is_sync_status_valid(self, sync_status):
         if sync_status is None:
