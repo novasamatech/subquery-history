@@ -474,6 +474,46 @@ export async function handleParachainRewarded(
   );
 }
 
+// ============= Mythos ================
+
+export async function handleMythosRewarded(
+  rewardEvent: SubstrateEvent<[accountId: Codec, reward: INumber]>,
+): Promise<void> {
+  await handleMythosRewardForTxHistory(rewardEvent);
+  let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
+  await updateAccountRewards(
+    rewardEvent,
+    RewardType.reward,
+    accumulatedReward.amount,
+  );
+}
+
+async function handleMythosRewardForTxHistory(
+  rewardEvent: SubstrateEvent,
+): Promise<void> {
+  let [account, amount] = decodeDataFromReward(rewardEvent);
+
+  await handleGenericForTxHistory(
+    rewardEvent,
+    account.toString(),
+    async (element: HistoryElement) => {
+      element.reward = {
+        eventIdx: rewardEvent.idx,
+        amount: amount.toString(),
+        isReward: true,
+        stash: account.toString(),
+        // Mythos staking rewards are paid manually by the user so each reward
+        // aggregates multiple payouts, and it is hard to split it into
+        // individual per-session per-validator pieces
+        validator: null,
+        era: null,
+      };
+
+      return element;
+    },
+  );
+}
+
 // ============= GENERICS ================
 
 interface AccumulatedInterface {

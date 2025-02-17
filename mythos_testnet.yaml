@@ -15,13 +15,12 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0xf6ee56e9c5277df5b4ce6ae9983ee88f3cbed27d31beeb98f9f84f997a1ab0b9"
-  endpoint: >-
-    wss://polkadot-mythos-rpc.polkadot.io
+  chainId: "0x15f6788bcf1d1a3b7e1c36074584e1a3f3d07e0a46e362a102c3c3df1a93669f"
+  endpoint: "wss://paseo-muse-rpc.polkadot.io"
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 2679576
     mapping:
       file: ./dist/index.js
       handlers:
