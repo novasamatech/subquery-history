@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-altair
+name: subquery-nova-altair
 version: 1.0.0
 runner:
   node:
@@ -20,7 +20,7 @@ network:
     wss://fullnode.altair.centrifuge.io
   dictionary: https://api.subquery.network/sq/subquery/altair-dictionary
   chaintypes:
-    file: ./dist/altairChaintypes.js
+    file: ./chainTypes/altairTypes.json
 dataSources:
   - name: main
     kind: substrate/Runtime
