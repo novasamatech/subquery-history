@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         node-js-image-version: [20]
-        subql-node-image-version: [v5.6.0]
+        subql-node-image-version: [v6.0.4]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
