@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - dev
+      - add-paseo
     tags:
       - "v*"
 
