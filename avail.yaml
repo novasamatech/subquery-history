@@ -15,11 +15,10 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x128ea318539862c0a06b745981300d527c1041c6f3388a8c49565559e3ea3d10"
-  endpoint: >-
-    wss://zeref-api.slowops.xyz/ws
+  chainId: "0xb91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a"
   chaintypes:
     file: ./dist/availChainTypes.js
+  endpoint: wss://zeref-api.slowops.xyz/ws
 dataSources:
   - name: main
     kind: substrate/Runtime
