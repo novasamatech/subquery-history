@@ -24,7 +24,9 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    # the old runtime generated blocks where EventRecord structure is shorte than
+    # current Polkadot API V15 can decode, so we need to start from block 430
+    startBlock: 220
     mapping:
       file: ./dist/index.js
       handlers:
