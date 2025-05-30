@@ -21,7 +21,7 @@ network:
   dictionary: https://api.subquery.network/sq/subquery/bifrost-parachain-dictionary
   chaintypes:
     #file: ./chainTypes/bifrostTypes.json
-    file: ./chainTypes/bifrostChaintypes.js
+    file: ./dist/bifrostChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
