@@ -20,13 +20,11 @@ network:
     wss://bifrost-parachain.api.onfinality.io/public-ws
   dictionary: https://api.subquery.network/sq/subquery/bifrost-parachain-dictionary
   chaintypes:
-    file: ./chainTypes/bifrostTypes.json
+    #file: ./chainTypes/bifrostTypes.json
+    file: ./chainTypes/bifrostChaintypes.ts
 dataSources:
   - name: main
     kind: substrate/Runtime
-    # the old runtime generated blocks where EventRecord structure is shorte than
-    # current Polkadot API V15 can decode, so we need to start from block 430
-    startBlock: 220
     mapping:
       file: ./dist/index.js
       handlers:
