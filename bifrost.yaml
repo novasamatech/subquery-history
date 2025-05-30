@@ -20,11 +20,10 @@ network:
     wss://bifrost-parachain.api.onfinality.io/public-ws
   dictionary: https://api.subquery.network/sq/subquery/bifrost-parachain-dictionary
   chaintypes:
-    file: ./chainTypes/bifrostTypes.json
+    file: ./dist/bifrostChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
     mapping:
       file: ./dist/index.js
       handlers:

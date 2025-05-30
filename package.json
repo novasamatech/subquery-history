@@ -22,7 +22,8 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@acala-network/type-definitions": "^4.1.5",
+    "@acala-network/type-definitions": "^5.1.2",
+    "@bifrost-finance/type-definitions": "^1.11.9",
     "@crustio/type-definitions": "^1.3.0",
     "@docknetwork/node-types": "0.17.0",
     "@equilab/definitions": "^1.4.18",
@@ -86,7 +87,8 @@
     "bittensorChaintypes": "./chainTypes/bittensorChainTypes.ts",
     "calamariChainTypes": "./chainTypes/calamariChainTypes.ts",
     "westmintChaintypes": "./chainTypes/westmintChaintypes.ts",
-    "availChainTypes": "./chainTypes/availChainTypes.ts"
+    "availChainTypes": "./chainTypes/availChainTypes.ts",
+    "bifrostChaintypes": "./chainTypes/bifrostChaintypes.ts"
   },
   "resolutions": {
     "ipfs-unixfs": "6.0.6"
