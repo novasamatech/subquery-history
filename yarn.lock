@@ -2,12 +2,10 @@
 # yarn lockfile v1
 
 
-"@acala-network/type-definitions@^4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@acala-network/type-definitions/-/type-definitions-4.1.5.tgz#c02624ba9bb637588ddd184a4ce35ab7d9de2bf6"
-  integrity sha512-XwXtKf5ESfzGk32N1sE3MlBtnamz2JZYtjB6KcKe9eOyv+3lowQvRn4Z347rNSEp+tpenZWnLwBXk4XWhdiSoQ==
-  dependencies:
-    "@open-web3/orml-type-definitions" "^1.1.4"
+"@acala-network/type-definitions@^5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@acala-network/type-definitions/-/type-definitions-5.1.2.tgz#533b7e65e166f56607eb084a1efb44ca2bae6e98"
+  integrity sha512-di3HH8Zn8i1jkQkQiwc44A8ovN9MvK5HwcNV3ngvW3TeF0dHbpHBQHdElJYpVge5IaEyhQ0kWihIEnVqpw4G9A==
 
 "@ampproject/remapping@^2.1.0":
   version "2.3.0"
