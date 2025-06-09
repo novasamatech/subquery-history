@@ -52,8 +52,8 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleAssetConversionSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted
+        # - handler: handleAssetConversionSwap
+        #   kind: substrate/EventHandler
+        #   filter:
+        #     module: assetConversion
+        #     method: SwapExecuted
