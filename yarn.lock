@@ -4882,10 +4882,10 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@zeitgeistpm/type-defs@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@zeitgeistpm/type-defs/-/type-defs-0.8.0.tgz#8eec3f7e4b32e191f3e040f2499ac3ecd7c67861"
-  integrity sha512-UGIVBwrVVOx9mqHohzdvFIcTBQ846NVMgLr9YISvevHZGAQh3RdxVlBOpNSZsWbTZtZPuxHocmvgDFeOnQSnoA==
+"@zeitgeistpm/type-defs@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@zeitgeistpm/type-defs/-/type-defs-1.0.0.tgz#cea874444a9d2714078dbc20f5474a08ce299328"
+  integrity sha512-dtjNlJSb8ELz87aTD6jqKKfO7kY4HFYzSmDk9JrzHLv+w/JKtG+aLz+WImL6MSaF1MjDE1tm28dj980Zn+nfGA==
 
 "@zeroio/type-definitions@^0.0.14":
   version "0.0.14"
