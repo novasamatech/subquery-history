@@ -24,7 +24,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 6812782
     mapping:
       file: ./dist/index.js
       handlers:
@@ -55,8 +55,11 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleAssetConversionSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted
+        # TODO: uncomment this when assetConversion is fixed,
+        # This is used new event structure https://assethub-kusama.subscan.io/block/6812782?tab=event&event=6812782-6
+        # old structure example - https://assethub-kusama.subscan.io/block/5749969?tab=event&event=5749969-8
+        # - handler: handleAssetConversionSwap
+        #   kind: substrate/EventHandler
+        #   filter:
+        #     module: assetConversion
+        #     method: SwapExecuted
