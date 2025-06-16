@@ -19,7 +19,6 @@ network:
   chaintypes:
     file: ./dist/astarChaintypes.js
   endpoint: wss://rpc.astar.network
-  dictionary: https://api.subquery.network/sq/subquery/astar-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime

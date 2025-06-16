@@ -18,7 +18,6 @@ network:
   chainId: "0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554"
   endpoint: >-
     wss://quartz.api.onfinality.io/public-ws
-  dictionary: https://api.subquery.network/sq/subquery/quartz-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime

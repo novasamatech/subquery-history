@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - dev
+      - remove-dict
     tags:
       - "v*"
 

@@ -18,7 +18,6 @@ network:
   chainId: "0x97da7ede98d7bad4e36b4d734b6055425a3be036da2a332ea5a7037656427a21"
   endpoint: >-
     wss://nodle-parachain.api.onfinality.io/public-ws
-  dictionary: https://api.subquery.network/sq/subquery/nodle-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime

@@ -17,7 +17,6 @@ schema:
 network:
   chainId: "0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755"
   endpoint: wss://basilisk-rpc.dwellir.com
-  dictionary: https://api.subquery.network/sq/subquery/basilisk-dictionary
   chaintypes:
     file: ./dist/basiliskChaintypes.js
 dataSources:
