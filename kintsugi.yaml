@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-kintsugi
+name: subquery-nova-kintsugi
 version: 1.0.0
 runner:
   node:

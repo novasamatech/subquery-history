@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-aleph-zero
+name: subquery-nova-wallet
 version: 1.0.0
 runner:
   node:
@@ -14,17 +14,15 @@ description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
-parent:
-  reference: QmZNNYQqBs3c9f3t7UUybt1Unr49F5gTEdvU3Byv6DntKo
-  untilBlock: 83300000
 network:
-  chainId: "0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e"
-  chaintypes:
-    file: ./dist/alephZeroChaintypes.js
+  chainId: "0x2faa5a5a9d511bf1afe23aed32951844ffb1909be446bfa1f57fab9cb74e85cf"
+  endpoint: >-
+    wss://westend-local-fast-a.novasama-tech.org
+  dictionary: https://api.subquery.network/sq/subquery/westend-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 5000
+    startBlock: 1
     mapping:
       file: ./dist/index.js
       handlers:

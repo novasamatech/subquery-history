@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-parallel-heiko
+name: subquery-nova-parallel-heiko
 version: 1.0.0
 runner:
   node:

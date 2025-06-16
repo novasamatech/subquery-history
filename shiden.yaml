@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-shiden
+name: subquery-nova-shiden
 version: 1.0.0
 runner:
   node:
