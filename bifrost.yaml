@@ -18,7 +18,6 @@ network:
   chainId: "0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed"
   endpoint: >-
     wss://bifrost-parachain.api.onfinality.io/public-ws
-  dictionary: https://api.subquery.network/sq/subquery/bifrost-parachain-dictionary
   chaintypes:
     file: ./dist/bifrostChaintypes.js
 dataSources:

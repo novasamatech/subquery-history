@@ -18,7 +18,6 @@ network:
   chainId: "0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f"
   endpoint: >-
     wss://paseo-rpc.dwellir.com
-  dictionary: https://api.subquery.network/sq/subquery/paseo-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime

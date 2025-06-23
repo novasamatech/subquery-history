@@ -18,7 +18,6 @@ network:
   chainId: "0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108"
   endpoint: >-
     wss://public-rpc.pinknode.io/shiden
-  dictionary: https://api.subquery.network/sq/subquery/shiden-dictionary
   chaintypes:
     file: ./dist/shidenChaintypes.js
 dataSources:

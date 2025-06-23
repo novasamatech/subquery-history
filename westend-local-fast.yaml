@@ -18,7 +18,6 @@ network:
   chainId: "0x2faa5a5a9d511bf1afe23aed32951844ffb1909be446bfa1f57fab9cb74e85cf"
   endpoint: >-
     wss://westend-local-fast-a.novasama-tech.org
-  dictionary: https://api.subquery.network/sq/subquery/westend-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime

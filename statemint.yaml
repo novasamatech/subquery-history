@@ -18,7 +18,6 @@ network:
   chainId: "0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f"
   endpoint: >-
     wss://statemint-rpc.polkadot.io
-  dictionary: https://api.subquery.network/sq/subquery/statemint-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime

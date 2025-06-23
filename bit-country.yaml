@@ -18,7 +18,6 @@ network:
   chainId: "0xf22b7850cdd5a7657bbfd90ac86441275bbc57ace3d2698a740c7b0ec4de5ec3"
   endpoint: >-
     wss://pioneer.api.onfinality.io/public-ws
-  dictionary: https://api.subquery.network/sq/subquery/bitcountry-pioneer-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime
