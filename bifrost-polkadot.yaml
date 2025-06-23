@@ -18,7 +18,7 @@ network:
   chainId: "0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b"
   endpoint: wss://hk.p.bifrost-rpc.liebi.com/ws
   chaintypes:
-    file: ./chainTypes/bifrostTypes.json
+    file: ./dist/bifrostChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
