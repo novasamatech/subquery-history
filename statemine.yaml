@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-statemine
+name: subquery-nova-statemine
 version: 1.0.0
 runner:
   node:
@@ -18,7 +18,6 @@ network:
   chainId: "0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a"
   endpoint: >-
     wss://rpc-asset-hub-kusama.luckyfriday.io
-  dictionary: https://api.subquery.network/sq/kodadot/statemine-dictionary
   chaintypes:
     file: ./dist/statemineChaintypes.js
 dataSources:
@@ -55,8 +54,11 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
-        - handler: handleAssetConversionSwap
-          kind: substrate/EventHandler
-          filter:
-            module: assetConversion
-            method: SwapExecuted
+        # TODO: uncomment this when assetConversion is fixed,
+        # This is used new event structure https://assethub-kusama.subscan.io/block/6812782?tab=event&event=6812782-6
+        # old structure example - https://assethub-kusama.subscan.io/block/5749969?tab=event&event=5749969-8
+        # - handler: handleAssetConversionSwap
+        #   kind: substrate/EventHandler
+        #   filter:
+        #     module: assetConversion
+        #     method: SwapExecuted
