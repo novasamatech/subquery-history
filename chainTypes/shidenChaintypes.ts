@@ -1,3 +1,6 @@
+// Copyright 2017-2024 @polkadot/types-known authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import type { OverrideBundleDefinition } from "@polkadot/types/types";
 
 // structs need to be in order
@@ -41,6 +44,17 @@ const definitions: OverrideBundleDefinition = {
           staked: "Balance",
         },
         EraIndex: "u32",
+        // TODO awaiting an error at a future spec version to figure out the end range [3,undefined]
+        DispatchErrorModule: {
+          index: "u8",
+          error: "u8",
+        },
+      },
+    },
+    {
+      minmax: [14, undefined],
+      types: {
+        EthTransaction: "LegacyTransaction",
       },
     },
   ],

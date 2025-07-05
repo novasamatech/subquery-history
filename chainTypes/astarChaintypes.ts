@@ -60,4 +60,4 @@ const definitions: OverrideBundleDefinition = {
   ],
 };
 
-export default { typesBundle: { spec: { shiden: definitions } } };
+export default { typesBundle: { spec: { astar: definitions } } };
