@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-karura
+name: subquery-nova-karura
 version: 1.0.0
 runner:
   node:
@@ -18,13 +18,11 @@ network:
   chainId: "0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b"
   endpoint: >-
     wss://karura.polkawallet.io
-  dictionary: https://api.subquery.network/sq/AcalaNetwork/karura-dictionary
   chaintypes:
     file: ./dist/karuraChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
     mapping:
       file: ./dist/index.js
       handlers:
