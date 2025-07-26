@@ -1,5 +1,5 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-astar
+name: subquery-nova-astar
 version: 1.0.0
 runner:
   node:
@@ -19,7 +19,6 @@ network:
   chaintypes:
     file: ./dist/astarChaintypes.js
   endpoint: wss://rpc.astar.network
-  dictionary: https://api.subquery.network/sq/subquery/astar-dictionary
 dataSources:
   - name: main
     kind: substrate/Runtime
