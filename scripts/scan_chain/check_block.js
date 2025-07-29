@@ -28,7 +28,18 @@
  * --------------------------------------------------------------------------
  */
 
-const { ApiPromise, WsProvider } = require("@polkadot/api");
+let ApiPromise, WsProvider;
+// Prefer the same @polkadot/api version that SubQuery’s indexer uses (vendored inside @subql/node).
+// This guarantees the checker fails/succeeds exactly as the real indexer would.
+try {
+  ({
+    ApiPromise,
+    WsProvider,
+  } = require("@subql/node/node_modules/@polkadot/api"));
+} catch {
+  // Fallback to workspace-level installation
+  ({ ApiPromise, WsProvider } = require("@polkadot/api"));
+}
 
 // ---- argument parsing -----------------------------------------------------
 
