@@ -201,33 +201,13 @@ export async function cachedStakingRewardEraIndex(
   if (cachedEra !== undefined) {
     return cachedEra;
   } else {
-    // Some very early Moonriver runtimes do not yet expose parachainStaking
-    // or its constants.  Fallback to 0 in that case so the indexer continues.
-    if (!api.query.parachainStaking?.round) {
-      parachainStakingRewardEra[blockId] = 0;
-      return 0;
-    }
+    const era = await api.query.parachainStaking.round();
 
-    const round = await api.query.parachainStaking.round();
-
-    // `rewardPaymentDelay` appeared later; treat as 0 if absent or unparsable.
-    let paymentDelay = 0;
-    if (api.consts.parachainStaking?.rewardPaymentDelay) {
-      try {
-        paymentDelay = Number(api.consts.parachainStaking.rewardPaymentDelay);
-      } catch {
-        paymentDelay = 0;
-      }
-    }
-
-    // `round` used to be a bare number, later became an object with `current`.
-    const rJson = round.toJSON() as any;
-    const current =
-      typeof rJson === "number"
-        ? rJson
-        : Number(rJson.current ?? rJson.index ?? 0);
-
-    const eraIndex = current - paymentDelay;
+    const paymentDelay =
+      api.consts.parachainStaking.rewardPaymentDelay.toHuman();
+    // HACK: used to get data from object
+    const eraIndex =
+      (era.toJSON() as { current: any }).current - Number(paymentDelay);
 
     parachainStakingRewardEra = {};
     parachainStakingRewardEra[blockId] = eraIndex;
