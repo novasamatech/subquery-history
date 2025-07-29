@@ -1,159 +1,184 @@
 #!/usr/bin/env python3
 """
 find_first_decodable.py
+-----------------------
 
-Small helper that connects to any Substrate-based RPC and
-discovers the earliest block whose extrinsics can be decoded with the
-available historical metadata.  Useful when an archive node has pruned older
-`:code` entries and you need a safe `startBlock` for SubQuery.
+Binary-search helper for discovering the earliest Substrate block that
+*successfully* decodes with **@polkadot/api** (the same stack SubQuery uses).
 
-Requires:
-    pip install -r requirements.txt
+Instead of Python’s `substrate-interface`, we spawn a tiny Node script
+(`check_block.js`) that does the real test:
 
-Example usage
--------------
-# Search from 390 000 up to chain head using a public archive RPC
-python scripts/find_first_decodable.py \
-    --ws wss://moonriver.unitedbloc.com \
-    --start 390000
+    node check_block.js <endpoint> <blockNumber> [preset]
+
+The Node tool prints either  `OK`  or  `FAIL`, allowing us to decide which
+half-range to probe next.  This guarantees the result is compatible with any
+producer based on `@polkadot/api` (SubQuery, Subsquid, etc.).
+
+Installation
+~~~~~~~~~~~~
+1. A working `node` binary (≥16).
+2. NPM packages:
+
+   ```bash
+   npm install @polkadot/api
+   pip install substrate-interface==1.9.0 scalecodec==1.2.2
+   ```
+
+Exampl
+~~~~~~~
+```bash
+python scripts/scan_chain/find_first_decodable.py \
+  --ws wss://moonriver.unitedbloc.com \
+  --start 390000 \
+  --preset moonriver
+```
 """
 
 from __future__ import annotations
 
 import argparse
+import os
+import subprocess
 import sys
 import time
 from typing import Optional
 
-from substrateinterface import SubstrateInterface
-from substrateinterface.exceptions import (
-    SubstrateRequestException,
-    StorageFunctionNotFound,
-    BlockNotFound,
-)
-from scalecodec.base import ScaleBytes, ScaleDecoder  # noqa: F401  (import side-effects)
+# Optional import just to fetch latest block height quickly.
+try:
+    from substrateinterface import SubstrateInterface
+except ImportError:
+    SubstrateInterface = None  # type: ignore
 
 
+HERE = os.path.abspath(os.path.dirname(__file__))
+NODE_CHECKER = os.path.join(HERE, "check_block.js")
 
-def is_decodable(substrate: SubstrateInterface, number: int) -> bool:
+
+# --------------------------------------------------------------------------- #
+# Helpers                                                                     #
+# --------------------------------------------------------------------------- #
+def is_decodable(endpoint: str, preset: str, height: int) -> bool:
     """
-    Return True if block `number` can be fetched & fully decoded.
-
-    Any exception raised by `substrate-interface` (metadata mismatch,
-    SCALE-codec failure, missing block, etc.) is treated as *not decodable*.
+    Return True when `@polkadot/api` can fetch & decode given `height`.
     """
-    try:
-        block_hash = substrate.get_block_hash(number)
-        if block_hash is None:
-            return False
-
-        # This both fetches and decodes header + extrinsics via historic metadata.
-        substrate.get_block(block_hash=block_hash)
-        return True
-
-    except (SubstrateRequestException, StorageFunctionNotFound, BlockNotFound, Exception):
-        # Logging can be uncommented for debugging:
-        # print(f"Block {number} decodability check failed: {exc}")
-        return False
+    proc = subprocess.run(
+        ["node", NODE_CHECKER, endpoint, str(height), preset],
+        capture_output=True,
+        text=True,
+    )
+    return proc.stdout.strip() == "OK"
 
 
 def binary_search_first_ok(
-    substrate: SubstrateInterface, low: int, high: int
+    endpoint: str,
+    preset: str,
+    low: int,
+    high: int,
 ) -> Optional[int]:
     """
-    Given range [low, high] where some *prefix* may fail to decode and the rest decode OK,
-    return minimal block number that decodes, or None if none do.
+    Classic binary search on monotone predicate `is_decodable`.
+    It assumes range looks like F…FT…T (F=fail, T=ok) and returns first T.
     """
-    result: Optional[int] = None
     attempt = 0
+    ans: Optional[int] = None
     while low <= high:
         mid = (low + high) // 2
         attempt += 1
-        ok = is_decodable(substrate, mid)
-        # Live progress line: rewritten on every probe
-        sys.stdout.write(f"\r▶️  probes: {attempt:4d} | testing block {mid:,} ... {'OK' if ok else 'FAIL'}")
+        ok = is_decodable(endpoint, preset, mid)
+
+        # Live one-line progress
+        sys.stdout.write(
+            f"\r▶️  probes: {attempt:5d} | testing block {mid:,} ... "
+            f"{'OK ' if ok else 'FAIL'}"
+        )
         sys.stdout.flush()
+
         if ok:
-            result = mid
-            high = mid - 1  # search earlier half
+            ans = mid
+            high = mid - 1
         else:
-            low = mid + 1   # search later half
-    # move cursor to a new line after finishing progress updates
-    print()
-    return result
+            low = mid + 1
+    print()  # newline after progress
+    return ans
 
 
+def latest_block(endpoint: str, preset: str) -> int:
+    """
+    Obtain latest block height using `substrate-interface` if available,
+    otherwise fallback to JSON-RPC.
+    """
+    if SubstrateInterface is not None:
+        sub = SubstrateInterface(url=endpoint, type_registry_preset=preset)
+        header = sub.get_block_header()
+        if isinstance(header, dict):
+            return int(
+                header.get("number")
+                or header.get("header", {}).get("number", 0)
+            )
+        return int(header.number)  # ScaleType Header
+    # Minimal JSON-RPC (HTTP POST) fallback
+    import json
+    import urllib.request
+
+    payload = json.dumps(
+        {"jsonrpc": "2.0", "method": "chain_getHeader", "params": [], "id": 1}
+    ).encode()
+    with urllib.request.urlopen(endpoint.replace("ws://", "http://").replace("wss://", "https://"), data=payload) as resp:
+        data = json.load(resp)
+    number_hex = data["result"]["number"]
+    return int(number_hex, 16)
+
+
+# --------------------------------------------------------------------------- #
+# CLI                                                                         #
+# --------------------------------------------------------------------------- #
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog="find_first_decodable.py",
-        description="Locate earliest Moonriver block that decodes with given RPC node",
+    p = argparse.ArgumentParser(
+        description="Find earliest block decodable with @polkadot/api."
     )
-    parser.add_argument(
-        "--ws",
-        required=True,
-        help="WebSocket endpoint of (archive) Moonriver node, e.g. wss://moonriver.public.blastapi.io:443",
-    )
-    parser.add_argument(
-        "--start",
-        type=int,
-        default=0,
-        help="Lower bound for search (default: 0)",
-    )
-    parser.add_argument(
+    p.add_argument("--ws", required=True, help="WebSocket RPC endpoint")
+    p.add_argument("--start", type=int, default=0, help="Lower bound (inclusive)")
+    p.add_argument(
         "--end",
         type=int,
         default=None,
-        help="Upper bound (default: latest at node head)",
+        help="Upper bound (default: latest at node)",
     )
-    parser.add_argument(
+    p.add_argument(
         "--preset",
-        default="moonriver",
-        help="Type-registry preset to use (default: moonriver)",
+        default="substrate",
+        help="Type-registry preset (moonriver, moonbeam, etc.)",
     )
-    return parser.parse_args()
+    return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
+    print(f"Using node checker: {NODE_CHECKER}")
     print(f"Connecting to {args.ws} ...")
-    substrate = SubstrateInterface(url=args.ws, type_registry_preset=args.preset)
+    head = args.end if args.end is not None else latest_block(args.ws, args.preset)
 
-    # Obtain latest block number robustly across substrate-interface versions
-    try:
-        # Newer API: directly ask for block number at chain head
-        head_number = substrate.get_block_number(substrate.get_chain_head())
-    except Exception:
-        # Older API fallback: extract from header dict or object
-        latest_header = substrate.get_block_header()
-        if isinstance(latest_header, dict):
-            head_number = int(
-                latest_header.get("number")
-                or latest_header.get("header", {}).get("number", 0)
-            )
-        else:
-            # ScaleType Header instance
-            head_number = int(latest_header.number)  # type: ignore[attr-defined]
-    high = args.end if args.end is not None else head_number
-    low = args.start
-    if low < 0 or high < low:
-        sys.exit("Invalid --start/--end range supplied")
+    lo, hi = args.start, head
+    if lo < 0 or hi < lo:
+        sys.exit("Invalid search interval")
 
-    print(f"Latest block at RPC: {head_number}")
-    print(f"Searching earliest decodable block in [{low}, {high}] ...")
+    print(f"Latest block at node: {head}")
+    print(f"Searching first decodable block in [{lo}, {hi}] ...")
 
     t0 = time.time()
-    first_ok = binary_search_first_ok(substrate, low, high)
-    duration = time.time() - t0
+    first_ok = binary_search_first_ok(args.ws, args.preset, lo, hi)
+    elapsed = time.time() - t0
 
     if first_ok is None:
-        print("❌  No decodable block found in specified range.")
+        print("\n❌  No decodable block found in the specified interval.")
         sys.exit(1)
 
     print(
         f"\n✅  Earliest decodable block: {first_ok}\n"
-        f"   (You can safely use this as startBlock in SubQuery)\n"
-        f"⏱  Search time: {duration:.1f} s"
+        f"   (safe startBlock for SubQuery)\n"
+        f"⏱  Search duration: {elapsed:.1f}s"
     )
 
 
