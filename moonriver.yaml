@@ -17,11 +17,11 @@ network:
   endpoint: >-
     wss://wss.api.moonriver.moonbeam.network
   chaintypes:
-    file: ./dist/moonbeamChaintypes.js
+    file: ./dist/moonriverChaintypes.js
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 390000
+    startBlock: 581188
     mapping:
       file: ./dist/index.js
       handlers:
