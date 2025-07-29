@@ -22,7 +22,7 @@ Installation
 
    ```bash
    npm install @polkadot/api
-   pip install substrate-interface==1.9.0 scalecodec==1.2.2
+   pip install -r requirements.txt
    ```
 
 Exampl
