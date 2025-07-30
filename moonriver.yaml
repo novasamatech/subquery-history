@@ -21,6 +21,7 @@ network:
 dataSources:
   - name: main
     kind: substrate/Runtime
+    # chain tail has historical metadata receiving issue, so we use 1200000 instead
     #startBlock: 390000
     startBlock: 1200000
     mapping:
