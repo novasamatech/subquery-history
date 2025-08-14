@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         node-js-image-version: [20]
-        subql-node-image-version: [v5.2.2]
+        subql-node-image-version: [v5.8.0, v6.1.0, v6.3.2]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,7 +47,9 @@ jobs:
       - name: Set image label for a tag or other branches
         if: ${{ github.ref_type == 'tag' || (github.ref_type == 'branch' && github.ref_name != 'master') }}
         run: |
-          echo "IMAGE_LABEL=${{ github.ref_name }}" >> "$GITHUB_ENV"
+          # Sanitize branch name by replacing invalid characters with hyphens
+          SANITIZED_REF_NAME=$(echo -n "${{ github.ref_name }}" | tr -c '[:alnum:].-' '-' | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_LABEL=$SANITIZED_REF_NAME" >> "$GITHUB_ENV"
       - name: Set full name of the Docker image
         run: |
           echo "FULL_IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_LABEL }}-node-js-${{ matrix.node-js-image-version }}-subql-node-${{ matrix.subql-node-image-version }}" >> "$GITHUB_ENV"

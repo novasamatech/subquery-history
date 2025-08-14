@@ -5,8 +5,6 @@ runner:
   node:
     name: "@subql/node"
     version: ">=4.6.6"
-    options:
-      historical: true
   query:
     name: "@subql/query"
     version: "*"
@@ -18,7 +16,6 @@ network:
   chainId: "0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d"
   endpoint: >-
     wss://moonbeam.api.onfinality.io/public-ws
-  dictionary: https://api.subquery.network/sq/subquery/moonbeam-dictionary
   chaintypes:
     file: ./dist/moonbeamChaintypes.js
 dataSources:

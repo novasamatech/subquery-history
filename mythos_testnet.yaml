@@ -1,10 +1,10 @@
 specVersion: 1.0.0
-name: subquery-nova-energywebx
+name: subquery-nova-mythos
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
-    version: ">=4.6.6"
+    version: "*"
   query:
     name: "@subql/query"
     version: "*"
@@ -13,18 +13,22 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x5a51e04b88a4784d205091aa7bada002f3e5da3045e5b05655ee4db2589c33b5"
-  endpoint: >-
-    wss://public-rpc.mainnet.energywebx.com/
+  chainId: "0x15f6788bcf1d1a3b7e1c36074584e1a3f3d07e0a46e362a102c3c3df1a93669f"
+  endpoint: "wss://paseo-muse-rpc.polkadot.io"
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 2679576
     mapping:
       file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -35,8 +39,23 @@ dataSources:
           filter:
             module: assets
             method: Transferred
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: localassets
+            method: Transferred
+        - handler: handleCurrencyTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: currencies
+            method: Transferred
         - handler: handleTokenTransfer
           kind: substrate/EventHandler
           filter:
             module: tokens
             method: Transfer
+        - handler: handleMythosRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: collatorStaking
+            method: StakingRewardReceived

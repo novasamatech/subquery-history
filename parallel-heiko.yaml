@@ -5,8 +5,6 @@ runner:
   node:
     name: "@subql/node"
     version: ">=4.6.6"
-    options:
-      historical: true
   query:
     name: "@subql/query"
     version: "*"
@@ -18,7 +16,6 @@ network:
   chainId: "0x64a1c658a48b2e70a7fb1ad4c39eea35022568c20fc44a6e2e3d0a57aee6053b"
   endpoint: >-
     wss://heiko-rpc.parallel.fi
-  dictionary: https://api.subquery.network/sq/subquery/parallel-heiko-dictionary
   chaintypes:
     file: ./dist/parallelHeikoChaintypes.js
 dataSources:
