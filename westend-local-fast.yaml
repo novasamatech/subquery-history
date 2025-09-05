@@ -13,7 +13,7 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x2faa5a5a9d511bf1afe23aed32951844ffb1909be446bfa1f57fab9cb74e85cf"
+  chainId: "0xece39890816675b6cbd1ae9f1c875397f0ec0002e2444768bb6293da040487b8"
   endpoint: >-
     wss://westend-local-fast-a.novasama-tech.org
 dataSources:
