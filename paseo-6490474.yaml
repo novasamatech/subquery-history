@@ -1,12 +1,10 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-aleph-zero
+name: subquery-nova-wallet
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
     version: ">=4.6.6"
-    options:
-      historical: true
   query:
     name: "@subql/query"
     version: "*"
@@ -14,17 +12,14 @@ description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
-parent:
-  reference: QmZNNYQqBs3c9f3t7UUybt1Unr49F5gTEdvU3Byv6DntKo
-  untilBlock: 83300000
 network:
-  chainId: "0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e"
-  chaintypes:
-    file: ./dist/alephZeroChaintypes.js
+  chainId: "0x77afd6190f1554ad45fd0d31aee62aacc33c6db0ea801129acb813f913e0764f"
+  endpoint: >-
+    wss://paseo-rpc.dwellir.com
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 5000
+    startBlock: 6490474
     mapping:
       file: ./dist/index.js
       handlers:
