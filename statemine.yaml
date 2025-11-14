@@ -76,7 +76,7 @@ dataSources:
           kind: substrate/EventHandler
           filter:
             module: staking
-            method: StakersElected
+            method: EraPaid
         - handler: handlePoolBondedSlash
           kind: substrate/EventHandler
           filter:
