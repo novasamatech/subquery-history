@@ -1,25 +1,21 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-kusama
+name: subquery-nova-wallet
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
     version: ">=4.6.6"
-    options:
-      historical: true
   query:
     name: "@subql/query"
     version: "*"
 description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
-parent:
-  reference: QmSCNvH1dPT8AwSMbxbePDe5QNMVre81wHfXgA9MwLrFWF
-  untilBlock: 23887054
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe"
-  dictionary: https://api.subquery.network/sq/subquery/dictionary-kusama
+  chainId: "0x66dd87064a82befb45665f337681d625528815359261370b7415a45a930b8772"
+  endpoint: >-
+    wss://westend-local-fast-a.novasama-tech.org
 dataSources:
   - name: main
     kind: substrate/Runtime
