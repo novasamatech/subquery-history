@@ -1,12 +1,10 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-kusama
+name: subquery-nova-kusama
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
     version: ">=4.6.6"
-    options:
-      historical: true
   query:
     name: "@subql/query"
     version: "*"
@@ -17,7 +15,6 @@ schema:
 network:
   chainId: "0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe"
   endpoint: wss://kusama-rpc.dwellir.com
-  dictionary: https://api.subquery.network/sq/subquery/dictionary-kusama
 dataSources:
   - name: main
     kind: substrate/Runtime

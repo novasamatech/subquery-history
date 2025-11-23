@@ -1,0 +1,66 @@
+name: Sync with subquery-common-api-polkadot-transactions
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs every day at midnight
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Checkout subquery-common-api-polkadot-transactions repository
+        uses: actions/checkout@v4
+        with:
+          repository: subquery/subquery-common-api-polkadot-transactions
+          path: subquery-common-api
+
+      - name: Sync repositories
+        run: |
+          rsync -av --exclude='ipfs-cids/*-cid' --exclude='README.md' --exclude='NOTICE' --exclude='*.yaml' subquery-common-api/ .
+
+      - name: Remove repository
+        run: |
+          rm -rf subquery-common-api
+
+      - name: Create new branch
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git checkout -b sync-branch
+          git add -A
+          git commit -m "Sync with subquery-common-api-polkadot-transactions"
+        working-directory: ${{ github.workspace }}
+
+      - name: Push changes
+        run: |
+          git push -f https://github.com/novasamatech/subquery-nova.git sync-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ${{ github.workspace }}
+
+  create-pr:
+    runs-on: ubuntu-latest
+    needs: sync
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: sync-branch
+          destination_branch: master
+          pr_title: "Sync with subquery-common-api-polkadot-transactions"
+          pr_body: "This PR syncs the repository with subquery-common-api-polkadot-transactions"
+          pr_reviewer: "stepanLav,valentun,ERussel"

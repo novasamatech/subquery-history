@@ -6,19 +6,29 @@ on:
 env:
   SUBQL_ACCESS_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
       project_files: ${{ steps.project_files.outputs.files }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: 🧾 Get list of projects
         id: project_files
         run: |
           chmod +x .github/get_all_project_files.sh
           echo "::set-output name=files::$(.github/get_all_project_files.sh)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
       - name: 🔄 Install dependencies
         run: yarn install
@@ -28,6 +38,16 @@ jobs:
 
       - name: 🏗 Build from sources
         run: yarn build
+
+      - name: 🐛 List dist folder contents
+        run: ls -la dist
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: |
+            dist
+            src/types
 
   deploy-to-IPFS:
     needs: setup
@@ -39,14 +59,24 @@ jobs:
       matrix: ${{fromJson(needs.setup.outputs.project_files)}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
       - name: 🔄 Install dependencies
-        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn install
 
-      - name: 🧬 Types generation
-        run: yarn codegen
+      - uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: .
+
+      - name: 🐛 List dist folder contents
+        run: ls -la dist
 
       - name: 📬 Deploy to IPFS
         run: |
@@ -63,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Download built artifact
         uses: actions/download-artifact@v2
