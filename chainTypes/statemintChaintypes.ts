@@ -37,7 +37,7 @@ const definitions: OverrideBundleDefinition = {
 };
 
 export default {
-  typesBundle: { spec: { statemine: definitions } },
+  typesBundle: { spec: { statemint: definitions } },
   types: {
     // Override for current runtime - needed for block decoding
     NovaAssetId: "Option<MultiLocationV3>",
