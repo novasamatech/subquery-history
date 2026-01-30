@@ -1,12 +1,10 @@
 specVersion: 1.0.0
-name: subquery-common-api-polkadot-transactions-kilt
+name: subquery-nova-mythos
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
+    version: "*"
   query:
     name: "@subql/query"
     version: "*"
@@ -14,24 +12,23 @@ description: Nova SubQuery project
 repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
-parent:
-  reference: QmXb1uHC673iHM2DLuxWRRn28W9Gevb6WkMHpkXwzPC9sW
-  untilBlock: 67015
 network:
-  chainId: "0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21"
-  endpoint: >-
-    wss://kilt-rpc.dwellir.com
-  chaintypes:
-    file: ./dist/kiltChaintypes.js
+  chainId: "0x15f6788bcf1d1a3b7e1c36074584e1a3f3d07e0a46e362a102c3c3df1a93669f"
+  endpoint: "wss://paseo-muse-rpc.polkadot.io"
 dataSources:
   - name: main
     kind: substrate/Runtime
-    startBlock: 200
+    startBlock: 2679576
     mapping:
       file: ./dist/index.js
       handlers:
         - handler: handleHistoryElement
           kind: substrate/CallHandler
+        - handler: handleParachainRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: parachainStaking
+            method: Rewarded
         - handler: handleTransfer
           kind: substrate/EventHandler
           filter:
@@ -41,6 +38,11 @@ dataSources:
           kind: substrate/EventHandler
           filter:
             module: assets
+            method: Transferred
+        - handler: handleAssetTransfer
+          kind: substrate/EventHandler
+          filter:
+            module: localassets
             method: Transferred
         - handler: handleCurrencyTransfer
           kind: substrate/EventHandler
@@ -52,3 +54,8 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
+        - handler: handleMythosRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: collatorStaking
+            method: StakingRewardReceived

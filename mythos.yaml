@@ -4,9 +4,7 @@ version: 1.0.0
 runner:
   node:
     name: "@subql/node"
-    version: ">=4.6.6"
-    options:
-      historical: true
+    version: "*"
   query:
     name: "@subql/query"
     version: "*"
@@ -57,3 +55,8 @@ dataSources:
           filter:
             module: tokens
             method: Transfer
+        - handler: handleMythosRewarded
+          kind: substrate/EventHandler
+          filter:
+            module: collatorStaking
+            method: StakingRewardReceived
