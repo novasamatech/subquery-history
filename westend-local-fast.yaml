@@ -1,12 +1,10 @@
 specVersion: 1.0.0
-name: subquery-nova-avail
+name: subquery-nova-wallet
 version: 1.0.0
 runner:
   node:
     name: "@subql/node"
     version: ">=4.6.6"
-    options:
-      historical: true
   query:
     name: "@subql/query"
     version: "*"
@@ -15,11 +13,9 @@ repository: https://github.com/nova-wallet/subquery-nova
 schema:
   file: ./schema.graphql
 network:
-  chainId: "0x128ea318539862c0a06b745981300d527c1041c6f3388a8c49565559e3ea3d10"
+  chainId: "0x2faa5a5a9d511bf1afe23aed32951844ffb1909be446bfa1f57fab9cb74e85cf"
   endpoint: >-
-    wss://zeref-api.slowops.xyz/ws
-  chaintypes:
-    file: ./dist/availChainTypes.js
+    wss://westend-local-fast-a.novasama-tech.org
 dataSources:
   - name: main
     kind: substrate/Runtime
