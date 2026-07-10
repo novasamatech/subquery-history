@@ -16,6 +16,25 @@ export async function handleStakersElected(
   await handleNewEra(event);
 }
 
+// Asset Hub (staking-async): by the time EraPaid is emitted, currentEra already
+// points to the next planned era whose exposures are not on-chain yet, so the
+// snapshot is taken on the last page (index 0) of PagedElectionProceeded instead —
+// at that point the exposures for currentEra are fully written.
+export async function handlePagedElectionProceeded(
+  event: SubstrateEvent,
+): Promise<void> {
+  const pageIndex = event.event.data[0].toString();
+  if (pageIndex !== "0") {
+    return;
+  }
+
+  const currentEra = ((await api.query.staking.currentEra()) as Option<INumber>)
+    .unwrap()
+    .toNumber();
+
+  await processEraStakersPaged(event, currentEra);
+}
+
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
   const currentEra = ((await api.query.staking.currentEra()) as Option<INumber>)
     .unwrap()
