@@ -14,6 +14,7 @@ import {
   mockOption,
   mockNumber,
   mockAddress,
+  mockBTreeMap,
 } from "./utils/mockFunctions";
 import { RewardType } from "../src/types";
 
@@ -47,7 +48,7 @@ const mockSubPoolsStorage = {
       points: mockNumber(1000),
       balance: mockNumber(1000),
     },
-    withEra: {
+    withEra: mockBTreeMap({
       4904: {
         points: mockNumber(2000),
         balance: mockNumber(2000),
@@ -56,55 +57,55 @@ const mockSubPoolsStorage = {
         points: mockNumber(0),
         balance: mockNumber(0),
       },
-    },
+    }),
   }),
 };
 
 const mockPoolMembers = [
   [
-    [mockAddress("12JFwUszJsgVUr5YW3QcheYmDZHNYHiPELbuJx3rm6guhrse")],
+    { args: [mockAddress("12JFwUszJsgVUr5YW3QcheYmDZHNYHiPELbuJx3rm6guhrse")] },
     mockOption({
       isSome: true,
       poolId: mockNumber(16),
       points: mockNumber(100),
       lastRecordedRewardCounter: undefined,
-      unbondingEras: {},
+      unbondingEras: mockBTreeMap({}),
     }),
   ],
   [
-    [mockAddress("16XzkhKCZqFA4yYd2nfrNk8GZBhq8xkdAQZe3T8tUWxanWWj")],
+    { args: [mockAddress("16XzkhKCZqFA4yYd2nfrNk8GZBhq8xkdAQZe3T8tUWxanWWj")] },
     mockOption({
       isSome: true,
       poolId: mockNumber(42),
       points: mockNumber(100),
       lastRecordedRewardCounter: undefined,
-      unbondingEras: {
+      unbondingEras: mockBTreeMap({
         4904: mockNumber(10),
-      },
+      }),
     }),
   ],
   [
-    [mockAddress("128uKFo94ewG8BrRXyqVQFDj8753XNfgsDUp9DSGdh8erKwS")],
+    { args: [mockAddress("128uKFo94ewG8BrRXyqVQFDj8753XNfgsDUp9DSGdh8erKwS")] },
     mockOption({
       isSome: true,
       poolId: mockNumber(42),
       points: mockNumber(50),
       lastRecordedRewardCounter: undefined,
-      unbondingEras: {
+      unbondingEras: mockBTreeMap({
         5426: mockNumber(5),
-      },
+      }),
     }),
   ],
   [
-    [mockAddress("13au37C1nZtMjvv2uPHRvamYdgAVxffTWJoCZXo2sw1NeysP")],
+    { args: [mockAddress("13au37C1nZtMjvv2uPHRvamYdgAVxffTWJoCZXo2sw1NeysP")] },
     mockOption({
       isSome: true,
       poolId: mockNumber(42),
       points: mockNumber(25),
       lastRecordedRewardCounter: undefined,
-      unbondingEras: {
+      unbondingEras: mockBTreeMap({
         1: mockNumber(1234),
-      },
+      }),
     }),
   ],
 ];
