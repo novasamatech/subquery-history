@@ -7,6 +7,7 @@
     "build": "./node_modules/.bin/subql build",
     "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
     "codegen": "./node_modules/.bin/subql codegen",
+    "test": "jest",
     "validate": "./node_modules/.bin/subql validate",
     "prepare": "husky install",
     "local-publish": "cd ./scripts && ./local-publish.sh"
