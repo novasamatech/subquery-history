@@ -16,12 +16,22 @@ export async function handleStakersElected(
   await handleNewEra(event);
 }
 
-// Asset Hub (staking-async): currentEra at the EraPaid block already points to
-// the next planned era whose exposures are not on-chain yet, and election events
-// are not reliable either (recent runtimes stopped emitting PagedElectionProceeded
-// for every page on the success path). The era that just became active is the
-// invariant: it cannot start without its full validator set, so snapshot activeEra
-// at the rotation block. getByEra guards against double-writes (backfill, reindex).
+// Asset Hub (staking-async). How the chain rotates eras (see Rotator/EraElectionPlanner in
+// https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/staking-async/src/session_rotation.rs):
+//
+// 1. `plan_new_era` bumps currentEra mid-era (planning deadline), so at any rotation
+//    currentEra already points to the NEXT planned era with no exposures in state.
+// 2. The multi-block election pulls pages msp..0; exposures are stored per page only
+//    on the Ok path of `do_elect_paged`. `PagedElectionProceeded` is emitted per elect()
+//    attempt: newer runtimes skip page 0 on the success path and emit the full failed
+//    range with `result: Err`, so election events are NOT a reliable trigger.
+// 3. The validator set is sent to the relay chain only after the last election page,
+//    and only then the era can be activated: `Rotator::start_era` emits EraPaid (in both
+//    legacy and DAP end-era paths) and increments activeEra.
+//
+// Therefore at the EraPaid block exposures(activeEra) are guaranteed complete - an era
+// cannot start without its full validator set. Snapshot activeEra here.
+// getByEra guards against double-writes (backfill, reindex).
 export async function handleAHEraPaid(event: SubstrateEvent): Promise<void> {
   const activeEra = (
     (await api.query.staking.activeEra()) as Option<PalletStakingActiveEraInfo>
