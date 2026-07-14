@@ -14,11 +14,12 @@
  *   node scripts/backfill_era_validator_infos.js \
  *     --ws wss://asset-hub-polkadot-rpc.n.dwellir.com \
  *     --out polkadot-ah-backfill.sql \
- *     [--from 2144] [--to 2227] [--schema app] [--no-timestamps]
+ *     [--from 2144] [--to 2227] [--schema app] [--timestamps]
  *
  *   psql -h <host> -p <port> -U <user> -d <db> -f polkadot-ah-backfill.sql
  *
  * Defaults: from = currentEra - historyDepth, to = currentEra, schema = app.
+ * Deployed tables have no created_at/updated_at columns; pass --timestamps if yours do.
  * Eras whose exposures are already pruned from state are skipped with a warning.
  * Row ids use the `<era>-backfill-<validator>` format so they never collide
  * with handler-written rows (`<block>-<eventIdx><validator>`).
@@ -28,7 +29,7 @@ const { ApiPromise, WsProvider } = require("@polkadot/api");
 const fs = require("fs");
 
 function parseArgs() {
-  const args = { schema: "app", timestamps: true };
+  const args = { schema: "app", timestamps: false };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i++) {
     switch (argv[i]) {
@@ -47,8 +48,8 @@ function parseArgs() {
       case "--schema":
         args.schema = argv[++i];
         break;
-      case "--no-timestamps":
-        args.timestamps = false;
+      case "--timestamps":
+        args.timestamps = true;
         break;
       default:
         throw new Error(`Unknown argument: ${argv[i]}`);
@@ -56,7 +57,7 @@ function parseArgs() {
   }
   if (!args.ws || !args.out) {
     throw new Error(
-      "Usage: backfill_era_validator_infos.js --ws <endpoint> --out <file.sql> [--from <era>] [--to <era>] [--schema app] [--no-timestamps]",
+      "Usage: backfill_era_validator_infos.js --ws <endpoint> --out <file.sql> [--from <era>] [--to <era>] [--schema app] [--timestamps]",
     );
   }
   return args;
