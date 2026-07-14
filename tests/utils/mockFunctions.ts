@@ -74,7 +74,8 @@ export class SubstrateTestEventBuilder<T extends AnyTuple = AnyTuple> {
     amount,
     idx = 0,
   ): SubstrateEvent<T> {
-    return this.withBlock().withEvent([era, poolId, amount], idx).build();
+    // on-chain event order: UnbondingPoolSlashed(pool_id, era, balance)
+    return this.withBlock().withEvent([poolId, era, amount], idx).build();
   }
 }
 
@@ -107,5 +108,18 @@ export function mockNumber(number: number): unknown {
     toString: jest.fn().mockReturnValue(number.toString()),
     toNumber: jest.fn().mockReturnValue(number),
     toBigInt: jest.fn().mockReturnValue(BigInt(number)),
+  };
+}
+
+// Mimics a BTreeMap codec: get() accepts a plain number or a numeric codec
+export function mockBTreeMap(entries: Record<number, unknown>): unknown {
+  return {
+    get: (key: unknown) => {
+      const numericKey =
+        typeof key === "number"
+          ? key
+          : (key as { toNumber(): number }).toNumber();
+      return entries[numericKey];
+    },
   };
 }

@@ -68,12 +68,7 @@ dataSources:
           filter:
             module: staking
             method: Slashed
-        - handler: handleNewEra
-          kind: substrate/EventHandler
-          filter:
-            module: staking
-            method: StakingElection
-        - handler: handleStakersElected
+        - handler: handleAHEraPaid
           kind: substrate/EventHandler
           filter:
             module: staking
