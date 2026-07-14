@@ -67,11 +67,11 @@ dataSources:
           filter:
             module: staking
             method: Slashed
-        - handler: handlePagedElectionProceeded
+        - handler: handleAHEraPaid
           kind: substrate/EventHandler
           filter:
             module: staking
-            method: PagedElectionProceeded
+            method: EraPaid
         - handler: handlePoolBondedSlash
           kind: substrate/EventHandler
           filter:

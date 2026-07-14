@@ -1,10 +1,10 @@
 import { SubstrateEvent } from "@subql/types";
-import { eventId } from "./common";
 import { EraValidatorInfo } from "../types/models/EraValidatorInfo";
 import { IndividualExposure } from "../types";
 import {
   SpStakingPagedExposureMetadata,
   SpStakingExposurePage,
+  PalletStakingActiveEraInfo,
 } from "@polkadot/types/lookup";
 import { Option } from "@polkadot/types";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
@@ -16,23 +16,35 @@ export async function handleStakersElected(
   await handleNewEra(event);
 }
 
-// Asset Hub (staking-async): by the time EraPaid is emitted, currentEra already
-// points to the next planned era whose exposures are not on-chain yet, so the
-// snapshot is taken on the last page (index 0) of PagedElectionProceeded instead —
-// at that point the exposures for currentEra are fully written.
-export async function handlePagedElectionProceeded(
-  event: SubstrateEvent,
-): Promise<void> {
-  const pageIndex = event.event.data[0].toString();
-  if (pageIndex !== "0") {
+// Asset Hub (staking-async). How the chain rotates eras (Rotator/EraElectionPlanner in pallet-staking-async):
+// https://github.com/paritytech/polkadot-sdk/blob/470d1ad2a82c95c28c825412cb636aed4f54b83e/substrate/frame/staking-async/src/session_rotation.rs
+//
+// 1. `plan_new_era` (#L1018) bumps currentEra mid-era (planning deadline), so at any rotation
+//    currentEra already points to the NEXT planned era with no exposures in state.
+// 2. The multi-block election pulls pages msp..0; exposures are stored per page only
+//    on the Ok path of `do_elect_paged` (#L1178). `PagedElectionProceeded` is emitted per elect()
+//    attempt: newer runtimes skip page 0 on the success path and emit the full failed
+//    range with `result: Err`, so election events are NOT a reliable trigger.
+// 3. The validator set is sent to the relay chain only after the last election page,
+//    and only then the era can be activated: `Rotator::start_era` emits EraPaid (in both
+//    legacy and DAP end-era paths) and increments activeEra (`start_era`, #L860).
+//
+// Therefore at the EraPaid block exposures(activeEra) are guaranteed complete - an era
+// cannot start without its full validator set. Snapshot activeEra here.
+// getByEra guards against double-writes (backfill, reindex).
+export async function handleAHEraPaid(event: SubstrateEvent): Promise<void> {
+  const activeEra = (
+    (await api.query.staking.activeEra()) as Option<PalletStakingActiveEraInfo>
+  )
+    .unwrap()
+    .index.toNumber();
+
+  const existing = await EraValidatorInfo.getByEra(activeEra);
+  if (existing !== undefined && existing.length > 0) {
     return;
   }
 
-  const currentEra = ((await api.query.staking.currentEra()) as Option<INumber>)
-    .unwrap()
-    .toNumber();
-
-  await processEraStakersPaged(event, currentEra);
+  await processEraStakersPaged(activeEra);
 }
 
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
@@ -41,16 +53,13 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
     .toNumber();
 
   if (api.query.staking.erasStakersOverview) {
-    await processEraStakersPaged(event, currentEra);
+    await processEraStakersPaged(currentEra);
   } else {
-    await processEraStakersClipped(event, currentEra);
+    await processEraStakersClipped(currentEra);
   }
 }
 
-async function processEraStakersClipped(
-  event: SubstrateEvent,
-  currentEra: number,
-): Promise<void> {
+async function processEraStakersClipped(currentEra: number): Promise<void> {
   const exposures =
     await api.query.staking.erasStakersClipped.entries(currentEra);
 
@@ -59,7 +68,7 @@ async function processEraStakersClipped(
     let validatorIdString = validatorId.toString();
     const exp = exposure as unknown as Exposure;
     const eraValidatorInfo = new EraValidatorInfo(
-      eventId(event) + validatorIdString,
+      `${currentEra}-${validatorIdString}`,
       validatorIdString,
       currentEra,
       exp.total.toBigInt(),
@@ -75,10 +84,7 @@ async function processEraStakersClipped(
   }
 }
 
-async function processEraStakersPaged(
-  event: SubstrateEvent,
-  currentEra: number,
-): Promise<void> {
+async function processEraStakersPaged(currentEra: number): Promise<void> {
   const overview =
     await api.query.staking.erasStakersOverview.entries(currentEra);
   const pages = await api.query.staking.erasStakersPaged.entries(currentEra);
@@ -124,7 +130,7 @@ async function processEraStakersPaged(
     }
 
     const eraValidatorInfo = new EraValidatorInfo(
-      eventId(event) + validatorIdString,
+      `${currentEra}-${validatorIdString}`,
       validatorIdString,
       currentEra,
       exposure.total.toBigInt(),

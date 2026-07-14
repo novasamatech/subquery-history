@@ -1,5 +1,5 @@
 import { EraValidatorInfo } from "../src/types";
-import { handlePagedElectionProceeded } from "../src/mappings/NewEra";
+import { handleAHEraPaid } from "../src/mappings/NewEra";
 import {
   SubstrateTestEventBuilder,
   mockOption,
@@ -7,7 +7,8 @@ import {
   mockAddress,
 } from "./utils/mockFunctions";
 
-const CURRENT_ERA = 2228;
+const ACTIVE_ERA = 2227;
+const PLANNED_ERA = 2228;
 
 const VALIDATOR_A = "14LzEeAqYAgVvbxqzdVQGL8zPQFe1o5zGRSbCZDwtCd2AZgA";
 const VALIDATOR_B = "15wD8upZxRZijKkF7JZDdaaFXuRZJhFyYpFQC5j6FaZL5PzA";
@@ -17,7 +18,7 @@ const NOMINATOR_3 = "13FNi4e4EJRpweeTZiUBA4BvjeMKZBxf67h5cyzxxRvHcBMk";
 
 function mockOverviewEntry(validator: string, pageCount: number) {
   return [
-    { args: [mockNumber(CURRENT_ERA), mockAddress(validator)] },
+    { args: [mockNumber(ACTIVE_ERA), mockAddress(validator)] },
     mockOption({
       total: mockNumber(3000),
       own: mockNumber(1000),
@@ -29,7 +30,7 @@ function mockOverviewEntry(validator: string, pageCount: number) {
 function mockPageEntry(validator: string, page: number, others: string[]) {
   return [
     {
-      args: [mockNumber(CURRENT_ERA), mockAddress(validator), mockNumber(page)],
+      args: [mockNumber(ACTIVE_ERA), mockAddress(validator), mockNumber(page)],
     },
     mockOption({
       others: others.map((who) => {
@@ -39,35 +40,45 @@ function mockPageEntry(validator: string, page: number, others: string[]) {
   ];
 }
 
+// At the EraPaid (rotation) block, exposures exist only for the era that just
+// became active; the planned era (currentEra) is not elected yet.
 const mockAPI = {
   query: {
     staking: {
-      currentEra: async () => mockOption(mockNumber(CURRENT_ERA)),
+      activeEra: async () =>
+        mockOption({ index: mockNumber(ACTIVE_ERA), start: mockOption(0) }),
+      currentEra: async () => mockOption(mockNumber(PLANNED_ERA)),
       erasStakersOverview: {
-        entries: async (_era: number) => [
-          mockOverviewEntry(VALIDATOR_A, 2),
-          mockOverviewEntry(VALIDATOR_B, 1),
-        ],
+        entries: async (era: number) =>
+          era === ACTIVE_ERA
+            ? [
+                mockOverviewEntry(VALIDATOR_A, 2),
+                mockOverviewEntry(VALIDATOR_B, 1),
+              ]
+            : [],
       },
       erasStakersPaged: {
-        entries: async (_era: number) => [
-          mockPageEntry(VALIDATOR_A, 0, [NOMINATOR_1]),
-          mockPageEntry(VALIDATOR_A, 1, [NOMINATOR_2]),
-          mockPageEntry(VALIDATOR_B, 0, [NOMINATOR_3]),
-        ],
+        entries: async (era: number) =>
+          era === ACTIVE_ERA
+            ? [
+                mockPageEntry(VALIDATOR_A, 0, [NOMINATOR_1]),
+                mockPageEntry(VALIDATOR_A, 1, [NOMINATOR_2]),
+                mockPageEntry(VALIDATOR_B, 0, [NOMINATOR_3]),
+              ]
+            : [],
       },
     },
   },
 };
 
-function pagedElectionEvent(pageIndex: number) {
+function eraPaidEvent() {
   return new SubstrateTestEventBuilder()
     .withBlock(new Date(), 18040436)
-    .withEvent([mockNumber(pageIndex), mockOption({})], 7)
+    .withEvent([mockNumber(ACTIVE_ERA - 1), mockNumber(1), mockNumber(1)], 7)
     .build();
 }
 
-describe("handlePagedElectionProceeded", () => {
+describe("handleAHEraPaid", () => {
   let savedInfos: EraValidatorInfo[] = [];
 
   beforeAll(() => {
@@ -90,21 +101,17 @@ describe("handlePagedElectionProceeded", () => {
     savedInfos = [];
   });
 
-  it("skips pages other than the last one (page index != 0)", async () => {
-    await handlePagedElectionProceeded(pagedElectionEvent(3));
+  it("snapshots the active era with merged pages and deterministic ids", async () => {
+    jest.spyOn(EraValidatorInfo, "getByEra").mockResolvedValue([]);
 
-    expect(savedInfos).toHaveLength(0);
-  });
-
-  it("saves era validator infos with merged pages on page index 0", async () => {
-    await handlePagedElectionProceeded(pagedElectionEvent(0));
+    await handleAHEraPaid(eraPaidEvent());
 
     expect(savedInfos).toHaveLength(2);
 
     const infoA = savedInfos.find((info) => info.address === VALIDATOR_A);
     expect(infoA).toBeDefined();
-    expect(infoA.id).toBe(`18040436-7${VALIDATOR_A}`);
-    expect(infoA.era).toBe(CURRENT_ERA);
+    expect(infoA.id).toBe(`${ACTIVE_ERA}-${VALIDATOR_A}`);
+    expect(infoA.era).toBe(ACTIVE_ERA);
     expect(infoA.total).toBe(BigInt(3000));
     expect(infoA.own).toBe(BigInt(1000));
     expect(infoA.others.map((other) => other.who)).toEqual([
@@ -114,7 +121,19 @@ describe("handlePagedElectionProceeded", () => {
 
     const infoB = savedInfos.find((info) => info.address === VALIDATOR_B);
     expect(infoB).toBeDefined();
-    expect(infoB.era).toBe(CURRENT_ERA);
+    expect(infoB.id).toBe(`${ACTIVE_ERA}-${VALIDATOR_B}`);
     expect(infoB.others.map((other) => other.who)).toEqual([NOMINATOR_3]);
+  });
+
+  it("skips eras that are already indexed (backfill or earlier run)", async () => {
+    jest
+      .spyOn(EraValidatorInfo, "getByEra")
+      .mockResolvedValue([
+        { id: `${ACTIVE_ERA}-backfill-x` } as EraValidatorInfo,
+      ]);
+
+    await handleAHEraPaid(eraPaidEvent());
+
+    expect(savedInfos).toHaveLength(0);
   });
 });
