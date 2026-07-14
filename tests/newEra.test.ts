@@ -102,7 +102,7 @@ describe("handleAHEraPaid", () => {
   });
 
   it("snapshots the active era with merged pages and deterministic ids", async () => {
-    jest.spyOn(EraValidatorInfo, "getByEra").mockResolvedValue([]);
+    jest.spyOn(EraValidatorInfo, "getByFields").mockResolvedValue([]);
 
     await handleAHEraPaid(eraPaidEvent());
 
@@ -127,7 +127,7 @@ describe("handleAHEraPaid", () => {
 
   it("skips eras that are already indexed (backfill or earlier run)", async () => {
     jest
-      .spyOn(EraValidatorInfo, "getByEra")
+      .spyOn(EraValidatorInfo, "getByFields")
       .mockResolvedValue([
         { id: `${ACTIVE_ERA}-backfill-x` } as EraValidatorInfo,
       ]);

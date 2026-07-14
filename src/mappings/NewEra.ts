@@ -31,7 +31,7 @@ export async function handleStakersElected(
 //
 // Therefore at the EraPaid block exposures(activeEra) are guaranteed complete - an era
 // cannot start without its full validator set. Snapshot activeEra here.
-// getByEra guards against double-writes (backfill, reindex).
+// The era-exists check guards against double-writes (backfill, reindex).
 export async function handleAHEraPaid(event: SubstrateEvent): Promise<void> {
   const activeEra = (
     (await api.query.staking.activeEra()) as Option<PalletStakingActiveEraInfo>
@@ -39,8 +39,13 @@ export async function handleAHEraPaid(event: SubstrateEvent): Promise<void> {
     .unwrap()
     .index.toNumber();
 
-  const existing = await EraValidatorInfo.getByEra(activeEra);
-  if (existing !== undefined && existing.length > 0) {
+  const existing = await EraValidatorInfo.getByFields(
+    [["era", "=", activeEra]],
+    {
+      limit: 1,
+    },
+  );
+  if (existing.length > 0) {
     return;
   }
 
