@@ -31,16 +31,21 @@ export async function handleStakersElected(
 //
 // Therefore at the EraPaid block exposures(activeEra) are guaranteed complete - an era
 // cannot start without its full validator set. Snapshot activeEra here.
-// getByEra guards against double-writes (backfill, reindex).
-export async function handleAHEraPaid(event: SubstrateEvent): Promise<void> {
+// The era-exists check guards against double-writes (backfill, reindex).
+export async function handleAHEraPaid(_: SubstrateEvent): Promise<void> {
   const activeEra = (
     (await api.query.staking.activeEra()) as Option<PalletStakingActiveEraInfo>
   )
     .unwrap()
     .index.toNumber();
 
-  const existing = await EraValidatorInfo.getByEra(activeEra);
-  if (existing !== undefined && existing.length > 0) {
+  const existing = await EraValidatorInfo.getByFields(
+    [["era", "=", activeEra]],
+    {
+      limit: 1,
+    },
+  );
+  if (existing.length > 0) {
     return;
   }
 
@@ -124,9 +129,18 @@ async function processEraStakersPaged(currentEra: number): Promise<void> {
     const [, validatorId] = key.args;
     let validatorIdString = validatorId.toString();
 
+    // Fail fast on incomplete exposures: a missing page means the on-chain
+    // invariant is broken, and halting the indexer is better than saving
+    // partial nominator sets silently.
     let others = [];
     for (let i = 0; i < exposure.pageCount.toNumber(); ++i) {
-      others.push(...othersCounted[validatorIdString][i]);
+      const page = othersCounted[validatorIdString]?.[i];
+      if (page === undefined) {
+        throw new Error(
+          `Missing exposure page ${i} for validator ${validatorIdString} in era ${currentEra}`,
+        );
+      }
+      others.push(...page);
     }
 
     const eraValidatorInfo = new EraValidatorInfo(
