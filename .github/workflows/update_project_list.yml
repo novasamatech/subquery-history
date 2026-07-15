@@ -1,0 +1,45 @@
+name: Projects healthcheck
+
+on:
+  schedule:
+    - cron: "0 0/4 * * *"
+  workflow_dispatch:
+  pull_request:
+
+env:
+  SUBQUERY_TOKEN: ${{ secrets.SUBQUERY_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate_project_list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ./scripts/python_scripts/requirements.txt
+
+      - name: Generate table
+        run: python ./scripts/python_scripts/generate_network_status.py
+
+      - uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Copy table to gh-pages
+        run: mv ./gh-pages-temp/README.md ./gh-pages/README.md
+
+      - name: Deploy report to Github Pages
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: gh-pages
