@@ -1,4 +1,8 @@
 import { OverrideBundleDefinition } from "@polkadot/types/types";
+import {
+  AssetHubExtrinsic,
+  AssetHubGeneralExtrinsic,
+} from "./assetHubExtrinsic";
 
 const definitions: OverrideBundleDefinition = {
   types: [
@@ -40,6 +44,8 @@ const definitions: OverrideBundleDefinition = {
 export default {
   typesBundle: { spec: { westmint: definitions } },
   types: {
+    Extrinsic: AssetHubExtrinsic,
+    GeneralExtrinsic: AssetHubGeneralExtrinsic,
     // Override for current runtime - needed for block decoding
     NovaAssetId: "Option<MultiLocationV3>",
   },

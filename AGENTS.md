@@ -29,6 +29,51 @@ This usually means `ChargeAssetTxPayment.assetId` type is misconfigured. The dec
 1. Correct spec version ranges in chain types
 2. Correct `MultiLocation` version (`MultiLocationV3` for newer runtimes)
 
+**"Invalid data passed to Mortal era" while fetching an Asset Hub block:**
+A general-v5 transaction can be misread using the v4 extension order. Polkadot,
+Kusama, and Westend Asset Hub register the shared decoder described below.
+Use SubQuery node >=6.3.5 for metadata v16 support; older runtimes are unsupported.
+
+### General v5 Extrinsic Decoder Scope
+
+`chainTypes/assetHubExtrinsic.ts` is shared by Polkadot (`statemintChaintypes.ts`),
+Kusama (`statemineChaintypes.ts`), and Westend (`westmintChaintypes.ts`) Asset Hub,
+following the merged [accounts PR #97](https://github.com/novasamatech/subquery-accounts/pull/97).
+It fixes `Invalid data passed to Mortal era` at Polkadot Asset Hub block `20494727`
+by decoding general-v5 extensions from the runtime metadata's versioned pipeline.
+The existing historical `NovaAssetId` ranges remain unchanged.
+
+The canonical decoder is maintained in `subquery-accounts/chainTypes/assetHubExtrinsic.ts`;
+keep both repositories synchronized. The local regression in
+`tests/assetHubExtrinsic.test.ts` uses the real incident transaction and reduced
+metadata from accounts, verifies the stock failure and the override's fields and
+byte/hash round trip, and covers signed v4 and bare-v5 compatibility.
+
+Related upstream work: [polkadot-js/api #6253](https://github.com/polkadot-js/api/pull/6253).
+That extension-support PR alone is not a removal condition. Remove both decoder
+overrides and their three registrations only when a published SubQuery runtime's
+stock codec satisfies the regression's successful-decoding assertions, including
+signed origins, bytes/hash and legacy behavior. Update the stock-failure assertion
+then, and verify the corresponding accounts tests before removing its copy.
+
+The SCALE layout is metadata-driven, but signed-origin handling specifically
+recognizes `VerifyMultiSignature.Signed`. The accessors also expect
+`CheckMortality`, `CheckNonce`, `ChargeAssetTxPayment`, and `CheckMetadataHash`.
+v4 and bare-v5 transactions delegate to the stock codec. General-v5 transactions
+without signed verification remain unsigned.
+
+The accounts [cross-network coverage](https://github.com/novasamatech/subquery-accounts/blob/0617ac0/doc/runbooks/asset-hub-v5.md#cross-network-coverage)
+uses real parent metadata for all three networks. Its Kusama and Westend signed
+pipeline-1 cases model the known Polkadot format; these are preventive compatibility
+checks, not native signed transactions captured on those chains. The source suite
+checks bytes/hash, signer/signature, fees, legacy decoding, and accounts entities
+through each configured SubQuery VM bundle.
+
+Future runtime changes need fixtures for the actual extension pipeline and review
+of any new authorization semantics. An unrecognized signed origin can be reported
+as unsigned, which makes `handleHistoryElement` skip ordinary transaction history.
+Verify history entities as well as codec fields when extending this adapter.
+
 ---
 
 ## Asset Hub Spec Version History

@@ -18,7 +18,7 @@ services:
 
   subquery-node:
     container_name: "node-${PROJECT_PATH}"
-    image: onfinality/subql-node:v5.6.0
+    image: onfinality/subql-node:v6.4.6
     depends_on:
       postgres:
         condition: service_healthy
