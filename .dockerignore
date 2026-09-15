@@ -1,0 +1,11 @@
+.git
+.cache
+.data
+node_modules
+dist
+src/types
+.yarn
+.claude
+.env
+.env.*
+*.log

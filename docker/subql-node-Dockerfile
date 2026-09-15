@@ -1,9 +1,9 @@
-ARG NODE_JS_IMAGE_VERSION=20-alpine
-ARG SUBQL_NODE_IMAGE_VERSION=v5.6.0
+ARG NODE_JS_IMAGE_VERSION=22-alpine
+ARG SUBQL_NODE_IMAGE_VERSION=v6.4.6
 
 FROM node:${NODE_JS_IMAGE_VERSION} AS build
 
-ADD . /project
+COPY . /project
 WORKDIR /project
 RUN yarn install && yarn codegen && yarn build
 
