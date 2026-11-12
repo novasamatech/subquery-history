@@ -26,6 +26,7 @@ import {
 } from "./Rewards";
 import { getPoolMembers } from "./Cache";
 import { Option } from "@polkadot/types";
+import { shouldIndexAddress } from "./addresses";
 
 export async function handlePoolReward(
   rewardEvent: SubstrateEvent<
@@ -34,6 +35,7 @@ export async function handlePoolReward(
 ): Promise<void> {
   await handlePoolRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedPoolReward(rewardEvent, true);
+  if (!accumulatedReward) return;
   let {
     event: {
       data: [accountId, poolId, amount],
@@ -59,7 +61,7 @@ async function handlePoolRewardForTxHistory(
       data: [account, poolId, amount],
     },
   } = rewardEvent;
-  handleGenericForTxHistory(
+  await handleGenericForTxHistory(
     rewardEvent,
     account.toString(),
     async (element: HistoryElement) => {
@@ -77,7 +79,7 @@ async function handlePoolRewardForTxHistory(
 async function updateAccumulatedPoolReward(
   event: SubstrateEvent<[accountId: Codec, poolId: INumber, reward: INumber]>,
   isReward: boolean,
-): Promise<AccumulatedReward> {
+): Promise<AccumulatedReward | undefined> {
   let {
     event: {
       data: [accountId, _, amount],
@@ -88,6 +90,7 @@ async function updateAccumulatedPoolReward(
     accountId.toString(),
     amount.toBigInt(),
     isReward,
+    event,
   );
 }
 
@@ -99,6 +102,9 @@ async function updateAccountPoolRewards(
   rewardType: RewardType,
   accumulatedAmount: bigint,
 ): Promise<void> {
+  if (!shouldIndexAddress(accountAddress, event.block, event.extrinsic?.idx)) {
+    return;
+  }
   let id = eventIdWithAddress(event, accountAddress);
   let accountPoolReward = new AccountPoolReward(
     id,
@@ -207,7 +213,9 @@ async function handleRelaychainPooledStakingSlash(
           accountId,
           personalSlash,
           false,
+          event,
         );
+        if (!accumulatedReward) continue;
         await updateAccountPoolRewards(
           event,
           accountId,
@@ -227,6 +235,11 @@ async function handlePoolSlashForTxHistory(
   accountId: string,
   personalSlash: bigint,
 ): Promise<void> {
+  if (
+    !shouldIndexAddress(accountId, slashEvent.block, slashEvent.extrinsic?.idx)
+  ) {
+    return;
+  }
   const extrinsic = slashEvent.extrinsic;
   const block = slashEvent.block;
   const blockNumber = block.block.header.number.toString();

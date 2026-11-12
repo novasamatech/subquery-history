@@ -32,6 +32,7 @@ import {
 } from "./Cache";
 import { Codec } from "@polkadot/types/types";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
+import { shouldIndexAddress } from "./addresses";
 
 function isPayoutStakers(call: CallBase<AnyTuple>): boolean {
   return call.method == "payoutStakers";
@@ -81,6 +82,7 @@ export async function handleReward(
 ): Promise<void> {
   await handleRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
+  if (!accumulatedReward) return;
   await updateAccountRewards(
     rewardEvent,
     RewardType.reward,
@@ -247,6 +249,7 @@ export async function handleSlash(
 ): Promise<void> {
   await handleSlashForTxHistory(slashEvent);
   let accumulatedReward = await updateAccumulatedReward(slashEvent, false);
+  if (!accumulatedReward) return;
   await updateAccountRewards(
     slashEvent,
     RewardType.slash,
@@ -375,12 +378,17 @@ async function buildRewardEvents<A>(
 
     const accountAddress = account.toString();
     const destinationAddress = accountsMapping[accountAddress];
+    const address = destinationAddress ?? accountAddress;
+    const extrinsicIdx = eventRecord.phase?.isApplyExtrinsic
+      ? eventRecord.phase.asApplyExtrinsic.toNumber()
+      : extrinsic?.idx;
+    if (!shouldIndexAddress(address, block, extrinsicIdx)) continue;
 
     const element = new HistoryElement(
       eventId,
       block.block.header.number.toNumber(),
       blockTimestamp,
-      destinationAddress !== undefined ? destinationAddress : accountAddress,
+      address,
     );
 
     if (extrinsic !== undefined) {
@@ -402,13 +410,14 @@ async function buildRewardEvents<A>(
 async function updateAccumulatedReward(
   event: SubstrateEvent,
   isReward: boolean,
-): Promise<AccumulatedReward> {
+): Promise<AccumulatedReward | undefined> {
   let [accountId, amount] = decodeDataFromReward(event);
   return await updateAccumulatedGenericReward(
     AccumulatedReward,
     accountId.toString(),
     (amount as unknown as Balance).toBigInt(),
     isReward,
+    event,
   );
 }
 
@@ -419,6 +428,9 @@ async function updateAccountRewards(
 ): Promise<void> {
   let [accountId, amount] = decodeDataFromReward(event);
   const accountAddress = accountId.toString();
+  if (!shouldIndexAddress(accountAddress, event.block, event.extrinsic?.idx)) {
+    return;
+  }
   let id = eventIdWithAddress(event, accountAddress);
   let accountReward = new AccountReward(
     id,
@@ -436,7 +448,7 @@ async function handleParachainRewardForTxHistory(
   rewardEvent: SubstrateEvent,
 ): Promise<void> {
   let [account, amount] = decodeDataFromReward(rewardEvent);
-  handleGenericForTxHistory(
+  await handleGenericForTxHistory(
     rewardEvent,
     account.toString(),
     async (element: HistoryElement) => {
@@ -467,6 +479,7 @@ export async function handleParachainRewarded(
 ): Promise<void> {
   await handleParachainRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
+  if (!accumulatedReward) return;
   await updateAccountRewards(
     rewardEvent,
     RewardType.reward,
@@ -481,6 +494,7 @@ export async function handleMythosRewarded(
 ): Promise<void> {
   await handleMythosRewardForTxHistory(rewardEvent);
   let accumulatedReward = await updateAccumulatedReward(rewardEvent, true);
+  if (!accumulatedReward) return;
   await updateAccountRewards(
     rewardEvent,
     RewardType.reward,
@@ -535,8 +549,13 @@ export async function updateAccumulatedGenericReward<
   accountId: string,
   amount: bigint,
   isReward: boolean,
-): Promise<AccumulatedRewardType> {
+  event: SubstrateEvent,
+): Promise<AccumulatedRewardType | undefined> {
   let accountAddress = accountId;
+  // These entities use the account as their indexed primary key as well.
+  if (!shouldIndexAddress(accountAddress, event.block, event.extrinsic?.idx)) {
+    return;
+  }
 
   let accumulatedReward = await AccumulatedRewardTypeObject.get(accountAddress);
   if (!accumulatedReward) {
@@ -556,6 +575,7 @@ export async function handleGenericForTxHistory(
   address: string,
   fieldCallback: (element: HistoryElement) => Promise<HistoryElement>,
 ): Promise<void> {
+  if (!shouldIndexAddress(address, event.block, event.extrinsic?.idx)) return;
   const extrinsic = event.extrinsic;
   const block = event.block;
   const blockNumber = block.block.header.number.toString();
@@ -573,7 +593,7 @@ export async function handleGenericForTxHistory(
     element.extrinsicIdx = extrinsic.idx;
   }
 
-  (await fieldCallback(element)).save();
+  await (await fieldCallback(element)).save();
 }
 
 interface AccountRewardsInterface {

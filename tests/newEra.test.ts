@@ -10,8 +10,9 @@ import {
 const ACTIVE_ERA = 2227;
 const PLANNED_ERA = 2228;
 
-const VALIDATOR_A = "14LzEeAqYAgVvbxqzdVQGL8zPQFe1o5zGRSbCZDwtCd2AZgA";
-const VALIDATOR_B = "15wD8upZxRZijKkF7JZDdaaFXuRZJhFyYpFQC5j6FaZL5PzA";
+// Preserve the fixture account ids with valid SS58 checksums.
+const VALIDATOR_A = "14LzEeAqYAgVvbxqzdVQGL8zPQFe1o5zGRSbCZDwtCd2AWYU";
+const VALIDATOR_B = "15wD8upZxRZijKkF7JZDdaaFXuRZJhFyYpFQC5j6FaZL5Pza";
 const NOMINATOR_1 = "136fZX6JHbywxoMXZiTY23eGGGkb3HrW7UHWZvZ5JGLzSGNF";
 const NOMINATOR_2 = "14UpRGUeAfsSZHFN63t4ojJrLNupPApUiLgovXtm7ZiAHUDA";
 const NOMINATOR_3 = "13FNi4e4EJRpweeTZiUBA4BvjeMKZBxf67h5cyzxxRvHcBMk";
@@ -135,5 +136,23 @@ describe("handleAHEraPaid", () => {
     await handleAHEraPaid(eraPaidEvent());
 
     expect(savedInfos).toHaveLength(0);
+  });
+
+  it("skips an invalid validator and still saves valid validators in the same era", async () => {
+    jest.spyOn(EraValidatorInfo, "getByFields").mockResolvedValue([]);
+    const entries = jest
+      .spyOn(mockAPI.query.staking.erasStakersOverview, "entries")
+      .mockResolvedValue([
+        mockOverviewEntry("0x" + "ab".repeat(5367), 1),
+        mockOverviewEntry(VALIDATOR_A, 2),
+      ]);
+
+    await handleAHEraPaid(eraPaidEvent());
+
+    expect(savedInfos.map((info) => info.address)).toEqual([VALIDATOR_A]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("block=18040436 extrinsicIdx=none"),
+    );
+    entries.mockRestore();
   });
 });

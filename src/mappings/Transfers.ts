@@ -2,6 +2,7 @@ import { Codec } from "@polkadot/types/types";
 import { HistoryElement } from "../types";
 import { HistoryElementProps } from "../types/models/HistoryElement";
 import { SubstrateEvent } from "@subql/types";
+import { shouldIndexAddress } from "./addresses";
 import {
   blockNumber,
   eventId,
@@ -289,5 +290,8 @@ export async function createAssetTransmission(
       data[key as keyof HistoryElementProps];
   }
 
+  if (!shouldIndexAddress(element.address, event.block, event.extrinsic?.idx)) {
+    return;
+  }
   await element.save();
 }
