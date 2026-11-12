@@ -27,6 +27,14 @@
 
 const { ApiPromise, WsProvider } = require("@polkadot/api");
 const fs = require("fs");
+// Reuse the indexer's validator when running this standalone maintenance script.
+if (require.main === module) {
+  require("ts-node").register({
+    transpileOnly: true,
+    project: require("path").resolve(__dirname, "../tsconfig.json"),
+  });
+}
+const { isValidAccountAddress } = require("../src/mappings/addresses");
 
 function parseArgs() {
   const args = { schema: "app", timestamps: false };
@@ -67,7 +75,7 @@ function sqlString(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
-async function fetchEraRows(api, era) {
+async function fetchEraRows(api, era, blockNumber) {
   const overview = await api.query.staking.erasStakersOverview.entries(era);
   if (overview.length === 0) {
     return [];
@@ -86,9 +94,17 @@ async function fetchEraRows(api, era) {
     ] = others;
   }
 
-  return overview.map(([key, exp]) => {
+  return overview.flatMap(([key, exp]) => {
     const [, validatorId] = key.args;
     const validator = validatorId.toString();
+    if (!isValidAccountAddress(validator)) {
+      console.warn(
+        `Skipping entity with invalid account address: block=${blockNumber} extrinsicIdx=none prefix=${JSON.stringify(
+          validator.slice(0, 42),
+        )} length=${validator.length}`,
+      );
+      return [];
+    }
     const exposure = exp.unwrap();
 
     const others = [];
@@ -103,14 +119,16 @@ async function fetchEraRows(api, era) {
       }
     }
 
-    return {
-      id: `${era}-backfill-${validator}`,
-      address: validator,
-      era: era,
-      total: exposure.total.toBigInt().toString(),
-      own: exposure.own.toBigInt().toString(),
-      others: others,
-    };
+    return [
+      {
+        id: `${era}-backfill-${validator}`,
+        address: validator,
+        era: era,
+        total: exposure.total.toBigInt().toString(),
+        own: exposure.own.toBigInt().toString(),
+        others: others,
+      },
+    ];
   });
 }
 
@@ -146,9 +164,14 @@ async function main() {
   const args = parseArgs();
 
   const api = await ApiPromise.create({ provider: new WsProvider(args.ws) });
+  const header = await api.rpc.chain.getHeader();
+  const blockNumber = header.number.toString();
+  const apiAt = await api.at(header.hash);
 
-  const currentEra = (await api.query.staking.currentEra()).unwrap().toNumber();
-  const historyDepth = api.consts.staking.historyDepth.toNumber();
+  const currentEra = (await apiAt.query.staking.currentEra())
+    .unwrap()
+    .toNumber();
+  const historyDepth = apiAt.consts.staking.historyDepth.toNumber();
   const from = args.from ?? currentEra - historyDepth;
   const to = args.to ?? currentEra;
   console.log(
@@ -164,7 +187,7 @@ async function main() {
   let totalRows = 0;
   const skipped = [];
   for (let era = from; era <= to; era++) {
-    const rows = await fetchEraRows(api, era);
+    const rows = await fetchEraRows(apiAt, era, blockNumber);
     if (rows.length === 0) {
       skipped.push(era);
       console.warn(`era ${era}: no exposures in state (pruned?), skipping`);
@@ -183,7 +206,11 @@ async function main() {
   process.exit(0);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+module.exports = { fetchEraRows };
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exit(1);
+  });
+}

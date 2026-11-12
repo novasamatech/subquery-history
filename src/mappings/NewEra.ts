@@ -9,6 +9,7 @@ import {
 import { Option } from "@polkadot/types";
 import { INumber } from "@polkadot/types-codec/types/interfaces";
 import { Exposure } from "@polkadot/types/interfaces";
+import { shouldIndexAddress } from "./addresses";
 
 export async function handleStakersElected(
   event: SubstrateEvent,
@@ -32,7 +33,7 @@ export async function handleStakersElected(
 // Therefore at the EraPaid block exposures(activeEra) are guaranteed complete - an era
 // cannot start without its full validator set. Snapshot activeEra here.
 // The era-exists check guards against double-writes (backfill, reindex).
-export async function handleAHEraPaid(_: SubstrateEvent): Promise<void> {
+export async function handleAHEraPaid(event: SubstrateEvent): Promise<void> {
   const activeEra = (
     (await api.query.staking.activeEra()) as Option<PalletStakingActiveEraInfo>
   )
@@ -49,7 +50,7 @@ export async function handleAHEraPaid(_: SubstrateEvent): Promise<void> {
     return;
   }
 
-  await processEraStakersPaged(activeEra);
+  await processEraStakersPaged(activeEra, event);
 }
 
 export async function handleNewEra(event: SubstrateEvent): Promise<void> {
@@ -58,19 +59,27 @@ export async function handleNewEra(event: SubstrateEvent): Promise<void> {
     .toNumber();
 
   if (api.query.staking.erasStakersOverview) {
-    await processEraStakersPaged(currentEra);
+    await processEraStakersPaged(currentEra, event);
   } else {
-    await processEraStakersClipped(currentEra);
+    await processEraStakersClipped(currentEra, event);
   }
 }
 
-async function processEraStakersClipped(currentEra: number): Promise<void> {
+async function processEraStakersClipped(
+  currentEra: number,
+  event: SubstrateEvent,
+): Promise<void> {
   const exposures =
     await api.query.staking.erasStakersClipped.entries(currentEra);
 
   for (const [key, exposure] of exposures) {
     const [, validatorId] = key.args;
     let validatorIdString = validatorId.toString();
+    if (
+      !shouldIndexAddress(validatorIdString, event.block, event.extrinsic?.idx)
+    ) {
+      continue;
+    }
     const exp = exposure as unknown as Exposure;
     const eraValidatorInfo = new EraValidatorInfo(
       `${currentEra}-${validatorIdString}`,
@@ -89,7 +98,10 @@ async function processEraStakersClipped(currentEra: number): Promise<void> {
   }
 }
 
-async function processEraStakersPaged(currentEra: number): Promise<void> {
+async function processEraStakersPaged(
+  currentEra: number,
+  event: SubstrateEvent,
+): Promise<void> {
   const overview =
     await api.query.staking.erasStakersOverview.entries(currentEra);
   const pages = await api.query.staking.erasStakersPaged.entries(currentEra);
@@ -128,6 +140,11 @@ async function processEraStakersPaged(currentEra: number): Promise<void> {
     ).unwrap();
     const [, validatorId] = key.args;
     let validatorIdString = validatorId.toString();
+    if (
+      !shouldIndexAddress(validatorIdString, event.block, event.extrinsic?.idx)
+    ) {
+      continue;
+    }
 
     // Fail fast on incomplete exposures: a missing page means the on-chain
     // invariant is broken, and halting the indexer is better than saving

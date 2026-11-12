@@ -35,6 +35,7 @@ import { ethereumEncode } from "@polkadot/util-crypto";
 import { u128, u32 } from "@polkadot/types-codec";
 import { convertHydraDxTokenIdToString, findHydraDxFeeTyped } from "./swaps";
 import { Codec } from "@polkadot/types/types";
+import { shouldIndexAddress } from "./addresses";
 
 type TransferData = {
   isTransferAll: boolean;
@@ -45,25 +46,25 @@ type TransferCallback = (
   isTransferAll: boolean,
   address: string,
   amount: any,
-  assetId?: string
+  assetId?: string,
 ) => Array<{ isTransferAll: boolean; transfer: Transfer }>;
 
 type AssetHubSwapCallback = (
   path: any,
   amountId: Codec,
   amountOut: Codec,
-  receiver: Codec
+  receiver: Codec,
 ) => Array<{ isTransferAll: boolean; transfer: Swap }>;
 
 type HydraDxSwapCallback = (
   assetIn: Codec,
   assetOut: Codec,
   amountIn: Codec,
-  amountOut: Codec
+  amountOut: Codec,
 ) => { isTransferAll: boolean; transfer: Swap };
 
 export async function handleHistoryElement(
-  extrinsic: SubstrateExtrinsic
+  extrinsic: SubstrateExtrinsic,
 ): Promise<void> {
   const { isSigned } = extrinsic.extrinsic;
 
@@ -86,8 +87,10 @@ function createHistoryElement(
   extrinsic: SubstrateExtrinsic,
   address: string,
   suffix: string = "",
-  hash?: string
-) {
+  hash?: string,
+): HistoryElement | undefined {
+  if (!shouldIndexAddress(address, extrinsic.block, extrinsic.idx)) return;
+
   let extrinsicHash = hash || extrinsic.extrinsic.hash.toString();
   let blockNumber = extrinsic.block.block.header.number.toNumber();
   let extrinsicIdx = extrinsic.idx;
@@ -109,7 +112,7 @@ function createHistoryElement(
 
 function addTransferToHistoryElement(
   element: HistoryElement,
-  transfer: Transfer | AssetTransfer | Swap
+  transfer: Transfer | AssetTransfer | Swap,
 ) {
   if ("assetIdIn" in transfer) {
     element.swap = transfer;
@@ -122,24 +125,25 @@ function addTransferToHistoryElement(
 
 async function saveFailedTransfers(
   transfers: Array<TransferData>,
-  extrinsic: SubstrateExtrinsic
+  extrinsic: SubstrateExtrinsic,
 ): Promise<void> {
   for (const { isTransferAll, transfer } of transfers) {
     const isSwap = "assetIdIn" in transfer;
     const from = isSwap ? transfer.sender : transfer.from;
     const to = isSwap ? transfer.receiver : transfer.to;
     const elementFrom = createHistoryElement(extrinsic, from, `-from`);
-    addTransferToHistoryElement(elementFrom, transfer);
+    if (elementFrom) addTransferToHistoryElement(elementFrom, transfer);
 
     // FIXME: Try to find more appropriate way to handle failed transferAll events
     if ((!isTransferAll && !isSwap) || from.toString() != to.toString()) {
       const elementTo = createHistoryElement(extrinsic, to, `-to`);
-      addTransferToHistoryElement(elementTo, transfer);
-
-      await elementTo.save();
+      if (elementTo) {
+        addTransferToHistoryElement(elementTo, transfer);
+        await elementTo.save();
+      }
     }
 
-    await elementFrom.save();
+    if (elementFrom) await elementFrom.save();
   }
 }
 
@@ -147,8 +151,9 @@ async function saveExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
   const element = createHistoryElement(
     extrinsic,
     extrinsic.extrinsic.signer.toString(),
-    "-extrinsic"
+    "-extrinsic",
   );
+  if (!element) return;
 
   element.extrinsic = {
     hash: extrinsic.extrinsic.hash.toString(),
@@ -166,7 +171,13 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     return;
   }
 
-  const addressFrom = ethereumEncode(executedEvent.event.data?.[0]?.toString());
+  // ethereum.Executed carries H160. Validate before checksum formatting, which
+  // can throw on malformed input or reinterpret a longer value as a public key.
+  const rawAddress = executedEvent.event.data?.[0]?.toString() ?? "";
+  if (!shouldIndexAddress(rawAddress, extrinsic.block, extrinsic.idx, "h160")) {
+    return;
+  }
+  const addressFrom = ethereumEncode(rawAddress);
   const hash = executedEvent.event.data?.[2]?.toString();
   const success = !!(executedEvent.event.data?.[3].toJSON() as any).succeed;
 
@@ -174,8 +185,9 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
     extrinsic,
     addressFrom,
     "-extrinsic",
-    hash
+    hash,
   );
+  if (!element) return;
 
   element.extrinsic = {
     hash,
@@ -190,7 +202,7 @@ async function saveEvmExtrinsic(extrinsic: SubstrateExtrinsic): Promise<void> {
 
 /// Success Transfer emits Transfer event that is handled at Transfers.ts handleTransfer()
 function findFailedTransferCalls(
-  extrinsic: SubstrateExtrinsic
+  extrinsic: SubstrateExtrinsic,
 ): Array<TransferData> | null {
   if (extrinsic.success) {
     return null;
@@ -201,7 +213,7 @@ function findFailedTransferCalls(
     isTransferAll,
     address,
     amount,
-    assetId?
+    assetId?,
   ) => {
     const transfer: Transfer = {
       amount: amount.toString(),
@@ -228,16 +240,16 @@ function findFailedTransferCalls(
     path,
     amountIn,
     amountOut,
-    receiver
+    receiver,
   ) => {
     let assetIdFee = "native";
     let fee = calculateFeeAsString(extrinsic);
     let foundAssetTxFeePaid = extrinsic.block.events.find((e) =>
-      isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e))
+      isAssetTxFeePaidEvent(eventRecordToSubstrateEvent(e)),
     );
     if (foundAssetTxFeePaid !== undefined) {
       const [who, actual_fee, tip, rawAssetIdFee] = getEventData(
-        eventRecordToSubstrateEvent(foundAssetTxFeePaid)
+        eventRecordToSubstrateEvent(foundAssetTxFeePaid),
       );
       if ("interior" in rawAssetIdFee) {
         assetIdFee = getAssetIdFromMultilocation(rawAssetIdFee);
@@ -248,7 +260,7 @@ function findFailedTransferCalls(
     const assetIdIn = getAssetIdFromMultilocation(path[0], true);
     const assetIdOut = getAssetIdFromMultilocation(
       path[path["length"] - 1],
-      true
+      true,
     );
 
     if (assetIdIn === undefined || assetIdOut === undefined) {
@@ -280,7 +292,7 @@ function findFailedTransferCalls(
     assetIn: Codec,
     assetOut: Codec,
     amountIn: Codec,
-    amountOut: Codec
+    amountOut: Codec,
   ) => {
     let fee = findHydraDxFeeTyped(extrinsic.events);
 
@@ -310,7 +322,7 @@ function findFailedTransferCalls(
     extrinsic.extrinsic.method,
     transferCallback,
     assetHubSwapCallback,
-    hydraDxSwapCallback
+    hydraDxSwapCallback,
   );
   if (transferCalls.length == 0) {
     return null;
@@ -323,7 +335,7 @@ function determineTransferCallsArgs(
   causeCall: CallBase<AnyTuple>,
   transferCallback: TransferCallback,
   assetHubSwapCallback: AssetHubSwapCallback,
-  hydraDxSwapCallback: HydraDxSwapCallback
+  hydraDxSwapCallback: HydraDxSwapCallback,
 ): Array<TransferData> {
   if (isNativeTransfer(causeCall)) {
     return transferCallback(false, ...extractArgsFromTransfer(causeCall));
@@ -334,7 +346,7 @@ function determineTransferCallsArgs(
   } else if (isEquilibriumTransfer(causeCall)) {
     return transferCallback(
       false,
-      ...extractArgsFromEquilibriumTransfer(causeCall)
+      ...extractArgsFromEquilibriumTransfer(causeCall),
     );
   } else if (isNativeTransferAll(causeCall)) {
     return transferCallback(true, ...extractArgsFromTransferAll(causeCall));
@@ -342,11 +354,11 @@ function determineTransferCallsArgs(
     return transferCallback(true, ...extractArgsFromOrmlTransferAll(causeCall));
   } else if (isSwapExactTokensForTokens(causeCall)) {
     return assetHubSwapCallback(
-      ...extractArgsFromSwapExactTokensForTokens(causeCall)
+      ...extractArgsFromSwapExactTokensForTokens(causeCall),
     );
   } else if (isSwapTokensForExactTokens(causeCall)) {
     return assetHubSwapCallback(
-      ...extractArgsFromSwapTokensForExactTokens(causeCall)
+      ...extractArgsFromSwapTokensForExactTokens(causeCall),
     );
   } else if (isHydraOmnipoolBuy(causeCall)) {
     return [hydraDxSwapCallback(...extractArgsFromHydraOmnipoolBuy(causeCall))];
@@ -365,7 +377,7 @@ function determineTransferCallsArgs(
           call,
           transferCallback,
           assetHubSwapCallback,
-          hydraDxSwapCallback
+          hydraDxSwapCallback,
         ).map((value, index, array) => {
           return value;
         });
@@ -377,7 +389,7 @@ function determineTransferCallsArgs(
       proxyCall,
       transferCallback,
       assetHubSwapCallback,
-      hydraDxSwapCallback
+      hydraDxSwapCallback,
     );
   } else {
     return [];
@@ -391,7 +403,7 @@ function extractArgsFromTransfer(call: CallBase<AnyTuple>): [string, bigint] {
 }
 
 function extractArgsFromAssetTransfer(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [string, bigint, string] {
   const [assetId, destinationAddress, amount] = call.args;
 
@@ -403,7 +415,7 @@ function extractArgsFromAssetTransfer(
 }
 
 function extractArgsFromOrmlTransfer(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [string, bigint, string] {
   const [destinationAddress, currencyId, amount] = call.args;
 
@@ -415,7 +427,7 @@ function extractArgsFromOrmlTransfer(
 }
 
 function extractArgsFromEquilibriumTransfer(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [string, bigint, string] {
   const [assetId, destinationAddress, amount] = call.args;
 
@@ -427,7 +439,7 @@ function extractArgsFromEquilibriumTransfer(
 }
 
 function extractArgsFromTransferAll(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [string, bigint] {
   const [destinationAddress] = call.args;
 
@@ -435,7 +447,7 @@ function extractArgsFromTransferAll(
 }
 
 function extractArgsFromOrmlTransferAll(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [string, bigint, string] {
   const [destinationAddress, currencyId] = call.args;
 
@@ -447,7 +459,7 @@ function extractArgsFromOrmlTransferAll(
 }
 
 function extractArgsFromSwapExactTokensForTokens(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [any, Codec, Codec, Codec] {
   const [path, amountIn, amountOut, receiver, _] = call.args;
 
@@ -455,7 +467,7 @@ function extractArgsFromSwapExactTokensForTokens(
 }
 
 function extractArgsFromSwapTokensForExactTokens(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [any, Codec, Codec, Codec] {
   const [path, amountOut, amountIn, receiver, _] = call.args;
 
@@ -463,7 +475,7 @@ function extractArgsFromSwapTokensForExactTokens(
 }
 
 function extractArgsFromHydraRouterSell(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [Codec, Codec, Codec, Codec] {
   const [assetIn, assetOut, amountIn, minAmountOut, _] = call.args;
 
@@ -471,7 +483,7 @@ function extractArgsFromHydraRouterSell(
 }
 
 function extractArgsFromHydraRouterBuy(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [Codec, Codec, Codec, Codec] {
   const [assetIn, assetOut, amountOut, maxAmountIn, _] = call.args;
 
@@ -479,7 +491,7 @@ function extractArgsFromHydraRouterBuy(
 }
 
 function extractArgsFromHydraOmnipoolSell(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [Codec, Codec, Codec, Codec] {
   const [assetIn, assetOut, amount, minBuyAmount, _] = call.args;
 
@@ -492,7 +504,7 @@ function extractArgsFromHydraOmnipoolSell(
 }
 
 function extractArgsFromHydraOmnipoolBuy(
-  call: CallBase<AnyTuple>
+  call: CallBase<AnyTuple>,
 ): [Codec, Codec, Codec, Codec] {
   const [assetOut, assetIn, amount, maxSellAmount, _] = call.args;
 
